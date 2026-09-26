@@ -1,0 +1,60 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>My trips</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+  .tabs { display: flex; gap: 8px; margin: 22px 0 30px; }
+  .tab { padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; color: var(--ink-2); background: var(--bg-soft); }
+  .tab.on { background: var(--ink); color: #fff; }
+  .upcoming { display: grid; grid-template-columns: 1.1fr 1fr; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow); }
+  .upcoming img { width: 100%; height: 100%; min-height: 360px; }
+  .up-body { padding: 34px; display: flex; flex-direction: column; }
+  .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; padding: 22px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .kv label { font-size: 12px; color: var(--ink-3); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .kv b { display: block; margin-top: 2px; }
+  .past { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 20px; }
+  .trip { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+  .trip img { width: 100%; height: 180px; }
+  .trip .tb { padding: 16px 18px; }
+  .trip .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .countdown { display: inline-flex; align-items: center; gap: 8px; background: var(--brand-50); color: var(--brand-600); font-weight: 700; font-size: 13px; padding: 6px 12px; border-radius: 999px; margin-bottom: 14px; align-self: flex-start; }
+</style></head>
+<body><div class="frame">
+  <header class="nav wrap">
+    <div class="logo"><div class="logo-mark"><i data-lucide="home"></i></div>Haven</div>
+    <nav class="nav-links"><a>Stays</a><a class="active">My trips</a><a>Saved</a><a>Messages</a></nav>
+    <div class="nav-right"><i data-lucide="bell"></i><div class="user-pill"><i data-lucide="menu"></i><div class="avatar">AT</div></div></div>
+  </header>
+  <main class="wrap" style="padding-bottom:80px">
+    <div class="h1" style="margin-top:44px;font-size:34px">Trips</div>
+    <div class="tabs"><span class="tab on">Upcoming · 1</span><span class="tab">Past · 6</span><span class="tab">Cancelled · 1</span></div>
+
+    <div class="upcoming">
+      <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80">
+      <div class="up-body">
+        <span class="countdown"><i data-lucide="plane-landing" style="width:16px;height:16px"></i>Check-in in 16 days</span>
+        <div class="h2" style="font-size:26px">Azure 2-Bed Luxury Apartment</div>
+        <div class="sub">Unit A · Lekki Phase 1, Lagos</div>
+        <div class="kv">
+          <div><label>Check-in</label><b>Mon, Oct 12 · 2:00 PM</b></div>
+          <div><label>Checkout</label><b>Fri, Oct 16 · 11:00 AM</b></div>
+          <div><label>Reference</label><b style="font-family:ui-monospace,monospace">HVN-7Q4K-2291</b></div>
+          <div><label>Status</label><b><span class="badge b-ok">Confirmed · Paid</span></b></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:auto">
+          <a class="btn btn-primary" style="flex:1">Manage booking</a>
+          <a class="btn btn-soft"><i data-lucide="message-circle"></i>Message</a>
+          <a class="btn btn-soft"><i data-lucide="map-pin"></i>Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:end;margin-top:52px"><div class="h2">Where you've been</div><u style="font-weight:700;font-size:14px">View all</u></div>
+    <div class="past">
+      <div class="trip"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=700&q=80"><div class="tb"><b>Maitama Garden Residence</b><div class="sub">Abuja · Aug 3 – 7, 2026</div><div class="foot"><span class="badge b-mute">Completed</span><a class="btn btn-sm btn-dark"><i data-lucide="star"></i>Leave a review</a></div></div></div>
+      <div class="trip"><img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=700&q=80"><div class="tb"><b>The Palms Studio Suite</b><div class="sub">Victoria Island · Jun 18 – 20, 2026</div><div class="foot"><span class="badge b-mute">Completed</span><span class="rating"><i data-lucide="star"></i>You rated 5.0</span></div></div></div>
+      <div class="trip"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=80"><div class="tb"><b>Chevron Drive Loft</b><div class="sub">Lekki · Apr 2 – 5, 2026</div><div class="foot"><span class="badge b-mute">Completed</span><span class="rating"><i data-lucide="star"></i>You rated 4.0</span></div></div></div>
+    </div>
+  </main>
+</div>
+<script>lucide.createIcons();</script></body></html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Property details</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+  .wrap { padding: 0 120px; }
+  .title-row { display: flex; justify-content: space-between; align-items: end; margin: 28px 0 22px; }
+  .actions { display: flex; gap: 18px; font-weight: 600; font-size: 14px; }
+  .actions span { display: flex; align-items: center; gap: 6px; text-decoration: underline; }
+  .gallery { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 230px 230px; gap: 8px; border-radius: 22px; overflow: hidden; position: relative; }
+  .gallery img { width: 100%; height: 100%; }
+  .gallery img:first-child { grid-row: span 2; }
+  .show-all { position: absolute; right: 22px; bottom: 22px; background: #fff; border: 1px solid var(--ink); border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: 13px; display: flex; gap: 8px; align-items: center; }
+  .body { display: grid; grid-template-columns: 1fr 400px; gap: 90px; margin-top: 40px; }
+  .host { display: flex; align-items: center; gap: 16px; padding-bottom: 28px; }
+  .host .avatar { width: 52px; height: 52px; font-size: 18px; }
+  .highlights { padding: 28px 0; display: grid; gap: 22px; }
+  .hl { display: flex; gap: 18px; }
+  .hl svg { width: 26px; height: 26px; flex: none; }
+  .hl b { display: block; }
+  .amen { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .amen div { display: flex; gap: 14px; align-items: center; font-size: 15px; }
+  .amen svg { width: 22px; height: 22px; }
+  .units { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+  .unit { border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .unit.on { border: 2px solid var(--ink); padding: 17px; }
+  .booking { position: sticky; top: 24px; border: 1px solid var(--line); border-radius: 22px; padding: 26px; box-shadow: var(--shadow-lg); }
+  .date-box { border: 1px solid #C9C9C4; border-radius: 12px; margin: 20px 0 16px; overflow: hidden; }
+  .date-box .row { display: grid; grid-template-columns: 1fr 1fr; }
+  .date-box .field { border: 0; border-radius: 0; }
+  .date-box .row .field:first-child { border-right: 1px solid #C9C9C4; }
+  .date-box .field + .field, .date-box .row + .field { border-top: 1px solid #C9C9C4; }
+  .line { display: flex; justify-content: space-between; margin: 12px 0; color: var(--ink-2); }
+  .line span:first-child { text-decoration: underline; }
+  .total { display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; padding-top: 16px; border-top: 1px solid var(--line); margin-top: 16px; }
+  .rv-summary { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; margin: 40px 0 20px; }
+  .rv-summary svg { width: 24px; height: 24px; fill: var(--ink); stroke: none; }
+  .bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+  .bars div { border-right: 1px solid var(--line); font-size: 14px; }
+  .bars div:last-child { border: 0; }
+  .bars b { display: block; font-size: 18px; margin-top: 4px; }
+  .reviews { display: grid; grid-template-columns: 1fr 1fr; gap: 36px 80px; margin-top: 30px; }
+  .rv-head { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .rv-head .avatar { width: 44px; height: 44px; }
+  .cal { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-top: 18px; }
+  .month b { display: block; text-align: center; margin-bottom: 14px; }
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; row-gap: 4px; }
+  .days .dh { color: var(--ink-3); font-weight: 600; font-size: 12px; padding-bottom: 6px; }
+  .days span { height: 40px; display: grid; place-items: center; font-weight: 600; }
+  .days .x { color: #C4C4C0; text-decoration: line-through; font-weight: 500; }
+  .days .sel { background: var(--ink); color: #fff; border-radius: 50%; }
+  .days .rng { background: var(--line-2); }
+</style></head>
+<body><div class="frame">
+  <header class="nav wrap">
+    <div class="logo"><div class="logo-mark"><i data-lucide="home"></i></div>Haven</div>
+    <div class="mini-search" style="display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:999px;padding:8px 8px 8px 22px;font-size:14px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.06)">Anywhere <span class="muted">·</span> Any week <span class="muted">·</span> <span class="muted">Add guests</span><span style="width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center"><i data-lucide="search"></i></span></div>
+    <div class="nav-right"><span>₦ NGN</span><div class="user-pill"><i data-lucide="menu"></i><div class="avatar">AT</div></div></div>
+  </header>
+  <main class="wrap">
+    <div class="title-row">
+      <div><div class="h1">Azure 2-Bed Luxury Apartment with Pool</div>
+      <div class="sub" style="margin-top:6px;display:flex;gap:10px;align-items:center"><span class="rating"><i data-lucide="star"></i>4.96</span>·<u>128 reviews</u>·<span class="badge b-brand"><i data-lucide="award" style="width:14px;height:14px"></i>Guest favourite</span>·<u>Lekki Phase 1, Lagos</u></div></div>
+      <div class="actions"><span><i data-lucide="share"></i>Share</span><span><i data-lucide="heart"></i>Save</span></div>
+    </div>
+    <div class="gallery">
+      <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1400&q=80">
+      <img src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=700&q=80">
+      <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=700&q=80">
+      <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=700&q=80">
+      <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=700&q=80">
+      <div class="show-all"><i data-lucide="grid-3x3"></i>Show all 24 photos</div>
+    </div>
+
+    <div class="body">
+      <div>
+        <div class="host"><div style="flex:1"><div class="h2">Entire serviced apartment in Lekki</div><div class="sub">4 guests · 2 bedrooms · 2 beds · 2.5 baths</div></div><div class="avatar" style="background:var(--brand)">H</div></div>
+        <div class="divider"></div>
+        <div class="highlights">
+          <div class="hl"><i data-lucide="zap"></i><div><b>24/7 power supply</b><span class="sub">Inverter + generator backup. No interruptions.</span></div></div>
+          <div class="hl"><i data-lucide="key-round"></i><div><b>Self check-in</b><span class="sub">Smart lock with a unique code for every stay.</span></div></div>
+          <div class="hl"><i data-lucide="calendar-x"></i><div><b>Free cancellation up to 48 hours before check-in</b><span class="sub">Full refund to your original payment method.</span></div></div>
+        </div>
+        <div class="divider"></div>
+        <p style="padding:28px 0;color:var(--ink-2)">A bright, contemporary apartment on a quiet close off Admiralty Way. Floor-to-ceiling windows, a fully equipped kitchen, fast fibre Wi-Fi and a shared rooftop pool — minutes from Lekki's best restaurants and a short drive to Victoria Island. <b style="color:var(--ink);text-decoration:underline">Show more</b></p>
+        <div class="divider"></div>
+
+        <div style="padding:28px 0">
+          <div class="h2">Choose your unit</div><div class="sub">This building has 3 identical units — we'll hold the one you choose.</div>
+          <div class="units">
+            <div class="unit on"><div style="display:flex;justify-content:space-between"><b>Unit A · 3rd floor</b><span class="badge b-ok">Available</span></div><div class="sub" style="margin-top:6px">Lagoon view · Balcony</div><div style="margin-top:10px"><b>₦85,000</b> <span class="muted">/ night</span></div></div>
+            <div class="unit"><div style="display:flex;justify-content:space-between"><b>Unit B · 5th floor</b><span class="badge b-ok">Available</span></div><div class="sub" style="margin-top:6px">City view · Workspace</div><div style="margin-top:10px"><b>₦90,000</b> <span class="muted">/ night</span></div></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+
+        <div style="padding:28px 0">
+          <div class="h2">What this place offers</div>
+          <div class="amen">
+            <div><i data-lucide="wifi"></i>Fibre Wi-Fi · 100 Mbps</div><div><i data-lucide="waves"></i>Shared rooftop pool</div>
+            <div><i data-lucide="cooking-pot"></i>Fully equipped kitchen</div><div><i data-lucide="car"></i>Free parking on premises</div>
+            <div><i data-lucide="tv"></i>65" Smart TV with Netflix</div><div><i data-lucide="air-vent"></i>Air conditioning</div>
+            <div><i data-lucide="shield"></i>24/7 security &amp; CCTV</div><div><i data-lucide="dumbbell"></i>Gym access</div>
+          </div>
+          <a class="btn btn-ghost" style="margin-top:24px">Show all 32 amenities</a>
+        </div>
+        <div class="divider"></div>
+
+        <div style="padding:28px 0">
+          <div class="h2">4 nights in Lekki Phase 1</div><div class="sub">Oct 12, 2026 – Oct 16, 2026</div>
+          <div class="cal">
+            <div class="month"><b>October 2026</b><div class="days">
+              <span class="dh">Su</span><span class="dh">Mo</span><span class="dh">Tu</span><span class="dh">We</span><span class="dh">Th</span><span class="dh">Fr</span><span class="dh">Sa</span>
+              <span></span><span></span><span></span><span></span><span class="x">1</span><span class="x">2</span><span class="x">3</span>
+              <span>4</span><span>5</span><span>6</span><span class="x">7</span><span class="x">8</span><span>9</span><span>10</span>
+              <span>11</span><span class="sel">12</span><span class="rng">13</span><span class="rng">14</span><span class="rng">15</span><span class="sel">16</span><span>17</span>
+              <span>18</span><span>19</span><span>20</span><span>21</span><span class="x">22</span><span class="x">23</span><span class="x">24</span>
+              <span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span>
+            </div></div>
+            <div class="month"><b>November 2026</b><div class="days">
+              <span class="dh">Su</span><span class="dh">Mo</span><span class="dh">Tu</span><span class="dh">We</span><span class="dh">Th</span><span class="dh">Fr</span><span class="dh">Sa</span>
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+              <span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span class="x">13</span><span class="x">14</span>
+              <span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span>
+              <span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span>
+              <span>29</span><span>30</span>
+            </div></div>
+          </div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="booking">
+          <div><span style="font-size:24px;font-weight:800">₦85,000</span> <span class="muted">night</span></div>
+          <div class="date-box">
+            <div class="row"><div class="field"><label>Check-in</label><div>10/12/2026</div></div><div class="field"><label>Checkout</label><div>10/16/2026</div></div></div>
+            <div class="field" style="display:flex;justify-content:space-between;align-items:center"><div><label>Guests</label><div>2 guests</div></div><i data-lucide="chevron-down"></i></div>
+          </div>
+          <a class="btn btn-primary btn-block" style="height:54px">Reserve</a>
+          <p class="muted" style="text-align:center;font-size:13px;margin-top:10px">You won't be charged yet</p>
+          <div class="line"><span>₦85,000 × 4 nights</span><span>₦340,000</span></div>
+          <div class="line"><span>Cleaning fee</span><span>₦15,000</span></div>
+          <div class="line"><span>Service fee</span><span>₦12,500</span></div>
+          <div class="line"><span>Caution deposit (refundable)</span><span>₦50,000</span></div>
+          <div class="total"><span>Total</span><span>₦417,500</span></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:16px">
+          <i data-lucide="gem" style="color:var(--brand);width:26px;height:26px"></i><div style="font-size:14px"><b>Great price.</b> <span class="sub">This stay is ₦12,000 less than similar apartments nearby.</span></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="divider" style="margin-top:12px"></div>
+    <div class="rv-summary"><i data-lucide="star"></i>4.96 · 128 reviews</div>
+    <div class="bars">
+      <div>Cleanliness<b>4.9</b></div><div>Accuracy<b>5.0</b></div><div>Check-in<b>4.9</b></div><div>Communication<b>5.0</b></div><div>Location<b>4.8</b></div><div>Value<b>4.9</b></div>
+    </div>
+    <div class="reviews">
+      <div><div class="rv-head"><div class="avatar"><img src="https://i.pravatar.cc/100?img=12"></div><div><b>Tunde</b><div class="muted" style="font-size:13px">September 2026 · Stayed 5 nights</div></div></div><p class="sub">Spotless apartment and the power never went off once. Check-in was seamless with the smart lock. Would definitely book again for work trips.</p></div>
+      <div><div class="rv-head"><div class="avatar"><img src="https://i.pravatar.cc/100?img=47"></div><div><b>Amaka</b><div class="muted" style="font-size:13px">August 2026 · Stayed 3 nights</div></div></div><p class="sub">Exactly like the pictures. The rooftop pool at sunset is a vibe! The team responded to every message within minutes.</p></div>
+      <div><div class="rv-head"><div class="avatar"><img src="https://i.pravatar.cc/100?img=33"></div><div><b>David</b><div class="muted" style="font-size:13px">August 2026 · Stayed 7 nights</div></div></div><p class="sub">Great location close to everything in Lekki. Kitchen had everything we needed. Wi-Fi was fast enough for video calls all day.</p></div>
+      <div><div class="rv-head"><div class="avatar"><img src="https://i.pravatar.cc/100?img=44"></div><div><b>Funmi</b><div class="muted" style="font-size:13px">July 2026 · Stayed 2 nights</div></div></div><p class="sub">Beautiful interiors and very secure estate. Caution deposit was refunded the next day. Highly recommend.</p></div>
+    </div>
+    <a class="btn btn-ghost" style="margin:30px 0 60px">Show all 128 reviews</a>
+  </main>
+</div>
+<script>lucide.createIcons();</script></body></html>

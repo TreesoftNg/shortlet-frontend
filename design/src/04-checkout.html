@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Checkout</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+  .wrap { padding: 0 160px; }
+  .back { display: flex; align-items: center; gap: 16px; margin: 44px 0 34px; }
+  .back .icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-soft); }
+  .cols { display: grid; grid-template-columns: 1fr 460px; gap: 90px; padding-bottom: 80px; }
+  .step { padding: 26px 0; border-bottom: 1px solid var(--line); }
+  .step-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; display: inline-grid; place-items: center; font-size: 13px; font-weight: 700; margin-right: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { padding: 12px 16px; }
+  .field div { color: var(--ink); }
+  .pay { border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+  .pay.on { border: 2px solid var(--brand); padding: 17px; background: var(--brand-50); }
+  .radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #C9C9C4; flex: none; }
+  .pay.on .radio { border: 7px solid var(--brand); }
+  .pay .ic { width: 42px; height: 42px; border-radius: 10px; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; }
+  .summary { border: 1px solid var(--line); border-radius: 22px; padding: 26px; position: sticky; top: 30px; }
+  .sum-top { display: flex; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .sum-top img { width: 124px; height: 106px; border-radius: 12px; }
+  .line { display: flex; justify-content: space-between; margin: 12px 0; color: var(--ink-2); }
+  .total { display: flex; justify-content: space-between; font-weight: 800; font-size: 17px; padding-top: 18px; border-top: 1px solid var(--line); margin-top: 16px; }
+  .hold { display: flex; align-items: center; gap: 10px; background: #FDF3E1; color: #8A5A08; border-radius: 12px; padding: 12px 16px; font-size: 14px; font-weight: 600; margin-bottom: 18px; }
+</style></head>
+<body><div class="frame">
+  <header class="nav" style="padding:0 80px">
+    <div class="logo"><div class="logo-mark"><i data-lucide="home"></i></div>Haven</div>
+    <div class="sub" style="display:flex;align-items:center;gap:8px"><i data-lucide="lock"></i>Secure checkout</div>
+  </header>
+  <main class="wrap">
+    <div class="back"><div class="icon"><i data-lucide="chevron-left"></i></div><div class="h1">Confirm and pay</div></div>
+    <div class="cols">
+      <div>
+        <div class="hold"><i data-lucide="timer"></i>We're holding Unit A for you for <b>14:52</b> minutes.</div>
+        <div class="step" style="padding-top:6px">
+          <div class="step-head"><div class="h3"><span class="step-num">1</span>Your trip</div></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:14px"><div><b>Dates</b><div class="sub">Oct 12 – 16, 2026 · 4 nights</div></div><u style="font-weight:700">Edit</u></div>
+          <div style="display:flex;justify-content:space-between"><div><b>Guests</b><div class="sub">2 adults</div></div><u style="font-weight:700">Edit</u></div>
+        </div>
+        <div class="step">
+          <div class="step-head"><div class="h3"><span class="step-num">2</span>Guest details</div><span class="sub">Signed in as <b style="color:var(--ink)">aladesiun.t</b></span></div>
+          <div class="grid2">
+            <div class="field"><label>First name</label><div>Temitope</div></div>
+            <div class="field"><label>Last name</label><div>Aladesiun</div></div>
+            <div class="field"><label>Email</label><div>temi@example.com</div></div>
+            <div class="field"><label>Phone</label><div>+234 801 234 5678</div></div>
+          </div>
+          <div class="field" style="margin-top:12px"><label>Purpose of stay (optional)</label><div class="muted">e.g. Business trip, family visit…</div></div>
+        </div>
+        <div class="step">
+          <div class="step-head"><div class="h3"><span class="step-num">3</span>Pay with</div><span class="sub" style="display:flex;align-items:center;gap:6px"><i data-lucide="shield-check" style="color:var(--ok)"></i>Encrypted &amp; secure</span></div>
+          <div class="pay on"><span class="radio"></span><span class="ic"><i data-lucide="credit-card"></i></span><div style="flex:1"><b>Debit / Credit card</b><div class="sub">Visa, Mastercard, Verve</div></div></div>
+          <div class="pay"><span class="radio"></span><span class="ic"><i data-lucide="landmark"></i></span><div style="flex:1"><b>Bank transfer</b><div class="sub">Pay into a one-time account number</div></div></div>
+          <div class="pay"><span class="radio"></span><span class="ic"><i data-lucide="smartphone"></i></span><div style="flex:1"><b>USSD</b><div class="sub">Pay from any Nigerian bank</div></div></div>
+          <p class="muted" style="font-size:13px;margin-top:8px">You'll complete payment on our secure payment partner's page.</p>
+        </div>
+        <div class="step" style="border:0">
+          <div class="h3" style="margin-bottom:10px">Cancellation policy</div>
+          <p class="sub"><b style="color:var(--ink)">Free cancellation before Oct 10.</b> Cancel before check-in on Oct 12 for a 50% refund. Caution deposit is refunded within 48 hours after checkout. <u style="color:var(--ink);font-weight:700">Learn more</u></p>
+          <p class="muted" style="font-size:13px;margin:26px 0 18px">By selecting the button below, I agree to the House Rules, Cancellation Policy and Terms of Service.</p>
+          <a class="btn btn-primary" style="height:56px;padding:0 40px;font-size:16px"><i data-lucide="lock"></i>Pay ₦417,500</a>
+        </div>
+      </div>
+      <aside>
+        <div class="summary">
+          <div class="sum-top"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80"><div><div class="muted" style="font-size:13px">Entire apartment · Unit A</div><b style="font-size:16px;display:block;margin:4px 0">Azure 2-Bed Luxury Apartment with Pool</b><span class="rating"><i data-lucide="star"></i>4.96 <span class="muted">(128)</span></span></div></div>
+          <div class="h3" style="margin:22px 0 6px">Price details</div>
+          <div class="line"><span>₦85,000 × 4 nights</span><span>₦340,000</span></div>
+          <div class="line"><span>Cleaning fee</span><span>₦15,000</span></div>
+          <div class="line"><span>Service fee</span><span>₦12,500</span></div>
+          <div class="line"><span>Caution deposit <span class="badge b-mute" style="margin-left:4px">Refundable</span></span><span>₦50,000</span></div>
+          <div class="total"><span>Total (NGN)</span><span>₦417,500</span></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+<script>lucide.createIcons();</script></body></html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Home</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+  .hero { position: relative; margin: 24px 80px 0; height: 560px; border-radius: 28px; overflow: hidden; }
+  .hero > img { width: 100%; height: 100%; }
+  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.1) 60%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,.35)); }
+  .hero-copy { position: absolute; left: 64px; bottom: 150px; z-index: 2; color: #fff; max-width: 640px; }
+  .hero-copy h1 { font-size: 56px; line-height: 1.05; font-weight: 800; letter-spacing: -.03em; }
+  .hero-copy p { font-size: 18px; margin-top: 14px; opacity: .92; }
+  .searchbar { position: absolute; z-index: 3; left: 64px; right: 64px; bottom: 40px; background: #fff; border-radius: 999px; box-shadow: var(--shadow-lg); display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr auto; align-items: center; padding: 8px 8px 8px 12px; }
+  .sb-item { padding: 10px 26px; border-right: 1px solid var(--line); }
+  .sb-item:nth-child(4) { border-right: 0; }
+  .sb-item label { display: block; font-size: 12px; font-weight: 700; }
+  .sb-item div { font-size: 14px; color: var(--ink-3); }
+  .sb-btn { height: 60px; padding: 0 28px; border-radius: 999px; background: var(--brand); color: #fff; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .sb-btn svg { width: 20px; height: 20px; }
+  .cats { display: flex; gap: 38px; padding: 34px 80px 10px; border-bottom: 1px solid var(--line); }
+  .cat { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ink-3); padding-bottom: 14px; }
+  .cat svg { width: 26px; height: 26px; stroke-width: 1.6; }
+  .cat.on { color: var(--ink); border-bottom: 2px solid var(--ink); }
+  .sec-head { display: flex; align-items: end; justify-content: space-between; margin: 44px 0 22px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+  .areas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .area { position: relative; height: 220px; border-radius: var(--r-lg); overflow: hidden; }
+  .area img { width: 100%; height: 100%; }
+  .area::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.6)); }
+  .area div { position: absolute; left: 20px; bottom: 18px; color: #fff; z-index: 2; }
+  .area b { font-size: 20px; display: block; }
+  .trust { margin: 64px 80px; background: var(--brand-50); border-radius: 28px; padding: 48px 56px; display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 40px; align-items: center; }
+  .trust-item .ic { width: 48px; height: 48px; border-radius: 14px; background: #fff; color: var(--brand); display: grid; place-items: center; margin-bottom: 14px; }
+  .trust-item b { display: block; margin-bottom: 4px; }
+</style></head>
+<body><div class="frame">
+  <header class="nav wrap">
+    <div class="logo"><div class="logo-mark"><i data-lucide="home"></i></div>Haven</div>
+    <nav class="nav-links"><a class="active">Stays</a><a>Locations</a><a>About</a><a>Contact</a></nav>
+    <div class="nav-right"><span>₦ NGN</span><i data-lucide="globe"></i>
+      <div class="user-pill"><i data-lucide="menu"></i><div class="avatar"><i data-lucide="user"></i></div></div></div>
+  </header>
+
+  <section class="hero">
+    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=2000&q=80">
+    <div class="hero-copy"><h1>Stay somewhere that feels like home.</h1><p>Serviced shortlet apartments across Lagos &amp; Abuja — verified, fully furnished, instantly bookable.</p></div>
+    <div class="searchbar">
+      <div class="sb-item"><label>Where</label><div>Lekki, Victoria Island, Ikoyi…</div></div>
+      <div class="sb-item"><label>Check in</label><div>Add dates</div></div>
+      <div class="sb-item"><label>Check out</label><div>Add dates</div></div>
+      <div class="sb-item"><label>Guests</label><div>Add guests</div></div>
+      <div class="sb-btn"><i data-lucide="search"></i>Search</div>
+    </div>
+  </section>
+
+  <div class="cats">
+    <div class="cat on"><i data-lucide="sparkles"></i>All stays</div>
+    <div class="cat"><i data-lucide="building-2"></i>Studios</div>
+    <div class="cat"><i data-lucide="bed-double"></i>1 Bedroom</div>
+    <div class="cat"><i data-lucide="sofa"></i>2 Bedroom</div>
+    <div class="cat"><i data-lucide="castle"></i>Penthouses</div>
+    <div class="cat"><i data-lucide="waves"></i>Pool</div>
+    <div class="cat"><i data-lucide="briefcase"></i>Business</div>
+    <div class="cat"><i data-lucide="party-popper"></i>Events allowed</div>
+    <div class="cat"><i data-lucide="sunset"></i>Waterfront</div>
+    <div class="cat"><i data-lucide="zap"></i>24/7 Power</div>
+  </div>
+
+  <main class="wrap">
+    <div class="sec-head"><div><div class="h2">Featured apartments</div><div class="sub">Handpicked stays our guests love</div></div><a class="btn btn-ghost btn-sm">View all <i data-lucide="arrow-right"></i></a></div>
+    <div class="grid4">
+      <div><div class="card-img"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"><span class="tag">Guest favourite</span><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+        <div class="card-body"><div class="card-row"><span>Lekki Phase 1, Lagos</span><span class="rating"><i data-lucide="star"></i>4.96</span></div><div class="sub">Azure 2-Bed Luxury Apartment</div><div class="sub">2 beds · 4 guests</div><div class="price"><b>₦85,000</b> <span class="muted">night</span></div></div></div>
+      <div><div class="card-img"><img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80"><span class="heart on"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+        <div class="card-body"><div class="card-row"><span>Victoria Island, Lagos</span><span class="rating"><i data-lucide="star"></i>4.89</span></div><div class="sub">The Palms Studio Suite</div><div class="sub">1 bed · 2 guests</div><div class="price"><b>₦55,000</b> <span class="muted">night</span></div></div></div>
+      <div><div class="card-img"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"><span class="tag">New</span><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+        <div class="card-body"><div class="card-row"><span>Ikoyi, Lagos</span><span class="rating"><i data-lucide="star"></i>5.0</span></div><div class="sub">Banana Island Penthouse</div><div class="sub">3 beds · 6 guests</div><div class="price"><b>₦240,000</b> <span class="muted">night</span></div></div></div>
+      <div><div class="card-img"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80"><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+        <div class="card-body"><div class="card-row"><span>Maitama, Abuja</span><span class="rating"><i data-lucide="star"></i>4.92</span></div><div class="sub">Maitama Garden Residence</div><div class="sub">2 beds · 4 guests</div><div class="price"><b>₦95,000</b> <span class="muted">night</span></div></div></div>
+    </div>
+
+    <div class="sec-head"><div><div class="h2">Explore by neighbourhood</div><div class="sub">Find the right base for work, rest or a weekend away</div></div></div>
+    <div class="areas">
+      <div class="area"><img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=800&q=80"><div><b>Lekki</b>42 apartments</div></div>
+      <div class="area"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"><div><b>Victoria Island</b>31 apartments</div></div>
+      <div class="area"><img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80"><div><b>Ikoyi</b>18 apartments</div></div>
+      <div class="area"><img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80"><div><b>Abuja</b>24 apartments</div></div>
+    </div>
+  </main>
+
+  <section class="trust">
+    <div><div class="h2" style="font-size:28px">Why guests book with Haven</div><p class="sub" style="margin-top:8px">Every apartment is inspected, cleaned by professionals and supported round the clock.</p></div>
+    <div class="trust-item"><div class="ic"><i data-lucide="shield-check"></i></div><b>Verified apartments</b><span class="sub">Photos match reality, always.</span></div>
+    <div class="trust-item"><div class="ic"><i data-lucide="credit-card"></i></div><b>Secure payments</b><span class="sub">Pay safely with card or transfer.</span></div>
+    <div class="trust-item"><div class="ic"><i data-lucide="headphones"></i></div><b>24/7 support</b><span class="sub">We're a message away.</span></div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-cols">
+      <div><div class="logo" style="margin-bottom:12px"><div class="logo-mark"><i data-lucide="home"></i></div>Haven</div><p>Premium shortlet apartments for business and leisure.</p></div>
+      <div><h4>Explore</h4><ul><li>All stays</li><li>Neighbourhoods</li><li>Long stays</li></ul></div>
+      <div><h4>Support</h4><ul><li>Help centre</li><li>Cancellation policy</li><li>Contact us</li></ul></div>
+      <div><h4>Company</h4><ul><li>About</li><li>Terms</li><li>Privacy</li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Haven Apartments</span><span style="display:flex;gap:16px"><i data-lucide="instagram"></i><i data-lucide="facebook"></i><i data-lucide="twitter"></i></span></div>
+  </footer>
+</div>
+<script>lucide.createIcons();</script></body></html>

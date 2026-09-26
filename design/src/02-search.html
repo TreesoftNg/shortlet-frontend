@@ -1,0 +1,105 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Search</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+  .mini-search { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 2px 10px rgba(0,0,0,.06); padding: 6px 6px 6px 22px; font-size: 14px; font-weight: 600; gap: 16px; }
+  .mini-search .sep { width: 1px; height: 22px; background: var(--line); }
+  .mini-search .go { width: 38px; height: 38px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; }
+  .filters { display: flex; align-items: center; gap: 10px; padding: 16px 40px; border-bottom: 1px solid var(--line); }
+  .filters .spacer { flex: 1; }
+  .layout { display: grid; grid-template-columns: 1fr 600px; }
+  .results { padding: 26px 40px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px 22px; margin-top: 20px; }
+  .card-img { aspect-ratio: 1 / 1; }
+  .map { position: relative; background: #E8EEE9; overflow: hidden; }
+  .map svg.bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pin { position: absolute; background: #fff; border-radius: 999px; padding: 7px 13px; font-weight: 800; font-size: 13px; box-shadow: 0 3px 12px rgba(0,0,0,.18); }
+  .pin.on { background: var(--ink); color: #fff; transform: scale(1.08); }
+  .map-card { position: absolute; left: 150px; top: 420px; width: 300px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg); }
+  .map-card img { width: 100%; height: 170px; }
+  .map-ctrl { position: absolute; right: 20px; top: 20px; display: flex; flex-direction: column; background: #fff; border-radius: 12px; box-shadow: var(--shadow); }
+  .map-ctrl div { width: 42px; height: 42px; display: grid; place-items: center; }
+  .map-ctrl div + div { border-top: 1px solid var(--line); }
+  .pagination { display: flex; justify-content: center; gap: 8px; margin: 40px 0 10px; }
+  .pagination span { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 14px; }
+  .pagination .on { background: var(--ink); color: #fff; }
+</style></head>
+<body><div class="frame">
+  <header class="nav" style="padding: 0 40px">
+    <div class="logo"><div class="logo-mark"><i data-lucide="home"></i></div>Haven</div>
+    <div class="mini-search"><span>Lekki, Lagos</span><span class="sep"></span><span>Oct 12 – 16</span><span class="sep"></span><span class="muted">2 guests</span><span class="go"><i data-lucide="search"></i></span></div>
+    <div class="nav-right"><span>₦ NGN</span><div class="user-pill"><i data-lucide="menu"></i><div class="avatar">AT</div></div></div>
+  </header>
+  <div class="filters">
+    <span class="chip on"><i data-lucide="sliders-horizontal"></i>Filters · 2</span>
+    <span class="chip">Price <i data-lucide="chevron-down"></i></span>
+    <span class="chip on">2+ Bedrooms <i data-lucide="x"></i></span>
+    <span class="chip">Instant book</span>
+    <span class="chip on">Pool <i data-lucide="x"></i></span>
+    <span class="chip">24/7 Power</span>
+    <span class="chip">Parking</span>
+    <span class="chip">Wi-Fi</span>
+    <span class="spacer"></span>
+    <span class="chip">Sort: Recommended <i data-lucide="chevron-down"></i></span>
+  </div>
+  <div class="layout">
+    <section class="results">
+      <div style="display:flex;justify-content:space-between;align-items:end">
+        <div><div class="h2">68 apartments in Lekki</div><div class="sub">Oct 12 – 16 · 4 nights · Prices include all fees</div></div>
+      </div>
+      <div class="grid3">
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=700&q=80"><span class="tag">Guest favourite</span><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Azure 2-Bed Luxury</span><span class="rating"><i data-lucide="star"></i>4.96</span></div><div class="sub">Lekki Phase 1 · 2 beds</div><div class="price"><b>₦85,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦340,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=700&q=80"><span class="heart on"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Oniru Waterfront Suite</span><span class="rating"><i data-lucide="star"></i>4.91</span></div><div class="sub">Oniru · 3 beds</div><div class="price"><b>₦120,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦480,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=80"><span class="tag">Only 1 left</span><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Chevron Drive Loft</span><span class="rating"><i data-lucide="star"></i>4.84</span></div><div class="sub">Chevron · 2 beds</div><div class="price"><b>₦70,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦280,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=700&q=80"><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Admiralty Way Residence</span><span class="rating"><i data-lucide="star"></i>4.93</span></div><div class="sub">Lekki Phase 1 · 2 beds</div><div class="price"><b>₦92,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦368,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80"><span class="tag">New</span><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Ikate Minimal Duplex</span><span class="rating"><i data-lucide="star"></i>5.0</span></div><div class="sub">Ikate · 3 beds</div><div class="price"><b>₦150,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦600,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=700&q=80"><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Orchid Hotel-Style Suite</span><span class="rating"><i data-lucide="star"></i>4.78</span></div><div class="sub">Orchid Road · 2 beds</div><div class="price"><b>₦65,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦260,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=700&q=80"><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Freedom Way Apartment</span><span class="rating"><i data-lucide="star"></i>4.88</span></div><div class="sub">Lekki Phase 1 · 2 beds</div><div class="price"><b>₦78,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦312,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=700&q=80"><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Osapa London Flat</span><span class="rating"><i data-lucide="star"></i>4.81</span></div><div class="sub">Osapa · 2 beds</div><div class="price"><b>₦60,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦240,000 total</span></div></div></div>
+        <div><div class="card-img"><img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=700&q=80"><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+          <div class="card-body"><div class="card-row"><span>Agungi Garden Home</span><span class="rating"><i data-lucide="star"></i>4.90</span></div><div class="sub">Agungi · 3 beds</div><div class="price"><b>₦110,000</b> <span class="muted">night ·</span> <span class="muted" style="text-decoration:underline">₦440,000 total</span></div></div></div>
+      </div>
+      <div class="pagination"><span><i data-lucide="chevron-left"></i></span><span class="on">1</span><span>2</span><span>3</span><span>…</span><span>8</span><span><i data-lucide="chevron-right"></i></span></div>
+    </section>
+    <aside class="map">
+      <svg class="bg" viewBox="0 0 600 1520" preserveAspectRatio="none">
+        <rect width="600" height="1520" fill="#EDF1EC"/>
+        <path d="M0 1080 C 150 1040, 300 1120, 600 1060 L600 1520 L0 1520Z" fill="#CFE3EE"/>
+        <path d="M0 250 C 120 230, 180 300, 260 260 S 420 200, 600 240 L600 0 L0 0Z" fill="#D6E7EF"/>
+        <rect x="60" y="560" width="120" height="90" rx="10" fill="#DCEBD8"/>
+        <rect x="380" y="780" width="150" height="110" rx="12" fill="#DCEBD8"/>
+        <g stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round">
+          <path d="M-10 720 C 200 700, 400 760, 610 700"/>
+          <path d="M220 280 L 260 1080"/>
+          <path d="M470 250 L 430 1070"/>
+        </g>
+        <g stroke="#fff" stroke-width="4" fill="none">
+          <path d="M0 480 L600 520"/><path d="M0 920 L600 900"/><path d="M100 260 L140 1070"/><path d="M340 260 L360 1070"/><path d="M0 380 L600 400"/><path d="M0 820 L600 820"/>
+        </g>
+        <text x="236" y="690" font-size="13" fill="#8A938C" font-family="Plus Jakarta Sans" font-weight="600">Admiralty Way</text>
+        <text x="40" y="1200" font-size="14" fill="#7FA3B6" font-family="Plus Jakarta Sans" font-weight="600">Lekki Lagoon</text>
+      </svg>
+      <div class="pin" style="left:90px;top:340px">₦85k</div>
+      <div class="pin on" style="left:250px;top:360px">₦120k</div>
+      <div class="pin" style="left:400px;top:300px">₦70k</div>
+      <div class="pin" style="left:330px;top:640px">₦92k</div>
+      <div class="pin" style="left:480px;top:560px">₦150k</div>
+      <div class="pin" style="left:120px;top:780px">₦65k</div>
+      <div class="pin" style="left:270px;top:860px">₦78k</div>
+      <div class="pin" style="left:450px;top:960px">₦60k</div>
+      <div class="pin" style="left:40px;top:600px">₦110k</div>
+      <div class="map-card"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=700&q=80"><div style="padding:14px 16px"><div class="card-row"><span>Oniru Waterfront Suite</span><span class="rating"><i data-lucide="star"></i>4.91</span></div><div class="sub">3 beds · 6 guests</div><div class="price"><b>₦120,000</b> <span class="muted">night</span></div></div></div>
+      <div class="map-ctrl"><div><i data-lucide="plus"></i></div><div><i data-lucide="minus"></i></div></div>
+    </aside>
+  </div>
+</div>
+<script>lucide.createIcons();</script></body></html>

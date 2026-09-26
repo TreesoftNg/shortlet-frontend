@@ -1,0 +1,82 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Mobile</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+  body { background: var(--bg-soft); }
+  .stage { width: 1440px; padding: 70px 90px; display: flex; gap: 60px; justify-content: center; }
+  .phone { width: 390px; height: 844px; border-radius: 52px; background: #fff; border: 10px solid #1B1D1F; overflow: hidden; position: relative; box-shadow: var(--shadow-lg); flex: none; }
+  .status { height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font-weight: 700; font-size: 14px; }
+  .island { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 110px; height: 32px; background: #1B1D1F; border-radius: 20px; }
+  .pad { padding: 0 20px; }
+  .m-search { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 999px; box-shadow: 0 3px 14px rgba(0,0,0,.12); border: 1px solid var(--line); margin: 6px 0 14px; }
+  .m-search b { display: block; font-size: 14px; }
+  .m-search span { font-size: 12px; color: var(--ink-3); }
+  .m-cats { display: flex; gap: 22px; border-bottom: 1px solid var(--line); padding: 0 20px; }
+  .m-cats div { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--ink-3); padding-bottom: 10px; }
+  .m-cats .on { color: var(--ink); border-bottom: 2px solid var(--ink); }
+  .m-cats svg { width: 22px; height: 22px; }
+  .card-img { aspect-ratio: 1 / .9; border-radius: 16px; }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; height: 82px; background: #fff; border-top: 1px solid var(--line); display: flex; justify-content: space-around; padding-top: 10px; }
+  .tabbar div { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; color: var(--ink-3); }
+  .tabbar .on { color: var(--brand); }
+  .tabbar svg { width: 22px; height: 22px; }
+  .m-hero { position: relative; height: 300px; }
+  .m-hero img { width: 100%; height: 100%; }
+  .m-hero .top { position: absolute; top: 54px; left: 16px; right: 16px; display: flex; justify-content: space-between; }
+  .round { width: 36px; height: 36px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .round svg { width: 16px; height: 16px; }
+  .counter { position: absolute; right: 16px; bottom: 34px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+  .m-sheet { position: relative; margin-top: -20px; background: #fff; border-radius: 22px 22px 0 0; padding: 22px 20px; }
+  .m-foot { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--line); padding: 14px 20px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .ic-row { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .ic-row svg { width: 22px; height: 22px; flex: none; }
+  .m-trip { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-bottom: 14px; }
+  .m-trip img { width: 100%; height: 150px; }
+  .caption { text-align: center; margin-top: 18px; font-weight: 700; color: var(--ink-2); }
+</style></head>
+<body><div class="stage">
+  <!-- Home -->
+  <div><div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span style="display:flex;gap:5px"><i data-lucide="signal" style="width:16px"></i><i data-lucide="wifi" style="width:16px"></i><i data-lucide="battery-full" style="width:18px"></i></span></div>
+    <div class="pad"><div class="m-search"><i data-lucide="search"></i><div><b>Where to?</b><span>Anywhere · Any week · Add guests</span></div></div></div>
+    <div class="m-cats"><div class="on"><i data-lucide="sparkles"></i>All</div><div><i data-lucide="building-2"></i>Studios</div><div><i data-lucide="sofa"></i>2 Bed</div><div><i data-lucide="castle"></i>Penthouse</div><div><i data-lucide="waves"></i>Pool</div></div>
+    <div class="pad" style="padding-top:18px">
+      <div class="card-img"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=700&q=80"><span class="tag">Guest favourite</span><span class="heart"><i data-lucide="heart"></i></span><div class="dots"><i></i><i></i><i></i><i></i></div></div>
+      <div class="card-body"><div class="card-row"><span>Lekki Phase 1, Lagos</span><span class="rating"><i data-lucide="star"></i>4.96</span></div><div class="sub">Azure 2-Bed Luxury · 2 beds</div><div class="price"><b>₦85,000</b> <span class="muted">night</span></div></div>
+      <div class="card-img" style="margin-top:18px"><img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=700&q=80"><span class="heart on"><i data-lucide="heart"></i></span></div>
+    </div>
+    <div class="tabbar"><div class="on"><i data-lucide="search"></i>Explore</div><div><i data-lucide="heart"></i>Saved</div><div><i data-lucide="luggage"></i>Trips</div><div><i data-lucide="message-square"></i>Inbox</div><div><i data-lucide="circle-user"></i>Profile</div></div>
+  </div><div class="caption">Explore</div></div>
+
+  <!-- Detail -->
+  <div><div class="phone">
+    <div class="m-hero"><img src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&q=80">
+      <div class="top"><span class="round"><i data-lucide="chevron-left"></i></span><span style="display:flex;gap:10px"><span class="round"><i data-lucide="share"></i></span><span class="round"><i data-lucide="heart"></i></span></span></div>
+      <span class="counter">1 / 24</span></div>
+    <div class="m-sheet">
+      <div class="h2" style="font-size:22px;line-height:1.25">Azure 2-Bed Luxury Apartment with Pool</div>
+      <div class="sub" style="margin-top:4px">Lekki Phase 1, Lagos</div>
+      <div class="sub">4 guests · 2 bedrooms · 2.5 baths</div>
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0;padding:12px 14px;border:1px solid var(--line);border-radius:14px"><i data-lucide="award" style="color:var(--brand)"></i><b style="font-size:14px;flex:1">Guest favourite</b><span class="rating"><i data-lucide="star"></i>4.96</span><span class="muted" style="font-size:13px">128 reviews</span></div>
+      <div class="ic-row"><i data-lucide="zap"></i><div><b style="font-size:14px">24/7 power supply</b><div class="sub" style="font-size:13px">Inverter + generator backup</div></div></div>
+      <div class="ic-row"><i data-lucide="key-round"></i><div><b style="font-size:14px">Self check-in</b><div class="sub" style="font-size:13px">Smart lock, unique code</div></div></div>
+    </div>
+    <div class="m-foot"><div><b style="font-size:16px">₦85,000</b> <span class="muted" style="font-size:13px">night</span><div style="font-size:13px;text-decoration:underline;font-weight:600">Oct 12 – 16</div></div><a class="btn btn-primary" style="padding:0 30px">Reserve</a></div>
+  </div><div class="caption">Property details</div></div>
+
+  <!-- Trips -->
+  <div><div class="phone">
+    <div class="island"></div>
+    <div class="status"><span>9:41</span><span style="display:flex;gap:5px"><i data-lucide="signal" style="width:16px"></i><i data-lucide="wifi" style="width:16px"></i><i data-lucide="battery-full" style="width:18px"></i></span></div>
+    <div class="pad">
+      <div class="h1" style="margin:10px 0 14px">Trips</div>
+      <div style="display:flex;gap:8px;margin-bottom:18px"><span class="chip on" style="background:var(--ink);color:#fff">Upcoming</span><span class="chip">Past</span><span class="chip">Cancelled</span></div>
+      <div class="m-trip"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=700&q=80"><div style="padding:14px 16px"><span class="badge b-brand" style="margin-bottom:8px">In 16 days</span><b style="display:block">Azure 2-Bed Luxury</b><div class="sub" style="font-size:13px">Oct 12 – 16 · Lekki Phase 1</div><div style="display:flex;gap:8px;margin-top:12px"><a class="btn btn-sm btn-primary" style="flex:1">Manage</a><a class="btn btn-sm btn-soft"><i data-lucide="message-circle"></i></a></div></div></div>
+      <div class="m-trip" style="display:flex"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&q=80" style="width:110px;height:auto"><div style="padding:12px 14px"><b style="font-size:14px">Maitama Garden Residence</b><div class="sub" style="font-size:12px">Aug 3 – 7 · Abuja</div><span class="badge b-warn" style="margin-top:8px">Review pending</span></div></div>
+    </div>
+    <div class="tabbar"><div><i data-lucide="search"></i>Explore</div><div><i data-lucide="heart"></i>Saved</div><div class="on"><i data-lucide="luggage"></i>Trips</div><div><i data-lucide="message-square"></i>Inbox</div><div><i data-lucide="circle-user"></i>Profile</div></div>
+  </div><div class="caption">My trips</div></div>
+</div>
+<script>lucide.createIcons();</script></body></html>
