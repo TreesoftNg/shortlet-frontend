@@ -1,7 +1,8 @@
 'use client';
 
 import type { Property, Review } from '@/data/types';
-import { Box, Button, Flex, Grid, Text } from '@chakra-ui/react';
+import { AppButton } from '@/shared/components';
+import { Box, Flex, Grid, Text } from '@chakra-ui/react';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 
@@ -119,19 +120,9 @@ export function PropertyReviews({ property, reviews }: PropertyReviewsProps) {
         ))}
       </Grid>
 
-      <Button
-        mt="30px"
-        h="48px"
-        px="22px"
-        borderRadius="12px"
-        border="1px solid"
-        borderColor="ink"
-        bg="white"
-        fontWeight="700"
-        fontSize="15px"
-      >
-        Show all {count} reviews
-      </Button>
+      <Box mt="30px">
+        <AppButton variant="outline">Show all {count} reviews</AppButton>
+      </Box>
     </Box>
   );
 }

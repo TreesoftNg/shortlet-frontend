@@ -2,9 +2,9 @@
 
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import type { AuthMode } from '@/features/auth/types';
+import { AppButton, LabeledField } from '@/shared/components';
 import {
   Box,
-  Button,
   Flex,
   Grid,
   Heading,
@@ -54,10 +54,9 @@ function AppleIcon() {
 
 export function AuthForm() {
   const router = useRouter();
-  const mode = useAuthStore((s) => s.mode);
-  const setMode = useAuthStore((s) => s.setMode);
   const login = useAuthStore((s) => s.login);
 
+  const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('temi@example.com');
   const [password, setPassword] = useState('password123');
   const [firstName, setFirstName] = useState('');
@@ -128,7 +127,7 @@ export function AuthForm() {
 
       {!isSignIn ? (
         <Flex gap="12px" mb="12px" direction={{ base: 'column', sm: 'row' }}>
-          <FieldBox label="First name">
+          <LabeledField label="First name" flex="1">
             <Input
               unstyled
               value={firstName}
@@ -138,8 +137,8 @@ export function AuthForm() {
               w="full"
               outline="none"
             />
-          </FieldBox>
-          <FieldBox label="Last name">
+          </LabeledField>
+          <LabeledField label="Last name" flex="1">
             <Input
               unstyled
               value={lastName}
@@ -149,11 +148,11 @@ export function AuthForm() {
               w="full"
               outline="none"
             />
-          </FieldBox>
+          </LabeledField>
         </Flex>
       ) : null}
 
-      <FieldBox label="Email" focused={emailFocused} mb="12px">
+      <LabeledField label="Email" emphasized={emailFocused} mb="12px">
         <Input
           unstyled
           type="email"
@@ -165,9 +164,9 @@ export function AuthForm() {
           w="full"
           outline="none"
         />
-      </FieldBox>
+      </LabeledField>
 
-      <FieldBox label="Password" mb="12px">
+      <LabeledField label="Password" mb="12px">
         <Flex align="center" justify="space-between" gap={2}>
           <Input
             unstyled
@@ -195,7 +194,7 @@ export function AuthForm() {
             )}
           </Box>
         </Flex>
-      </FieldBox>
+      </LabeledField>
 
       {isSignIn ? (
         <Flex
@@ -238,19 +237,9 @@ export function AuthForm() {
         <Box h="22px" />
       )}
 
-      <Button
-        w="full"
-        h="52px"
-        borderRadius="12px"
-        bg="brand.500"
-        color="white"
-        fontWeight="700"
-        fontSize="15px"
-        _hover={{ bg: 'brand.600' }}
-        onClick={handleSubmit}
-      >
+      <AppButton size="lg" fullWidth onClick={handleSubmit}>
         Continue
-      </Button>
+      </AppButton>
 
       <Flex align="center" gap="14px" color="ink.3" fontSize="13px" my="22px">
         <Box flex="1" h="1px" bg="line" />
@@ -258,49 +247,24 @@ export function AuthForm() {
         <Box flex="1" h="1px" bg="line" />
       </Flex>
 
-      <Flex
-        as="button"
-        w="full"
-        h="50px"
-        align="center"
-        justify="center"
-        borderRadius="12px"
-        border="1px solid"
-        borderColor="#C9C9C4"
-        bg="white"
-        color="ink"
-        fontWeight="700"
-        fontSize="15px"
-        gap="12px"
-        mb="10px"
-        cursor="pointer"
-        _hover={{ bg: 'bg.soft' }}
+      <Box mb="10px">
+        <AppButton
+          variant="outlineMuted"
+          fullWidth
+          leftIcon={<GoogleIcon />}
+          onClick={handleSubmit}
+        >
+          Continue with Google
+        </AppButton>
+      </Box>
+      <AppButton
+        variant="outlineMuted"
+        fullWidth
+        leftIcon={<AppleIcon />}
         onClick={handleSubmit}
       >
-        <GoogleIcon />
-        Continue with Google
-      </Flex>
-      <Flex
-        as="button"
-        w="full"
-        h="50px"
-        align="center"
-        justify="center"
-        borderRadius="12px"
-        border="1px solid"
-        borderColor="#C9C9C4"
-        bg="white"
-        color="ink"
-        fontWeight="700"
-        fontSize="15px"
-        gap="12px"
-        cursor="pointer"
-        _hover={{ bg: 'bg.soft' }}
-        onClick={handleSubmit}
-      >
-        <AppleIcon />
         Continue with Apple
-      </Flex>
+      </AppButton>
 
       <Text color="ink.3" fontSize="13px" textAlign="center" mt="20px">
         By continuing you agree to our{' '}
@@ -313,42 +277,6 @@ export function AuthForm() {
         </Text>
         .
       </Text>
-    </Box>
-  );
-}
-
-function FieldBox({
-  label,
-  children,
-  focused,
-  mb,
-}: {
-  label: string;
-  children: React.ReactNode;
-  focused?: boolean;
-  mb?: string;
-}) {
-  return (
-    <Box
-      border={focused ? '2px solid' : '1px solid'}
-      borderColor={focused ? 'ink' : '#D5D5D0'}
-      borderRadius="12px"
-      px={focused ? '15px' : '16px'}
-      py={focused ? '11px' : '12px'}
-      mb={mb}
-      flex="1"
-      w="full"
-    >
-      <Text
-        fontSize="11px"
-        fontWeight="700"
-        textTransform="uppercase"
-        letterSpacing="0.04em"
-        mb="2px"
-      >
-        {label}
-      </Text>
-      {children}
     </Box>
   );
 }

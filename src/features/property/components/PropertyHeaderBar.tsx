@@ -1,8 +1,9 @@
 'use client';
 
+import { AccountMenuButton } from '@/shared/components';
 import { SunmadeLogo } from '@/shared/components/brand';
-import { Box, Flex, Text } from '@chakra-ui/react';
-import { Menu, Search } from 'lucide-react';
+import { Flex, Text } from '@chakra-ui/react';
+import { Search } from 'lucide-react';
 import Link from 'next/link';
 
 export function PropertyHeaderBar() {
@@ -69,33 +70,15 @@ export function PropertyHeaderBar() {
         </Link>
       </Flex>
 
-      <Flex align="center" gap="14px" fontSize="14px" fontWeight="600" flexShrink={0}>
+      <Flex
+        align="center"
+        gap="14px"
+        fontSize="14px"
+        fontWeight="600"
+        flexShrink={0}
+      >
         <Text display={{ base: 'none', lg: 'block' }}>₦ NGN</Text>
-        <Flex
-          align="center"
-          gap="10px"
-          py="6px"
-          pl="14px"
-          pr="6px"
-          border="1px solid"
-          borderColor="line"
-          borderRadius="full"
-        >
-          <Menu size={18} strokeWidth={1.9} />
-          <Flex
-            w="32px"
-            h="32px"
-            borderRadius="full"
-            bg="brand.500"
-            color="white"
-            align="center"
-            justify="center"
-            fontSize="13px"
-            fontWeight="700"
-          >
-            AT
-          </Flex>
-        </Flex>
+        <AccountMenuButton />
       </Flex>
     </Flex>
   );

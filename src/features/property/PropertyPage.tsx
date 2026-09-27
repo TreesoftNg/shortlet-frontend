@@ -14,6 +14,7 @@ import {
   usePropertyReviews,
 } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
+import { DEMO_STAY } from '@/data/demo-stay';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
 import { formatNaira } from '@/shared/lib/format';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
@@ -26,11 +27,11 @@ type PropertyPageProps = {
 
 export function PropertyPage({ slug }: PropertyPageProps) {
   const router = useRouter();
-  const { data: property, isError } = useProperty(slug);
+  const { data: property, isError, isPending } = useProperty(slug);
   const { data: reviews = [] } = usePropertyReviews(property?.id);
   const selectedUnitId = usePropertyBookingStore((s) => s.selectedUnitId);
   const setSelectedUnitId = usePropertyBookingStore((s) => s.setSelectedUnitId);
-  const nights = usePropertyBookingStore((s) => s.nights);
+  const nights = DEMO_STAY.nights;
 
   useEffect(() => {
     if (property?.units[0] && !selectedUnitId) {
@@ -43,7 +44,15 @@ export function PropertyPage({ slug }: PropertyPageProps) {
     [property, selectedUnitId],
   );
 
-  if (isError || property === null) {
+  if (isPending) {
+    return (
+      <Box p={10} textAlign="center">
+        <Text color="ink.2">Loading property…</Text>
+      </Box>
+    );
+  }
+
+  if (isError || !property) {
     return (
       <Box p={10} textAlign="center">
         <Heading size="lg" mb={4}>
@@ -53,8 +62,6 @@ export function PropertyPage({ slug }: PropertyPageProps) {
       </Box>
     );
   }
-
-  if (!property) return null;
 
   const nightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;

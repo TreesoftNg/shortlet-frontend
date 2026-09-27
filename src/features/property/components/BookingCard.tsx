@@ -1,5 +1,6 @@
 'use client';
 
+import { DEMO_STAY } from '@/data/demo-stay';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
 import { formatNaira } from '@/shared/lib/format';
 import { tokens } from '@/shared/theme/tokens';
@@ -16,10 +17,10 @@ type BookingCardProps = {
 
 export function BookingCard({ property, selectedUnit }: BookingCardProps) {
   const router = useRouter();
-  const nights = usePropertyBookingStore((s) => s.nights);
   const guests = usePropertyBookingStore((s) => s.guests);
-  const checkInLabel = usePropertyBookingStore((s) => s.checkInLabel);
-  const checkOutLabel = usePropertyBookingStore((s) => s.checkOutLabel);
+  const nights = DEMO_STAY.nights;
+  const checkInLabel = DEMO_STAY.checkInLabel;
+  const checkOutLabel = DEMO_STAY.checkOutLabel;
 
   const nightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;

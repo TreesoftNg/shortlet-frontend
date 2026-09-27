@@ -2,20 +2,16 @@
 
 import { AuthArtPanel } from '@/features/auth/components/AuthArtPanel';
 import { AuthForm } from '@/features/auth/components/AuthForm';
-import { useAuthStore } from '@/features/auth/store/auth-store';
+import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
+import { useIsAuthenticated } from '@/features/auth/store/auth-store';
 import { Box, Flex, Grid } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export function AuthPage() {
   const router = useRouter();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(useAuthStore.persist.hasHydrated());
-    return useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-  }, []);
+  const hydrated = useAuthHydrated();
+  const isAuthenticated = useIsAuthenticated();
 
   useEffect(() => {
     if (hydrated && isAuthenticated) {

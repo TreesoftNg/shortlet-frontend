@@ -1,7 +1,8 @@
 'use client';
 
+import { AppButton, SectionHeader, StatusBadge, Surface } from '@/shared/components';
 import type { Booking } from '@/data/types';
-import { Box, Button, Flex, Grid, Text } from '@chakra-ui/react';
+import { Box, Flex, Grid, Text } from '@chakra-ui/react';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -28,26 +29,18 @@ export function PastTripsGrid({
   return (
     <Box>
       {title ? (
-        <Flex
-          justify="space-between"
-          align="end"
+        <SectionHeader
+          title={title}
           mt={{ base: 8, md: '52px' }}
           mb="20px"
-        >
-          <Text
-            as="h2"
-            fontSize="22px"
-            fontWeight="700"
-            letterSpacing="-0.01em"
-          >
-            {title}
-          </Text>
-          {showViewAll ? (
-            <Text as="u" fontWeight="700" fontSize="14px" cursor="pointer">
-              View all
-            </Text>
-          ) : null}
-        </Flex>
+          action={
+            showViewAll ? (
+              <Text as="u" fontWeight="700" fontSize="14px" cursor="pointer">
+                View all
+              </Text>
+            ) : null
+          }
+        />
       ) : null}
 
       <Grid
@@ -59,14 +52,7 @@ export function PastTripsGrid({
         gap="22px"
       >
         {bookings.map((booking) => (
-          <Box
-            key={booking.id}
-            asChild
-            border="1px solid"
-            borderColor="line"
-            borderRadius="18px"
-            overflow="hidden"
-          >
+          <Surface key={booking.id} radius="lg" asChild>
             <Link href={`/properties/${booking.property_slug}`}>
               <Box position="relative" h="180px">
                 <Image
@@ -92,35 +78,20 @@ export function PastTripsGrid({
                   gap={2}
                   flexWrap="wrap"
                 >
-                  <Flex
-                    px="10px"
-                    py="4px"
-                    borderRadius="full"
-                    bg="line.2"
-                    color="ink.2"
-                    fontSize="12px"
-                    fontWeight="700"
-                  >
-                    {booking.status === 'cancelled'
-                      ? 'Cancelled'
-                      : 'Completed'}
-                  </Flex>
+                  <StatusBadge status={booking.status} />
 
                   {booking.review_pending ? (
-                    <Button
-                      h="38px"
-                      px="14px"
-                      borderRadius="10px"
-                      bg="ink"
-                      color="white"
-                      fontSize="13px"
-                      fontWeight="700"
-                      gap="6px"
-                      onClick={(e) => e.preventDefault()}
+                    <AppButton
+                      variant="ink"
+                      size="sm"
+                      leftIcon={<Star size={14} strokeWidth={1.9} />}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
                     >
-                      <Star size={14} strokeWidth={1.9} />
                       Leave a review
-                    </Button>
+                    </AppButton>
                   ) : booking.your_rating != null ? (
                     <Flex
                       align="center"
@@ -135,7 +106,7 @@ export function PastTripsGrid({
                 </Flex>
               </Box>
             </Link>
-          </Box>
+          </Surface>
         ))}
       </Grid>
     </Box>

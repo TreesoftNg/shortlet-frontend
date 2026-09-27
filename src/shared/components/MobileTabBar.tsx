@@ -1,26 +1,48 @@
 'use client';
 
+/**
+ * Mobile-only bottom nav. Desktop uses SiteHeader + account menu instead.
+ * Only include routes that exist — no Saved/Inbox until those pages ship.
+ */
+
+import { useIsAuthenticated } from '@/features/auth/store/auth-store';
 import { Flex, Text } from '@chakra-ui/react';
-import {
-  CircleUser,
-  Heart,
-  Luggage,
-  MessageSquare,
-  Search,
-} from 'lucide-react';
+import { CircleUser, Luggage, Search, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const tabs = [
-  { href: '/', label: 'Explore', icon: Search },
-  { href: '/saved', label: 'Saved', icon: Heart },
-  { href: '/trips', label: 'Trips', icon: Luggage },
-  { href: '/inbox', label: 'Inbox', icon: MessageSquare },
-  { href: '/account', label: 'Profile', icon: CircleUser },
-];
+type Tab = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match?: (pathname: string) => boolean;
+};
 
 export function MobileTabBar() {
   const pathname = usePathname();
+  const isAuthenticated = useIsAuthenticated();
+
+  const tabs: Tab[] = [
+    {
+      href: '/',
+      label: 'Explore',
+      icon: Search,
+      match: (path) => path === '/',
+    },
+    {
+      href: '/trips',
+      label: 'Trips',
+      icon: Luggage,
+      match: (path) => path.startsWith('/trips'),
+    },
+    {
+      href: isAuthenticated ? '/account' : '/auth',
+      label: 'Profile',
+      icon: CircleUser,
+      match: (path) =>
+        path.startsWith('/account') || path.startsWith('/auth'),
+    },
+  ];
 
   return (
     <Flex
@@ -40,17 +62,15 @@ export function MobileTabBar() {
       zIndex={50}
       maxW="1440px"
       mx="auto"
+      aria-label="Mobile navigation"
     >
       {tabs.map((tab) => {
         const Icon = tab.icon;
-        const active =
-          tab.href === '/'
-            ? pathname === '/'
-            : pathname.startsWith(tab.href);
+        const active = tab.match?.(pathname) ?? pathname.startsWith(tab.href);
 
         return (
           <Flex
-            key={tab.href}
+            key={tab.label}
             asChild
             direction="column"
             align="center"

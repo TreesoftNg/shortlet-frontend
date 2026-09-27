@@ -1,21 +1,6 @@
-import {
-  neighborhoods,
-  properties,
-  reviews,
-  websiteContent,
-} from '@/data/mocks';
-import type {
-  Neighborhood,
-  Property,
-  Review,
-  WebsiteContent,
-} from '@/data/types';
-
-/** Simulates network latency so React Query loading states can be exercised. */
-const delay = (ms = 200) =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
+import { request } from '@/data/api/client';
+import { neighborhoods, properties } from '@/data/mocks';
+import type { Property } from '@/data/types';
 
 export type PropertySort =
   | 'recommended'
@@ -50,38 +35,26 @@ function matchesNeighborhood(property: Property, value: string): boolean {
   );
 }
 
-export async function getWebsiteContent(): Promise<WebsiteContent> {
-  await delay();
-  return websiteContent;
-}
-
-export async function getNeighborhoods(): Promise<Neighborhood[]> {
-  await delay();
-  return neighborhoods;
-}
-
-export async function getNeighborhoodBySlug(
-  slug: string,
-): Promise<Neighborhood | null> {
-  await delay();
-  return neighborhoods.find((n) => n.slug === slug) ?? null;
-}
-
 export async function getProperties(
   params: PropertyListParams = {},
 ): Promise<Property[]> {
-  await delay();
-
   let results = properties.filter((property) => {
     if (!property.listed) return false;
     if (params.featured && !property.featured) return false;
-    if (params.neighborhood && !matchesNeighborhood(property, params.neighborhood)) {
+    if (
+      params.neighborhood &&
+      !matchesNeighborhood(property, params.neighborhood)
+    ) {
       return false;
     }
     if (params.guests && (property.capacity.max ?? 0) < params.guests) {
       return false;
     }
-    if (params.tag && params.tag !== 'all' && !property.tags?.includes(params.tag)) {
+    if (
+      params.tag &&
+      params.tag !== 'all' &&
+      !property.tags?.includes(params.tag)
+    ) {
       return false;
     }
     if (
@@ -131,24 +104,15 @@ export async function getProperties(
       });
   }
 
-  return results;
+  return request(results);
 }
 
 export async function getPropertyBySlug(
   slug: string,
 ): Promise<Property | null> {
-  await delay();
-  return properties.find((property) => property.slug === slug) ?? null;
+  return request(properties.find((property) => property.slug === slug) ?? null);
 }
 
 export async function getPropertyById(id: string): Promise<Property | null> {
-  await delay();
-  return properties.find((property) => property.id === id) ?? null;
-}
-
-export async function getReviewsByPropertyId(
-  propertyId: string,
-): Promise<Review[]> {
-  await delay();
-  return reviews.filter((review) => review.property_id === propertyId);
+  return request(properties.find((property) => property.id === id) ?? null);
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/features/auth/store/auth-store';
+import { AppButton, Surface } from '@/shared/components';
 import type { AuthUser } from '@/features/auth/types';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { LogOut, Mail, UserRound } from 'lucide-react';
@@ -20,13 +21,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
   };
 
   return (
-    <Box
-      border="1px solid"
-      borderColor="line"
-      borderRadius="18px"
-      p={{ base: '20px', md: '28px' }}
-      bg="bg"
-    >
+    <Surface radius="lg" p={{ base: '20px', md: '28px' }}>
       <Flex
         align={{ base: 'start', sm: 'center' }}
         gap="18px"
@@ -78,27 +73,15 @@ export function ProfileCard({ user }: ProfileCardProps) {
           </Flex>
         </Box>
 
-        <Flex
-          as="button"
-          align="center"
-          gap="8px"
-          h="42px"
-          px="16px"
-          borderRadius="12px"
-          border="1px solid"
-          borderColor="line"
-          bg="white"
-          color="ink"
-          fontWeight="700"
-          fontSize="14px"
-          cursor="pointer"
-          _hover={{ bg: 'bg.soft' }}
+        <AppButton
+          variant="outlineMuted"
+          size="sm"
+          leftIcon={<LogOut size={16} strokeWidth={1.9} />}
           onClick={handleLogout}
         >
-          <LogOut size={16} strokeWidth={1.9} />
           Log out
-        </Flex>
+        </AppButton>
       </Flex>
-    </Box>
+    </Surface>
   );
 }

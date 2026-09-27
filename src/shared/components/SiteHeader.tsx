@@ -1,25 +1,40 @@
 'use client';
 
-import { useAuthStore } from '@/features/auth/store/auth-store';
-import { pagePx } from '@/shared/layout';
+import { AccountMenuButton } from '@/shared/components/AccountMenuButton';
 import { SunmadeLogo } from '@/shared/components/brand';
+import { pagePx } from '@/shared/layout';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Globe, Menu, User } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const links = [
+export type NavLink = {
+  href: string;
+  label: string;
+};
+
+/** Single primary nav for the customer site (discover / brand). */
+const navLinks: NavLink[] = [
   { href: '/', label: 'Stays' },
   { href: '/locations', label: 'Locations' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
 
-export function SiteHeader() {
+type SiteHeaderProps = {
+  /**
+   * @deprecated Trips no longer uses a separate primary nav.
+   * Kept optional so call sites can still pass it without breaking.
+   */
+  variant?: 'marketing' | 'trips';
+  showCurrency?: boolean;
+};
+
+export function SiteHeader({
+  variant: _variant = 'marketing',
+  showCurrency = true,
+}: SiteHeaderProps) {
   const pathname = usePathname();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const user = useAuthStore((s) => s.user);
-  const accountHref = isAuthenticated ? '/account' : '/auth';
 
   return (
     <Flex
@@ -52,7 +67,7 @@ export function SiteHeader() {
         color="ink.2"
         display={{ base: 'none', md: 'flex' }}
       >
-        {links.map((link) => {
+        {navLinks.map((link) => {
           const active =
             link.href === '/'
               ? pathname === '/'
@@ -90,43 +105,15 @@ export function SiteHeader() {
         fontSize="14px"
         fontWeight="600"
       >
-        <Text display={{ base: 'none', lg: 'block' }}>₦ NGN</Text>
-        <Box display={{ base: 'none', lg: 'block' }} color="ink.2">
-          <Globe size={18} strokeWidth={1.9} />
-        </Box>
-        <Flex
-          asChild
-          align="center"
-          gap="10px"
-          py="6px"
-          pl={{ base: '10px', md: '14px' }}
-          pr="6px"
-          border="1px solid"
-          borderColor="line"
-          borderRadius="full"
-          boxShadow="0 1px 2px rgba(0,0,0,.04)"
-        >
-          <Link href={accountHref}>
-            <Menu size={18} strokeWidth={1.9} />
-            <Flex
-              w="32px"
-              h="32px"
-              borderRadius="full"
-              bg="brand.500"
-              color="white"
-              align="center"
-              justify="center"
-              fontSize="13px"
-              fontWeight="700"
-            >
-              {user?.avatarInitials ? (
-                user.avatarInitials
-              ) : (
-                <User size={16} strokeWidth={1.9} />
-              )}
-            </Flex>
-          </Link>
-        </Flex>
+        {showCurrency ? (
+          <Text display={{ base: 'none', lg: 'block' }}>₦ NGN</Text>
+        ) : null}
+        {showCurrency ? (
+          <Box display={{ base: 'none', lg: 'block' }} color="ink.2">
+            <Globe size={18} strokeWidth={1.9} />
+          </Box>
+        ) : null}
+        <AccountMenuButton />
       </Flex>
     </Flex>
   );

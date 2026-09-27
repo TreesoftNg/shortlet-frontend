@@ -1,6 +1,7 @@
 'use client';
 
-import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
+import { AppButton } from '@/shared/components';
+import { Box, Flex, Grid, Heading } from '@chakra-ui/react';
 import {
   AirVent,
   Car,
@@ -51,19 +52,9 @@ export function PropertyAmenities({ labels }: PropertyAmenitiesProps) {
           );
         })}
       </Grid>
-      <Button
-        mt="24px"
-        h="48px"
-        px="22px"
-        borderRadius="12px"
-        border="1px solid"
-        borderColor="ink"
-        bg="white"
-        fontWeight="700"
-        fontSize="15px"
-      >
-        Show all 32 amenities
-      </Button>
+      <Box mt="24px">
+        <AppButton variant="outline">Show all 32 amenities</AppButton>
+      </Box>
     </Box>
   );
 }

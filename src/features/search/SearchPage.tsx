@@ -11,6 +11,7 @@ import {
   useSearchProperties,
   type SearchFilters,
 } from '@/features/search/hooks/useSearchData';
+import { DEMO_STAY } from '@/data/demo-stay';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
 import { Box, Grid } from '@chakra-ui/react';
 import { useSearchParams } from 'next/navigation';
@@ -56,7 +57,7 @@ export function SearchPage() {
     <Box bg="bg" maxW="1440px" mx="auto" minH="100vh">
       <SearchMiniBar
         locationLabel={miniLocation}
-        datesLabel="Oct 12 – 16"
+        datesLabel={DEMO_STAY.datesRangeLabel}
         guestsLabel={`${filters.guests} guests`}
       />
 

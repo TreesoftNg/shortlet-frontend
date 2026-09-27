@@ -117,6 +117,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
         align="center"
         gap="8px"
         bg="white"
+        color="ink"
         border="1px solid"
         borderColor="ink"
         borderRadius="10px"

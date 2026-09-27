@@ -7,8 +7,9 @@ import {
   mockGuest,
   useCheckoutProperty,
   useCheckoutQuote,
+  type PaymentMethod,
 } from '@/features/checkout/hooks/useCheckoutData';
-import { useCheckoutStore } from '@/features/checkout/store/checkout-store';
+import { DEMO_STAY } from '@/data/demo-stay';
 import { formatNaira } from '@/shared/lib/format';
 import {
   Box,
@@ -21,7 +22,7 @@ import {
 } from '@chakra-ui/react';
 import { ChevronLeft, Lock, Timer } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function formatHold(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -35,19 +36,19 @@ export function CheckoutPage() {
   const propertySlug = searchParams.get('property');
   const unitId = searchParams.get('unit');
 
-  const { data: property } = useCheckoutProperty(propertySlug);
+  const { data: property, isPending, isError } = useCheckoutProperty(propertySlug);
   const quote = useCheckoutQuote(property, unitId);
 
-  const holdSeconds = useCheckoutStore((s) => s.holdSeconds);
-  const purpose = useCheckoutStore((s) => s.purpose);
-  const setPurpose = useCheckoutStore((s) => s.setPurpose);
-  const tickHold = useCheckoutStore((s) => s.tickHold);
-  const paymentMethod = useCheckoutStore((s) => s.paymentMethod);
+  const [holdSeconds, setHoldSeconds] = useState(DEMO_STAY.holdSeconds);
+  const [purpose, setPurpose] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
 
   useEffect(() => {
-    const id = window.setInterval(() => tickHold(), 1000);
+    const id = window.setInterval(() => {
+      setHoldSeconds((s) => Math.max(0, s - 1));
+    }, 1000);
     return () => window.clearInterval(id);
-  }, [tickHold]);
+  }, []);
 
   if (!propertySlug) {
     return (
@@ -61,7 +62,18 @@ export function CheckoutPage() {
     );
   }
 
-  if (!property || !quote) {
+  if (isPending) {
+    return (
+      <Box>
+        <CheckoutHeader />
+        <Box p={10} textAlign="center">
+          <Text color="ink.2">Loading checkout…</Text>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (isError || !property || !quote) {
     return (
       <Box>
         <CheckoutHeader />
@@ -286,7 +298,10 @@ export function CheckoutPage() {
 
             {/* Step 3 — pay */}
             <Box py="26px" borderBottom="1px solid" borderColor="line">
-              <PaymentMethods />
+              <PaymentMethods
+                value={paymentMethod}
+                onChange={setPaymentMethod}
+              />
             </Box>
 
             {/* Policy + pay CTA */}

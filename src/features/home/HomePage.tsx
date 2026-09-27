@@ -10,16 +10,14 @@ import {
   useNeighborhoods,
   useWebsiteContent,
 } from '@/features/home/hooks/useHomeData';
-import { MobileTabBar } from '@/shared/components/MobileTabBar';
-import { SiteFooter } from '@/shared/components/SiteFooter';
-import { SiteHeader } from '@/shared/components/SiteHeader';
+import { AppPage } from '@/shared/components';
 import { pagePx } from '@/shared/layout';
 import { Box, Text } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 
 export function HomePage() {
-  const { data: content } = useWebsiteContent();
-  const { data: neighborhoods } = useNeighborhoods();
+  const { data: content, isPending: contentPending } = useWebsiteContent();
+  const { data: neighborhoods = [] } = useNeighborhoods();
   const featuredQuery = useFeaturedProperties();
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -29,10 +27,18 @@ export function HomePage() {
     return list.filter((p) => p.tags?.includes(activeCategory));
   }, [featuredQuery.data, activeCategory]);
 
-  return (
-    <Box bg="bg" maxW="1440px" mx="auto" minH="100vh">
-      <SiteHeader />
+  if (contentPending || !content) {
+    return (
+      <AppPage wrapMain={false}>
+        <Box px={pagePx} py={10}>
+          <Text color="ink.2">Loading…</Text>
+        </Box>
+      </AppPage>
+    );
+  }
 
+  return (
+    <AppPage wrapMain={false}>
       <HomeHero
         headline={content.hero.headline}
         subheadline={content.hero.subheadline}
@@ -62,9 +68,6 @@ export function HomePage() {
         subtitle={content.trust.subtitle}
         items={content.trust.items}
       />
-
-      <SiteFooter />
-      <MobileTabBar />
-    </Box>
+    </AppPage>
   );
 }

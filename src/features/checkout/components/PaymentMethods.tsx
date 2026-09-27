@@ -1,7 +1,6 @@
 'use client';
 
-import type { PaymentMethod } from '@/features/checkout/hooks/useCheckoutData';
-import { useCheckoutStore } from '@/features/checkout/store/checkout-store';
+import type { PaymentMethod } from '@/data/hooks';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { CreditCard, Landmark, ShieldCheck, Smartphone } from 'lucide-react';
 
@@ -31,10 +30,12 @@ const methods: {
   },
 ];
 
-export function PaymentMethods() {
-  const paymentMethod = useCheckoutStore((s) => s.paymentMethod);
-  const setPaymentMethod = useCheckoutStore((s) => s.setPaymentMethod);
+type PaymentMethodsProps = {
+  value: PaymentMethod;
+  onChange: (method: PaymentMethod) => void;
+};
 
+export function PaymentMethods({ value, onChange }: PaymentMethodsProps) {
   return (
     <Box>
       <Flex justify="space-between" align="center" mb="16px">
@@ -65,7 +66,7 @@ export function PaymentMethods() {
 
       {methods.map((method) => {
         const Icon = method.icon;
-        const on = paymentMethod === method.id;
+        const on = value === method.id;
         return (
           <Flex
             key={method.id}
@@ -81,7 +82,7 @@ export function PaymentMethods() {
             bg={on ? 'brand.50' : 'white'}
             cursor="pointer"
             textAlign="left"
-            onClick={() => setPaymentMethod(method.id)}
+            onClick={() => onChange(method.id)}
           >
             <Box
               w="22px"

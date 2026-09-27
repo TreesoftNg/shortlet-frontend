@@ -1,3 +1,8 @@
+/**
+ * Ephemeral search UI — map pin ↔ card hover sync.
+ * Result lists come from React Query (`useProperties`), not this store.
+ */
+
 import { create } from 'zustand';
 
 type SearchUiState = {

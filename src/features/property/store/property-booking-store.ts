@@ -1,21 +1,26 @@
+/**
+ * Property-page UI selection only (not server data).
+ * Dates / nights live in `DEMO_STAY` until calendar is real.
+ */
+
+import { DEMO_STAY } from '@/data/demo-stay';
 import { create } from 'zustand';
 
-type PropertyBookingState = {
+type PropertyBookingUiState = {
   selectedUnitId: string | null;
   guests: number;
-  nights: number;
-  checkInLabel: string;
-  checkOutLabel: string;
   setSelectedUnitId: (id: string) => void;
   setGuests: (guests: number) => void;
+  reset: () => void;
 };
 
-export const usePropertyBookingStore = create<PropertyBookingState>((set) => ({
-  selectedUnitId: null,
-  guests: 2,
-  nights: 4,
-  checkInLabel: '10/12/2026',
-  checkOutLabel: '10/16/2026',
-  setSelectedUnitId: (id) => set({ selectedUnitId: id }),
-  setGuests: (guests) => set({ guests }),
-}));
+export const usePropertyBookingStore = create<PropertyBookingUiState>(
+  (set) => ({
+    selectedUnitId: null,
+    guests: DEMO_STAY.guests,
+    setSelectedUnitId: (id) => set({ selectedUnitId: id }),
+    setGuests: (guests) => set({ guests }),
+    reset: () =>
+      set({ selectedUnitId: null, guests: DEMO_STAY.guests }),
+  }),
+);

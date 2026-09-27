@@ -1,13 +1,8 @@
 'use client';
 
-import {
-  getNeighborhoodBySlug,
-  getProperties,
-  type PropertyListParams,
-  type PropertySort,
-} from '@/data/api';
-import { neighborhoods, properties } from '@/data/mocks';
-import { useQuery } from '@tanstack/react-query';
+import { useNeighborhood, useProperties } from '@/data/hooks';
+import type { PropertyListParams, PropertySort } from '@/data/api';
+import { DEMO_STAY } from '@/data/demo-stay';
 import { useMemo } from 'react';
 
 export type SearchFilters = {
@@ -20,8 +15,8 @@ export type SearchFilters = {
 };
 
 export const defaultSearchFilters: SearchFilters = {
-  guests: 2,
-  nights: 4,
+  guests: DEMO_STAY.guests,
+  nights: DEMO_STAY.nights,
   minBedrooms: null,
   amenities: [],
   sort: 'recommended',
@@ -38,29 +33,11 @@ function toParams(filters: SearchFilters): PropertyListParams {
 }
 
 export function useSearchProperties(filters: SearchFilters) {
-  const params = toParams(filters);
-
-  return useQuery({
-    queryKey: ['properties', 'search', params],
-    queryFn: () => getProperties(params),
-    initialData: () => {
-      // Sync first paint; React Query will still refetch.
-      return properties.filter((p) => p.listed);
-    },
-    initialDataUpdatedAt: 0,
-  });
+  return useProperties(toParams(filters));
 }
 
 export function useSearchNeighborhood(slug?: string) {
-  return useQuery({
-    queryKey: ['neighborhood', slug],
-    queryFn: () => (slug ? getNeighborhoodBySlug(slug) : Promise.resolve(null)),
-    initialData: () =>
-      slug
-        ? neighborhoods.find((n) => n.slug === slug) ?? null
-        : null,
-    enabled: true,
-  });
+  return useNeighborhood(slug);
 }
 
 export function useActiveFilterCount(filters: SearchFilters) {

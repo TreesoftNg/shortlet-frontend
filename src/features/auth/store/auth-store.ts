@@ -1,16 +1,17 @@
+'use client';
+
+/**
+ * Auth session only.
+ * Sign-in / sign-up form mode stays in AuthForm local state.
+ * Profile / bookings come from React Query, not this store.
+ */
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import {
-  mockAuthUser,
-  type AuthMode,
-  type AuthUser,
-} from '@/features/auth/types';
+import { mockAuthUser, type AuthUser } from '@/features/auth/types';
 
 type AuthState = {
   user: AuthUser | null;
-  mode: AuthMode;
-  isAuthenticated: boolean;
-  setMode: (mode: AuthMode) => void;
   login: (email: string) => void;
   logout: () => void;
 };
@@ -19,22 +20,19 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      mode: 'signin',
-      isAuthenticated: false,
-      setMode: (mode) => set({ mode }),
       login: (email) =>
         set({
           user: { ...mockAuthUser, email: email || mockAuthUser.email },
-          isAuthenticated: true,
         }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      logout: () => set({ user: null }),
     }),
     {
       name: 'sunmade-auth',
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      partialize: (state) => ({ user: state.user }),
     },
   ),
 );
+
+export function useIsAuthenticated() {
+  return useAuthStore((s) => s.user != null);
+}
