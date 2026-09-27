@@ -20,9 +20,11 @@ export function CheckoutHeader() {
       mx="auto"
       w="full"
     >
-      <Link href="/">
-        <SunmadeLogo size={{ base: '17px', md: '20px' }} />
-      </Link>
+      <Flex asChild align="center" h="full">
+        <Link href="/">
+          <SunmadeLogo size={{ base: '17px', md: '20px' }} />
+        </Link>
+      </Flex>
 
       <Flex align="center" gap="8px" color="ink.2" fontSize="14px" fontWeight="600">
         <Lock size={16} strokeWidth={1.9} />

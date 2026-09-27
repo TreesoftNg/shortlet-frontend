@@ -53,9 +53,11 @@ export function ConfirmationPage() {
         borderColor="line"
         bg="bg"
       >
-        <Link href="/">
-          <SunmadeLogo size="20px" />
-        </Link>
+        <Flex asChild align="center" h="full">
+          <Link href="/">
+            <SunmadeLogo size="20px" />
+          </Link>
+        </Flex>
         <Flex align="center" gap="14px" fontWeight="600" fontSize="14px">
           <Link href="/trips">My trips</Link>
           <Flex

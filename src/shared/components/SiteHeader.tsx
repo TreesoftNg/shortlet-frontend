@@ -38,9 +38,11 @@ export function SiteHeader() {
       top={0}
       zIndex={40}
     >
-      <Link href="/">
-        <SunmadeLogo size={{ base: '17px', md: '20px' }} />
-      </Link>
+      <Flex asChild align="center" h="full">
+        <Link href="/">
+          <SunmadeLogo size={{ base: '17px', md: '20px' }} />
+        </Link>
+      </Flex>
 
       <Flex
         as="nav"

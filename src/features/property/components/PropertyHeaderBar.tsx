@@ -24,9 +24,11 @@ export function PropertyHeaderBar() {
       mx="auto"
       w="full"
     >
-      <Link href="/">
-        <SunmadeLogo size={{ base: '17px', md: '20px' }} wordmarkDisplay={{ base: 'none', sm: 'inline-grid' }} />
-      </Link>
+      <Flex asChild align="center" h="full">
+        <Link href="/">
+          <SunmadeLogo size={{ base: '17px', md: '20px' }} wordmarkDisplay={{ base: 'none', sm: 'inline-grid' }} />
+        </Link>
+      </Flex>
 
       <Flex
         asChild
