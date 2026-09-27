@@ -11,7 +11,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Haven | Shortlet Apartments',
+  title: 'Sunmade Apartments & Suites',
   description:
     'Serviced shortlet apartments across Lagos & Abuja — verified, fully furnished, instantly bookable.',
 };

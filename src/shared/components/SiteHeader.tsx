@@ -2,8 +2,9 @@
 
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import { pagePx } from '@/shared/layout';
+import { SunmadeLogo } from '@/shared/components/brand';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Globe, Home, Menu, User } from 'lucide-react';
+import { Globe, Menu, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -38,28 +39,7 @@ export function SiteHeader() {
       zIndex={40}
     >
       <Link href="/">
-        <Flex
-          align="center"
-          gap={{ base: '8px', md: '10px' }}
-          fontWeight="800"
-          fontSize={{ base: '18px', md: '22px' }}
-          color="brand.500"
-          letterSpacing="-0.02em"
-        >
-          <Flex
-            w={{ base: '30px', md: '34px' }}
-            h={{ base: '30px', md: '34px' }}
-            borderRadius="10px"
-            bg="brand.500"
-            color="white"
-            align="center"
-            justify="center"
-            flexShrink={0}
-          >
-            <Home size={18} strokeWidth={1.9} />
-          </Flex>
-          Haven
-        </Flex>
+        <SunmadeLogo size={{ base: '17px', md: '20px' }} />
       </Link>
 
       <Flex

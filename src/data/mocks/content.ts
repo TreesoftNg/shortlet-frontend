@@ -1,7 +1,7 @@
 import type { WebsiteContent } from '@/data/types';
 
 export const websiteContent: WebsiteContent = {
-  brand_name: 'Haven',
+  brand_name: 'Sunmade Apartments & Suites',
   currency: 'NGN',
   currency_symbol: '₦',
   hero: {
@@ -12,7 +12,7 @@ export const websiteContent: WebsiteContent = {
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=2000&q=80',
   },
   trust: {
-    title: 'Why guests book with Haven',
+    title: 'Why guests book with Sunmade',
     subtitle:
       'Every apartment is inspected, cleaned by professionals and supported round the clock.',
     items: [

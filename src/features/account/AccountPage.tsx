@@ -62,7 +62,7 @@ export function AccountPage() {
           Your account
         </Heading>
         <Text color="ink.2" fontSize="15px" mt="6px" mb={{ base: 6, md: 8 }}>
-          Manage your profile and review all your Haven bookings.
+          Manage your profile and review all your Sunmade bookings.
         </Text>
 
         <Text

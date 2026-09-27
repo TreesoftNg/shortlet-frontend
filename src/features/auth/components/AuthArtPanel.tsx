@@ -1,7 +1,7 @@
 'use client';
 
+import { SunmadeLogo } from '@/shared/components/brand';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Home } from 'lucide-react';
 import Image from 'next/image';
 
 export function AuthArtPanel() {
@@ -29,31 +29,14 @@ export function AuthArtPanel() {
         bg="linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.6))"
       />
 
-      <Flex
+      <Box
         position="absolute"
         top={{ base: 5, md: '36px' }}
         left={{ base: 5, md: '44px' }}
         zIndex={2}
-        align="center"
-        gap="10px"
-        color="white"
-        fontWeight="800"
-        fontSize="22px"
-        letterSpacing="-0.02em"
       >
-        <Flex
-          w="34px"
-          h="34px"
-          borderRadius="10px"
-          bg="white"
-          color="brand.500"
-          align="center"
-          justify="center"
-        >
-          <Home size={20} strokeWidth={1.9} />
-        </Flex>
-        Haven
-      </Flex>
+        <SunmadeLogo size="22px" variant="light" />
+      </Box>
 
       <Box
         position="absolute"

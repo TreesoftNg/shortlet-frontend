@@ -1,7 +1,7 @@
 import type { Property } from '@/data/types';
 
 /**
- * Mock inventory shaped like Hospitable properties + Haven UI fields.
+ * Mock inventory shaped like Hospitable properties + Sunmade UI fields.
  * `listings[].platform: 'airbnb'` mirrors channel mapping from Hospitable.
  */
 export const properties: Property[] = [
@@ -54,12 +54,12 @@ export const properties: Property[] = [
       {
         platform: 'airbnb',
         platform_id: 'azr-lekki-001',
-        platform_name: 'Haven Host',
-        platform_email: 'host@haven.ng',
+        platform_name: 'Sunmade Host',
+        platform_email: 'host@sunmadeapartments.com',
       },
       {
         platform: 'direct',
-        platform_id: 'haven-azure-001',
+        platform_id: 'sunmade-azure-001',
       },
     ],
     tags: ['pool', 'power', '2-bedroom'],

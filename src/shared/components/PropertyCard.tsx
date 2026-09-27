@@ -9,6 +9,7 @@ import {
   shortArea,
 } from '@/shared/lib/format';
 import type { Property } from '@/data/types';
+import { tokens } from '@/shared/theme/tokens';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { Heart, Star } from 'lucide-react';
 import Image from 'next/image';
@@ -112,7 +113,7 @@ export function PropertyCard({
             <Heart
               size={24}
               strokeWidth={1.9}
-              fill={saved ? '#0E7C6B' : 'none'}
+              fill={saved ? tokens.colors.brand[500] : 'none'}
               color="white"
             />
           </Box>

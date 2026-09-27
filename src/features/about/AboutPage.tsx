@@ -11,7 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const story = [
-  'Haven is a shortlet brand built for guests who want verified, fully furnished apartments across Lagos and Abuja — without the guesswork of unverified listings.',
+  'Sunmade Apartments & Suites is a shortlet brand built for guests who want verified, fully furnished apartments across Lagos and Abuja — without the guesswork of unverified listings.',
   'Every stay is inspected, professionally cleaned, and supported round the clock. Book in minutes, check in with confidence, and settle into a space that feels like home.',
 ];
 
@@ -76,7 +76,7 @@ export function AboutPage() {
               content?.hero.image ??
               'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=2000&q=80'
             }
-            alt="Haven apartment interior"
+            alt="Sunmade apartment interior"
             fill
             sizes="100vw"
             style={{ objectFit: 'cover' }}

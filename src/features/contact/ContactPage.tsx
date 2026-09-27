@@ -12,7 +12,7 @@ const details = [
   {
     icon: Mail,
     label: 'Email',
-    value: 'hello@havenstays.ng',
+    value: 'hello@sunmadeapartments.com',
   },
   {
     icon: Phone,
@@ -74,7 +74,7 @@ export function ContactPage() {
             Contact us
           </Heading>
           <Text color="ink.2" fontSize={{ base: '15px', md: '16px' }} mt="14px">
-            Questions about a booking, a stay, or partnering with Haven? Send a
+            Questions about a booking, a stay, or partnering with Sunmade? Send a
             message — we usually reply within a few hours.
           </Text>
         </Box>

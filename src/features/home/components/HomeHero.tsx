@@ -1,6 +1,7 @@
 'use client';
 
 import { pagePx } from '@/shared/layout';
+import { tokens } from '@/shared/theme/tokens';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { Search } from 'lucide-react';
 import Image from 'next/image';
@@ -40,7 +41,7 @@ export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {
           textAlign="left"
           onClick={() => router.push('/search')}
         >
-          <Search size={18} strokeWidth={1.9} color="#0E7C6B" />
+          <Search size={18} strokeWidth={1.9} color={tokens.colors.brand[500]} />
           <Box>
             <Text fontSize="14px" fontWeight="700" color="ink">
               Where to?

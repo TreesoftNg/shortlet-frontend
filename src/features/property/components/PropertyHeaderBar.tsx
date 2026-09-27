@@ -1,7 +1,8 @@
 'use client';
 
+import { SunmadeLogo } from '@/shared/components/brand';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Home, Menu, Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import Link from 'next/link';
 
 export function PropertyHeaderBar() {
@@ -24,30 +25,7 @@ export function PropertyHeaderBar() {
       w="full"
     >
       <Link href="/">
-        <Flex
-          align="center"
-          gap="10px"
-          fontWeight="800"
-          fontSize={{ base: '18px', md: '22px' }}
-          color="brand.500"
-          letterSpacing="-0.02em"
-          flexShrink={0}
-        >
-          <Flex
-            w={{ base: '30px', md: '34px' }}
-            h={{ base: '30px', md: '34px' }}
-            borderRadius="10px"
-            bg="brand.500"
-            color="white"
-            align="center"
-            justify="center"
-          >
-            <Home size={18} strokeWidth={1.9} />
-          </Flex>
-          <Text as="span" display={{ base: 'none', sm: 'inline' }}>
-            Haven
-          </Text>
-        </Flex>
+        <SunmadeLogo size={{ base: '17px', md: '20px' }} wordmarkDisplay={{ base: 'none', sm: 'inline-grid' }} />
       </Link>
 
       <Flex

@@ -2,6 +2,7 @@
 
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
 import { formatNaira } from '@/shared/lib/format';
+import { tokens } from '@/shared/theme/tokens';
 import type { Property, Unit } from '@/data/types';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { ChevronDown, Gem } from 'lucide-react';
@@ -183,7 +184,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
         borderRadius="16px"
         fontSize="14px"
       >
-        <Gem size={26} strokeWidth={1.9} color="#0E7C6B" />
+        <Gem size={26} strokeWidth={1.9} color={tokens.colors.brand[500]} />
         <Text>
           <Text as="b" fontWeight="700">
             Great price.{' '}

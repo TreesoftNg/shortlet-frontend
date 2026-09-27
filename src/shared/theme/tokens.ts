@@ -1,17 +1,17 @@
 /**
- * Design tokens mirrored from design/src/styles.css
- * Source of truth for brand, ink, surfaces, radii, and shadows.
+ * Design tokens. Brand colours come from the Sunmade logo (design/brand);
+ * layout and surfaces mirror design/src/styles.css.
  */
 export const tokens = {
   colors: {
     brand: {
-      50: '#E8F5F2',
-      100: '#CDEBE4',
-      500: '#0E7C6B',
-      600: '#0B6A5B',
+      50: '#E7F1EE',
+      100: '#C8E0D9',
+      500: '#10695B',
+      600: '#0C574B',
     },
     accent: {
-      500: '#F2A93B',
+      500: '#F8A42F',
     },
     ink: {
       DEFAULT: '#1B1D1F',

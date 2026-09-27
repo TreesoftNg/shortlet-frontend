@@ -1,6 +1,7 @@
 'use client';
 
 import { badgeLabel, formatLocation } from '@/shared/lib/format';
+import { tokens } from '@/shared/theme/tokens';
 import type { Property } from '@/data/types';
 import { Box, Flex, Heading, Text } from '@chakra-ui/react';
 import { Award, Heart, Share, Star } from 'lucide-react';
@@ -92,8 +93,8 @@ export function PropertyTitle({ property }: PropertyTitleProps) {
           <Heart
             size={16}
             strokeWidth={1.9}
-            fill={saved ? '#0E7C6B' : 'none'}
-            color={saved ? '#0E7C6B' : 'currentColor'}
+            fill={saved ? tokens.colors.brand[500] : 'none'}
+            color={saved ? tokens.colors.brand[500] : 'currentColor'}
           />
           Save
         </Flex>

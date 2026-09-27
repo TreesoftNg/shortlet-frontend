@@ -1,7 +1,8 @@
 'use client';
 
+import { SunmadeLogo } from '@/shared/components/brand';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Home, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import Link from 'next/link';
 
 export function CheckoutHeader() {
@@ -20,27 +21,7 @@ export function CheckoutHeader() {
       w="full"
     >
       <Link href="/">
-        <Flex
-          align="center"
-          gap="10px"
-          fontWeight="800"
-          fontSize={{ base: '18px', md: '22px' }}
-          color="brand.500"
-          letterSpacing="-0.02em"
-        >
-          <Flex
-            w="34px"
-            h="34px"
-            borderRadius="10px"
-            bg="brand.500"
-            color="white"
-            align="center"
-            justify="center"
-          >
-            <Home size={20} strokeWidth={1.9} />
-          </Flex>
-          Haven
-        </Flex>
+        <SunmadeLogo size={{ base: '17px', md: '20px' }} />
       </Link>
 
       <Flex align="center" gap="8px" color="ink.2" fontSize="14px" fontWeight="600">

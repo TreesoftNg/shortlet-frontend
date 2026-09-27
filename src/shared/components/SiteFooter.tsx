@@ -1,8 +1,8 @@
 'use client';
 
 import { pagePx } from '@/shared/layout';
+import { SunmadeLogo } from '@/shared/components/brand';
 import { Box, Flex, Grid, Text } from '@chakra-ui/react';
-import { Home } from 'lucide-react';
 import Link from 'next/link';
 
 const columns = [
@@ -76,28 +76,9 @@ export function SiteFooter() {
         gap={{ base: 8, md: '40px' }}
       >
         <Box gridColumn={{ base: '1 / -1', sm: '1 / -1', md: 'auto' }}>
-          <Flex
-            align="center"
-            gap="10px"
-            fontWeight="800"
-            fontSize="20px"
-            color="brand.500"
-            mb="12px"
-            letterSpacing="-0.02em"
-          >
-            <Flex
-              w="34px"
-              h="34px"
-              borderRadius="10px"
-              bg="brand.500"
-              color="white"
-              align="center"
-              justify="center"
-            >
-              <Home size={20} strokeWidth={1.9} />
-            </Flex>
-            Haven
-          </Flex>
+          <Box mb="16px">
+            <SunmadeLogo size="22px" />
+          </Box>
           <Text maxW="320px">
             Premium shortlet apartments for business and leisure.
           </Text>
@@ -136,7 +117,7 @@ export function SiteFooter() {
         direction={{ base: 'column', sm: 'row' }}
         gap={4}
       >
-        <Text>© 2026 Haven Apartments</Text>
+        <Text>© 2026 Sunmade Apartments & Suites</Text>
         <Flex gap="16px">
           <SocialIcon
             label="Instagram"

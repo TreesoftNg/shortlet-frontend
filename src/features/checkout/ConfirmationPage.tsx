@@ -6,13 +6,13 @@ import {
   useCheckoutQuote,
 } from '@/features/checkout/hooks/useCheckoutData';
 import { formatNaira } from '@/shared/lib/format';
+import { SunmadeLogo } from '@/shared/components/brand';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import {
   CalendarPlus,
   Check,
   CircleCheck,
   Download,
-  Home,
   Mail,
   Menu,
   MessageCircle,
@@ -54,26 +54,7 @@ export function ConfirmationPage() {
         bg="bg"
       >
         <Link href="/">
-          <Flex
-            align="center"
-            gap="10px"
-            fontWeight="800"
-            fontSize="22px"
-            color="brand.500"
-          >
-            <Flex
-              w="34px"
-              h="34px"
-              borderRadius="10px"
-              bg="brand.500"
-              color="white"
-              align="center"
-              justify="center"
-            >
-              <Home size={20} strokeWidth={1.9} />
-            </Flex>
-            Haven
-          </Flex>
+          <SunmadeLogo size="20px" />
         </Link>
         <Flex align="center" gap="14px" fontWeight="600" fontSize="14px">
           <Link href="/trips">My trips</Link>
@@ -269,7 +250,7 @@ export function ConfirmationPage() {
                   fontFamily="ui-monospace, monospace"
                   letterSpacing="0.08em"
                 >
-                  HVN-7Q4K-2291
+                  SMD-7Q4K-2291
                 </Text>
               </Box>
               <Box textAlign={{ base: 'left', sm: 'right' }}>
@@ -302,6 +283,7 @@ export function ConfirmationPage() {
                 border="1px solid"
                 borderColor="ink"
                 bg="white"
+                color="ink"
                 fontWeight="700"
                 gap="8px"
               >

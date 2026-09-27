@@ -46,7 +46,7 @@ export function LocationsPage() {
             Locations
           </Heading>
           <Text color="ink.2" fontSize={{ base: '15px', md: '16px' }} mt="14px">
-            Browse Haven neighbourhoods across Lagos and Abuja, then jump into
+            Browse Sunmade neighbourhoods across Lagos and Abuja, then jump into
             available apartments in each area.
           </Text>
         </Box>

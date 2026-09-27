@@ -86,7 +86,7 @@ export function AuthForm() {
       <Text color="ink.2" fontSize="14px" mt="6px">
         {isSignIn
           ? 'Sign in to manage your bookings and check out faster.'
-          : 'Join Haven to book verified shortlets across Lagos & Abuja.'}
+          : 'Join Sunmade to book verified shortlets across Lagos & Abuja.'}
       </Text>
 
       <Grid

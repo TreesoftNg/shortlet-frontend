@@ -73,7 +73,7 @@ export type Review = {
 };
 
 /**
- * Website property = Hospitable property fields + Haven booking UI fields.
+ * Website property = Hospitable property fields + Sunmade booking UI fields.
  * Hospitable core stays untouched for future API / Airbnb sync.
  */
 export type Property = HospitableProperty & {
