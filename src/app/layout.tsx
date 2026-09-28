@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { AppProviders } from '@/shared/providers/app-providers';
 import './globals.css';
@@ -11,9 +11,16 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Sunmade Apartments & Suites',
+  title: {
+    default: 'Sunmade Apartments & Suites',
+    template: '%s · Sunmade Apartments & Suites',
+  },
   description:
     'Serviced shortlet apartments across Lagos & Abuja — verified, fully furnished, instantly bookable.',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#10695B',
 };
 
 export default function RootLayout({

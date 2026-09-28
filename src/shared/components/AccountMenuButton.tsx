@@ -93,7 +93,6 @@ export function AccountMenuButton() {
           <Menu.Trigger asChild>
             <Flex
               as="button"
-              type="button"
               align="center"
               gap="10px"
               py="6px"
