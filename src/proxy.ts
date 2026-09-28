@@ -1,16 +1,12 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { isComingSoonEnabled } from '@/shared/lib/coming-soon';
 
 const PREVIEW_COOKIE = 'coming_soon_preview';
 const PREVIEW_QUERY = 'preview';
 
-function comingSoonEnabled(): boolean {
-  const value = process.env.COMING_SOON?.trim().toLowerCase();
-  return value === '1' || value === 'true' || value === 'yes';
-}
-
 export function proxy(request: NextRequest) {
-  if (!comingSoonEnabled()) {
+  if (!isComingSoonEnabled()) {
     return NextResponse.next();
   }
 
