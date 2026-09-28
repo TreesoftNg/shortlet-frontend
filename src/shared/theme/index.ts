@@ -47,6 +47,7 @@ const config = defineConfig({
         },
         bg: {
           DEFAULT: { value: tokens.colors.bg.DEFAULT },
+          
           soft: { value: tokens.colors.bg.soft },
         },
         danger: { value: tokens.colors.status.danger },

@@ -1,13 +1,12 @@
 'use client';
 
-import { BookingsList } from '@/features/account/components/BookingsList';
 import { ProfileCard } from '@/features/account/components/ProfileCard';
-import { useAllBookings } from '@/features/account/hooks/useAllBookings';
 import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
 import {
   useAuthStore,
   useIsAuthenticated,
 } from '@/features/auth/store/auth-store';
+import { TripsPanel } from '@/features/trips/components/TripsPanel';
 import { AppPage, PageHero, SectionHeader } from '@/shared/components';
 import { Text } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
@@ -18,7 +17,6 @@ export function AccountPage() {
   const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useIsAuthenticated();
-  const { data: bookings = [] } = useAllBookings();
 
   useEffect(() => {
     if (!hydrated) return;
@@ -36,10 +34,10 @@ export function AccountPage() {
   }
 
   return (
-    <AppPage footer={false} mainMaxW="900px" mainPt={{ base: 6, md: '44px' }}>
+    <AppPage footer={false} mainPt={{ base: 6, md: '44px' }}>
       <PageHero
         title="Your account"
-        description="Manage your profile and review all your bookings."
+        description="Manage your profile and review your trips."
         size="app"
         mb={{ base: 6, md: 8 }}
         maxW="none"
@@ -48,14 +46,8 @@ export function AccountPage() {
       <SectionHeader title="Profile" mt={0} mb="14px" />
       <ProfileCard user={user} />
 
-      <SectionHeader
-        title="All bookings"
-        subtitle={`${bookings.length} booking${bookings.length === 1 ? '' : 's'}`}
-        mt={{ base: 8, md: 10 }}
-        mb="14px"
-      />
-
-      <BookingsList bookings={bookings} />
+      <SectionHeader title="Trips" mt={{ base: 8, md: 10 }} mb={0} />
+      <TripsPanel />
     </AppPage>
   );
 }

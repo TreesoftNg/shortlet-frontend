@@ -11,12 +11,14 @@ type PastTripsGridProps = {
   bookings: Booking[];
   title?: string;
   showViewAll?: boolean;
+  onViewAll?: () => void;
 };
 
 export function PastTripsGrid({
   bookings,
   title = "Where you've been",
   showViewAll = true,
+  onViewAll,
 }: PastTripsGridProps) {
   if (!bookings.length) {
     return (
@@ -35,7 +37,19 @@ export function PastTripsGrid({
           mb="20px"
           action={
             showViewAll ? (
-              <Text as="u" fontWeight="700" fontSize="14px" cursor="pointer">
+              <Text
+                as="button"
+                type="button"
+                fontWeight="700"
+                fontSize="14px"
+                cursor="pointer"
+                textDecoration="underline"
+                bg="transparent"
+                border="none"
+                p={0}
+                color="inherit"
+                onClick={onViewAll}
+              >
                 View all
               </Text>
             ) : null
