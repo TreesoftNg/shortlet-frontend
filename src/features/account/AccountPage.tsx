@@ -7,8 +7,14 @@ import {
   useIsAuthenticated,
 } from '@/features/auth/store/auth-store';
 import { TripsPanel } from '@/features/trips/components/TripsPanel';
-import { AppPage, PageHero, SectionHeader } from '@/shared/components';
-import { Text } from '@chakra-ui/react';
+import {
+  AppPage,
+  PageHero,
+  SectionHeader,
+  Skeleton,
+  SkeletonText,
+} from '@/shared/components';
+import { Box } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -27,8 +33,8 @@ export function AccountPage() {
 
   if (!hydrated || !isAuthenticated || !user) {
     return (
-      <AppPage footer={false} mainPt={10}>
-        <Text color="ink.2">Loading your account…</Text>
+      <AppPage footer={false} mainPt={{ base: 6, md: '44px' }}>
+        <AccountPageSkeleton />
       </AppPage>
     );
   }
@@ -49,5 +55,20 @@ export function AccountPage() {
       <SectionHeader title="Trips" mt={{ base: 8, md: 10 }} mb={0} />
       <TripsPanel />
     </AppPage>
+  );
+}
+
+function AccountPageSkeleton() {
+  return (
+    <Box aria-busy="true">
+      <Skeleton h="36px" w="220px" mb={3} borderRadius="full" />
+      <Skeleton h="16px" w="320px" mb={8} borderRadius="full" />
+      <Skeleton h="18px" w="80px" mb="14px" borderRadius="full" />
+      <Skeleton h="120px" borderRadius="lg" mb={10} />
+      <Skeleton h="18px" w="70px" mb={4} borderRadius="full" />
+      <Skeleton h="40px" w={{ base: '100%', md: '360px' }} borderRadius="full" mb={6} />
+      <Skeleton h="220px" borderRadius="22px" mb={6} />
+      <SkeletonText lines={2} />
+    </Box>
   );
 }

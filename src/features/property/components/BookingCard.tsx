@@ -1,13 +1,20 @@
 'use client';
 
+import { DEMO_STAY } from '@/data/demo-stay';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
-import { formatNaira, nightsBetween, parseISODate } from '@/shared/lib/format';
+import {
+  formatNaira,
+  guestsLabel,
+  nightsBetween,
+  parseISODate,
+  toISODate,
+} from '@/shared/lib/format';
 import { tokens } from '@/shared/theme/tokens';
 import type { Property, Unit } from '@/data/types';
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { ChevronDown, Gem } from 'lucide-react';
+import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
+import { ChevronDown, ChevronUp, Gem, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 type BookingCardProps = {
   property: Property;
@@ -24,12 +31,22 @@ function shortDateLabel(iso: string) {
 
 export function BookingCard({ property, selectedUnit }: BookingCardProps) {
   const router = useRouter();
+  const [guestsOpen, setGuestsOpen] = useState(false);
+  const [editingDate, setEditingDate] = useState<'checkIn' | 'checkOut' | null>(
+    null,
+  );
+
   const guests = usePropertyBookingStore((s) => s.guests);
   const checkIn = usePropertyBookingStore((s) => s.checkIn);
   const checkOut = usePropertyBookingStore((s) => s.checkOut);
+  const setGuests = usePropertyBookingStore((s) => s.setGuests);
+  const setDates = usePropertyBookingStore((s) => s.setDates);
+
   const nights = nightsBetween(checkIn, checkOut);
-  const checkInLabel = shortDateLabel(checkIn);
-  const checkOutLabel = shortDateLabel(checkOut);
+  const maxGuests = Math.max(
+    1,
+    selectedUnit?.capacity.max ?? property.capacity.max ?? 16,
+  );
 
   const nightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;
@@ -42,7 +59,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
   const lines = useMemo(
     () => [
       {
-        label: `${formatNaira(nightly)} × ${nights} nights`,
+        label: `${formatNaira(nightly)} × ${nights} night${nights === 1 ? '' : 's'}`,
         amount: stay,
       },
       { label: 'Cleaning fee', amount: cleaning },
@@ -51,6 +68,17 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
     ],
     [nightly, nights, stay, cleaning, service, deposit],
   );
+
+  const applyDates = (nextIn: string, nextOut: string) => {
+    let start = nextIn || checkIn;
+    let end = nextOut || checkOut;
+    if (parseISODate(end) <= parseISODate(start)) {
+      const bumped = parseISODate(start);
+      bumped.setDate(bumped.getDate() + 1);
+      end = toISODate(bumped);
+    }
+    setDates(start, end);
+  };
 
   return (
     <Box>
@@ -81,38 +109,57 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           overflow="hidden"
         >
           <Flex>
-            <Box flex="1" p="10px 14px" borderRight="1px solid #C9C9C4">
-              <Text
-                fontSize="11px"
-                fontWeight="700"
-                textTransform="uppercase"
-                letterSpacing="0.04em"
-              >
-                Check-in
-              </Text>
-              <Text fontSize="15px" color="ink.2">
-                {checkInLabel}
-              </Text>
-            </Box>
-            <Box flex="1" p="10px 14px">
-              <Text
-                fontSize="11px"
-                fontWeight="700"
-                textTransform="uppercase"
-                letterSpacing="0.04em"
-              >
-                Checkout
-              </Text>
-              <Text fontSize="15px" color="ink.2">
-                {checkOutLabel}
-              </Text>
-            </Box>
+            <DateCell
+              label="Check-in"
+              value={checkIn}
+              display={shortDateLabel(checkIn)}
+              min={DEMO_STAY.checkIn}
+              editing={editingDate === 'checkIn'}
+              borderRight
+              onOpen={() => {
+                setEditingDate('checkIn');
+                setGuestsOpen(false);
+              }}
+              onClose={() => setEditingDate(null)}
+              onChange={(value) => {
+                applyDates(value, checkOut);
+                setEditingDate(null);
+              }}
+            />
+            <DateCell
+              label="Checkout"
+              value={checkOut}
+              display={shortDateLabel(checkOut)}
+              min={checkIn}
+              editing={editingDate === 'checkOut'}
+              onOpen={() => {
+                setEditingDate('checkOut');
+                setGuestsOpen(false);
+              }}
+              onClose={() => setEditingDate(null)}
+              onChange={(value) => {
+                applyDates(checkIn, value);
+                setEditingDate(null);
+              }}
+            />
           </Flex>
+
           <Flex
+            as="button"
+            w="full"
             justify="space-between"
             align="center"
             p="10px 14px"
             borderTop="1px solid #C9C9C4"
+            border="none"
+            bg={guestsOpen ? 'bg.soft' : 'transparent'}
+            cursor="pointer"
+            textAlign="left"
+            _hover={{ bg: 'bg.soft' }}
+            onClick={() => {
+              setGuestsOpen((open) => !open);
+              setEditingDate(null);
+            }}
           >
             <Box>
               <Text
@@ -124,11 +171,55 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
                 Guests
               </Text>
               <Text fontSize="15px" color="ink.2">
-                {guests} guests
+                {guestsLabel(guests)}
               </Text>
             </Box>
-            <ChevronDown size={18} strokeWidth={1.9} />
+            {guestsOpen ? (
+              <ChevronUp size={18} strokeWidth={1.9} />
+            ) : (
+              <ChevronDown size={18} strokeWidth={1.9} />
+            )}
           </Flex>
+
+          {guestsOpen ? (
+            <Flex
+              align="center"
+              justify="space-between"
+              gap={4}
+              px="14px"
+              py="14px"
+              borderTop="1px solid #C9C9C4"
+              bg="bg.soft"
+            >
+              <Box>
+                <Text fontWeight="700" fontSize="14px">
+                  Adults
+                </Text>
+                <Text color="ink.3" fontSize="12px" mt="2px">
+                  Ages 13 or above · max {maxGuests}
+                </Text>
+              </Box>
+              <Flex align="center" gap="12px">
+                <StepButton
+                  ariaLabel="Fewer guests"
+                  disabled={guests <= 1}
+                  onClick={() => setGuests(guests - 1)}
+                >
+                  <Minus size={16} strokeWidth={2} />
+                </StepButton>
+                <Text minW="24px" textAlign="center" fontWeight="700">
+                  {guests}
+                </Text>
+                <StepButton
+                  ariaLabel="More guests"
+                  disabled={guests >= maxGuests}
+                  onClick={() => setGuests(guests + 1)}
+                >
+                  <Plus size={16} strokeWidth={2} />
+                </StepButton>
+              </Flex>
+            </Flex>
+          ) : null}
         </Box>
 
         <Button
@@ -148,12 +239,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
         >
           Reserve
         </Button>
-        <Text
-          textAlign="center"
-          fontSize="13px"
-          color="ink.3"
-          mt="10px"
-        >
+        <Text textAlign="center" fontSize="13px" color="ink.3" mt="10px">
           You won&apos;t be charged yet
         </Text>
 
@@ -205,5 +291,112 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
         </Text>
       </Flex>
     </Box>
+  );
+}
+
+function DateCell({
+  label,
+  value,
+  display,
+  min,
+  editing,
+  borderRight,
+  onOpen,
+  onClose,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  display: string;
+  min?: string;
+  editing: boolean;
+  borderRight?: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Box
+      flex="1"
+      p="10px 14px"
+      borderRight={borderRight ? '1px solid #C9C9C4' : undefined}
+      bg={editing ? 'bg.soft' : 'transparent'}
+      position="relative"
+      cursor="pointer"
+      onClick={() => {
+        if (!editing) onOpen();
+      }}
+      _hover={{ bg: 'bg.soft' }}
+    >
+      <Text
+        fontSize="11px"
+        fontWeight="700"
+        textTransform="uppercase"
+        letterSpacing="0.04em"
+      >
+        {label}
+      </Text>
+      {editing ? (
+        <Input
+          type="date"
+          value={value}
+          min={min}
+          autoFocus
+          mt="4px"
+          h="32px"
+          px="8px"
+          fontSize="14px"
+          fontWeight="600"
+          borderColor="line"
+          borderRadius="8px"
+          bg="white"
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onClose}
+        />
+      ) : (
+        <Text fontSize="15px" color="ink.2">
+          {display}
+        </Text>
+      )}
+    </Box>
+  );
+}
+
+function StepButton({
+  children,
+  onClick,
+  disabled,
+  ariaLabel,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  ariaLabel: string;
+}) {
+  return (
+    <Flex
+      as="button"
+      w="32px"
+      h="32px"
+      borderRadius="full"
+      border="1px solid"
+      borderColor="line"
+      align="center"
+      justify="center"
+      cursor={disabled ? 'not-allowed' : 'pointer'}
+      opacity={disabled ? 0.4 : 1}
+      aria-disabled={disabled}
+      aria-label={ariaLabel}
+      bg="white"
+      _hover={disabled ? undefined : { bg: 'bg' }}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (disabled) return;
+        onClick();
+      }}
+    >
+      {children}
+    </Flex>
   );
 }

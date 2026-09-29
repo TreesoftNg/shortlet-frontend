@@ -5,6 +5,7 @@ import {
   useCheckoutProperty,
   useCheckoutQuote,
 } from '@/features/checkout/hooks/useCheckoutData';
+import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import { formatNaira } from '@/shared/lib/format';
 import { SunmadeLogo } from '@/shared/components/brand';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
@@ -28,15 +29,59 @@ export function ConfirmationPage() {
   const unitId = searchParams.get('unit');
   const totalParam = searchParams.get('total');
 
-  const { data: property } = useCheckoutProperty(slug);
+  const {
+    data: property,
+    isPending,
+    isError,
+    refetch,
+  } = useCheckoutProperty(slug);
   const quote = useCheckoutQuote(property, unitId);
   const total = totalParam ? Number(totalParam) : quote?.total;
 
-  if (!property || !quote) {
+  if (!slug) {
     return (
-      <Box p={10} textAlign="center" bg="bg.soft" minH="100vh">
-        <Heading mb={4}>Booking not found</Heading>
-        <Button onClick={() => router.push('/')}>Go home</Button>
+      <Box p={10} bg="bg.soft" minH="100vh">
+        <Box maxW="640px" mx="auto">
+          <EmptyState
+            title="No booking to show"
+            description="Complete a reservation to see your confirmation here."
+            actionLabel="Go home"
+            actionHref="/"
+            mt={0}
+          />
+        </Box>
+      </Box>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <Box p={10} bg="bg.soft" minH="100vh" aria-busy="true">
+        <Box maxW="720px" mx="auto">
+          <Skeleton h="48px" w="48px" borderRadius="full" mb={6} />
+          <Skeleton h="32px" w="280px" mb={3} borderRadius="full" />
+          <SkeletonText lines={2} lastWidth="50%" />
+          <Skeleton h="200px" mt={8} borderRadius="22px" />
+        </Box>
+      </Box>
+    );
+  }
+
+  if (isError || !property || !quote) {
+    return (
+      <Box p={10} bg="bg.soft" minH="100vh">
+        <Box maxW="640px" mx="auto">
+          <ErrorState
+            title="Booking not found"
+            description="We couldn’t load this confirmation. The link may be incomplete."
+            actionLabel="Go home"
+            actionHref="/"
+            onRetry={() => {
+              void refetch();
+            }}
+            mt={0}
+          />
+        </Box>
       </Box>
     );
   }

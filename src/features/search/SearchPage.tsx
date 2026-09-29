@@ -35,7 +35,12 @@ export function SearchPage() {
     }));
   }, [neighborhoodParam]);
 
-  const { data: properties = [] } = useSearchProperties(filters);
+  const {
+    data: properties = [],
+    isPending: propertiesPending,
+    isError: propertiesError,
+    refetch: refetchProperties,
+  } = useSearchProperties(filters);
   const { data: neighborhood } = useSearchNeighborhood(filters.neighborhood);
   const activeFilterCount = useActiveFilterCount(filters);
 
@@ -95,6 +100,18 @@ export function SearchPage() {
           datesLabel={datesLabel}
           nights={filters.nights}
           guests={filters.guests}
+          isPending={propertiesPending}
+          isError={propertiesError}
+          onRetry={() => {
+            void refetchProperties();
+          }}
+          onClearFilters={() => {
+            setFilters({
+              ...defaultSearchFilters,
+              neighborhood: undefined,
+            });
+            router.replace('/search', { scroll: false });
+          }}
         />
         <Box
           position={{ lg: 'sticky' }}

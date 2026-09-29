@@ -5,7 +5,10 @@ import { TrustSection } from '@/features/home/components/TrustSection';
 import {
   AppButton,
   AppPage,
+  ErrorState,
   PageHero,
+  Skeleton,
+  SkeletonText,
   Surface,
 } from '@/shared/components';
 import { pagePx } from '@/shared/layout';
@@ -36,7 +39,12 @@ const cities = [
 ];
 
 export function AboutPage() {
-  const { data: content } = useWebsiteContent();
+  const {
+    data: content,
+    isPending,
+    isError,
+    refetch,
+  } = useWebsiteContent();
 
   return (
     <AppPage wrapMain={false}>
@@ -126,7 +134,32 @@ export function AboutPage() {
           </Grid>
         </Box>
 
-        {content ? (
+        {isPending ? (
+          <Box px={pagePx} py={10} aria-busy="true">
+            <Skeleton h="28px" w="200px" mb={3} borderRadius="full" />
+            <SkeletonText lines={2} lastWidth="40%" />
+            <Grid
+              templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }}
+              gap={4}
+              mt={8}
+            >
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} h="140px" borderRadius="lg" />
+              ))}
+            </Grid>
+          </Box>
+        ) : isError ? (
+          <Box px={pagePx}>
+            <ErrorState
+              title="Couldn’t load brand details"
+              description="Trust highlights are temporarily unavailable."
+              onRetry={() => {
+                void refetch();
+              }}
+              compact
+            />
+          </Box>
+        ) : content ? (
           <TrustSection
             title={content.trust.title}
             subtitle={content.trust.subtitle}
