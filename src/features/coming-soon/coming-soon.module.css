@@ -242,18 +242,24 @@
     min-height: 100dvh;
     height: auto;
     grid-template-columns: 1fr;
+    overflow-x: hidden;
   }
 
   .panel,
   .content {
     height: auto;
     min-height: 0;
-    overflow: visible;
   }
 
+  /* Keep the watermark clipped — overflow:visible lets right:-70px widen the page */
   .panel {
+    overflow: hidden;
     padding: 28px 24px 32px;
     gap: 36px;
+  }
+
+  .content {
+    overflow: visible;
   }
 
   .watermark {
