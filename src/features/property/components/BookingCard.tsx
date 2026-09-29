@@ -1,8 +1,7 @@
 'use client';
 
-import { DEMO_STAY } from '@/data/demo-stay';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
-import { formatNaira } from '@/shared/lib/format';
+import { formatNaira, nightsBetween, parseISODate } from '@/shared/lib/format';
 import { tokens } from '@/shared/theme/tokens';
 import type { Property, Unit } from '@/data/types';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
@@ -15,12 +14,22 @@ type BookingCardProps = {
   selectedUnit: Unit | null;
 };
 
+function shortDateLabel(iso: string) {
+  return parseISODate(iso).toLocaleDateString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export function BookingCard({ property, selectedUnit }: BookingCardProps) {
   const router = useRouter();
   const guests = usePropertyBookingStore((s) => s.guests);
-  const nights = DEMO_STAY.nights;
-  const checkInLabel = DEMO_STAY.checkInLabel;
-  const checkOutLabel = DEMO_STAY.checkOutLabel;
+  const checkIn = usePropertyBookingStore((s) => s.checkIn);
+  const checkOut = usePropertyBookingStore((s) => s.checkOut);
+  const nights = nightsBetween(checkIn, checkOut);
+  const checkInLabel = shortDateLabel(checkIn);
+  const checkOutLabel = shortDateLabel(checkOut);
 
   const nightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;

@@ -39,7 +39,6 @@ export function PastTripsGrid({
             showViewAll ? (
               <Text
                 as="button"
-                type="button"
                 fontWeight="700"
                 fontSize="14px"
                 cursor="pointer"

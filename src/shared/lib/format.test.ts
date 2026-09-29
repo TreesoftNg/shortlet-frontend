@@ -2,9 +2,12 @@ import {
   badgeLabel,
   bedsGuestsLabel,
   bedsOnlyLabel,
+  formatDatesRangeLabel,
   formatLocation,
   formatNaira,
   formatNairaShort,
+  guestsLabel,
+  nightsBetween,
   shortArea,
 } from '@/shared/lib/format';
 import { describe, expect, it } from 'vitest';
@@ -63,5 +66,22 @@ describe('bedsOnlyLabel', () => {
   it('formats bed counts', () => {
     expect(bedsOnlyLabel(1)).toBe('1 bed');
     expect(bedsOnlyLabel(3)).toBe('3 beds');
+  });
+});
+
+describe('date helpers', () => {
+  it('counts nights between ISO dates', () => {
+    expect(nightsBetween('2026-10-12', '2026-10-16')).toBe(4);
+  });
+
+  it('formats a same-month date range', () => {
+    expect(formatDatesRangeLabel('2026-10-12', '2026-10-16')).toBe(
+      'Oct 12 – 16',
+    );
+  });
+
+  it('formats guest counts', () => {
+    expect(guestsLabel(1)).toBe('1 guest');
+    expect(guestsLabel(2)).toBe('2 guests');
   });
 });

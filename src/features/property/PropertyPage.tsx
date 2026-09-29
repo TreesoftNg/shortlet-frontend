@@ -14,9 +14,9 @@ import {
   usePropertyReviews,
 } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
-import { DEMO_STAY } from '@/data/demo-stay';
+import { useNeighborhoods } from '@/data/hooks';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
-import { formatNaira } from '@/shared/lib/format';
+import { formatNaira, nightsBetween, shortArea } from '@/shared/lib/format';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
@@ -29,9 +29,12 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   const router = useRouter();
   const { data: property, isError, isPending } = useProperty(slug);
   const { data: reviews = [] } = usePropertyReviews(property?.id);
+  const { data: neighborhoods = [] } = useNeighborhoods();
   const selectedUnitId = usePropertyBookingStore((s) => s.selectedUnitId);
   const setSelectedUnitId = usePropertyBookingStore((s) => s.setSelectedUnitId);
-  const nights = DEMO_STAY.nights;
+  const checkIn = usePropertyBookingStore((s) => s.checkIn);
+  const checkOut = usePropertyBookingStore((s) => s.checkOut);
+  const nights = nightsBetween(checkIn, checkOut);
 
   useEffect(() => {
     if (property?.units[0] && !selectedUnitId) {
@@ -66,10 +69,20 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   const nightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;
   const capacity = property.capacity;
+  const locationLabel = shortArea(property.address.display);
+  const neighborhood = neighborhoods.find(
+    (n) => n.id === property.neighborhood_id,
+  );
+  const searchHref = neighborhood
+    ? `/search?neighborhood=${neighborhood.slug}`
+    : '/search';
 
   return (
     <Box bg="bg" maxW="1440px" mx="auto" minH="100vh" pb={{ base: '100px', md: 0 }}>
-      <PropertyHeaderBar />
+      <PropertyHeaderBar
+        locationLabel={locationLabel}
+        searchHref={searchHref}
+      />
 
       <Box as="main" px={{ base: 4, md: 8, lg: '120px' }}>
         <PropertyTitle property={property} />

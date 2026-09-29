@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 type SearchResultsProps = {
   properties: Property[];
   locationLabel: string;
+  datesLabel: string;
   nights: number;
   guests: number;
 };
@@ -16,6 +17,7 @@ type SearchResultsProps = {
 export function SearchResults({
   properties,
   locationLabel,
+  datesLabel,
   nights,
   guests,
 }: SearchResultsProps) {
@@ -40,8 +42,8 @@ export function SearchResults({
           {locationLabel ? ` in ${locationLabel}` : ''}
         </Heading>
         <Text color="ink.2" fontSize="14px" mt={1}>
-          Oct 12 – 16 · {nights} nights · {guests} guests · Prices include all
-          fees
+          {datesLabel} · {nights} night{nights === 1 ? '' : 's'} · {guests}{' '}
+          guest{guests === 1 ? '' : 's'} · Prices include all fees
         </Text>
       </Box>
 
