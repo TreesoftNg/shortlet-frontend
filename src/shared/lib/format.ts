@@ -45,3 +45,38 @@ export function bedsGuestsLabel(
 export function bedsOnlyLabel(beds: number | null): string {
   return beds === 1 ? '1 bed' : `${beds ?? 0} beds`;
 }
+
+export function parseISODate(iso: string): Date {
+  const [year, month, day] = iso.split('-').map(Number);
+  return new Date(year, (month ?? 1) - 1, day ?? 1);
+}
+
+export function toISODate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export function nightsBetween(checkIn: string, checkOut: string): number {
+  const start = parseISODate(checkIn).getTime();
+  const end = parseISODate(checkOut).getTime();
+  return Math.max(1, Math.round((end - start) / 86_400_000));
+}
+
+/** e.g. Oct 12 – 16 or Oct 28 – Nov 2 */
+export function formatDatesRangeLabel(checkIn: string, checkOut: string): string {
+  const start = parseISODate(checkIn);
+  const end = parseISODate(checkOut);
+  const sameMonth = start.getMonth() === end.getMonth();
+  const withMonth = { month: 'short' as const, day: 'numeric' as const };
+  const dayOnly = { day: 'numeric' as const };
+  if (sameMonth) {
+    return `${start.toLocaleDateString('en-US', withMonth)} – ${end.toLocaleDateString('en-US', dayOnly)}`;
+  }
+  return `${start.toLocaleDateString('en-US', withMonth)} – ${end.toLocaleDateString('en-US', withMonth)}`;
+}
+
+export function guestsLabel(guests: number): string {
+  return guests === 1 ? '1 guest' : `${guests} guests`;
+}

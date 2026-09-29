@@ -10,14 +10,34 @@ import {
   useNeighborhoods,
   useWebsiteContent,
 } from '@/features/home/hooks/useHomeData';
-import { AppPage } from '@/shared/components';
+import {
+  AppPage,
+  EmptyState,
+  ErrorState,
+  NeighborhoodTileSkeleton,
+  PropertyCardSkeletonGrid,
+  SectionHeader,
+  Skeleton,
+  SkeletonText,
+} from '@/shared/components';
 import { pagePx } from '@/shared/layout';
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Flex, Grid } from '@chakra-ui/react';
+import { Building2, MapPin } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 export function HomePage() {
-  const { data: content, isPending: contentPending } = useWebsiteContent();
-  const { data: neighborhoods = [] } = useNeighborhoods();
+  const {
+    data: content,
+    isPending: contentPending,
+    isError: contentError,
+    refetch: refetchContent,
+  } = useWebsiteContent();
+  const {
+    data: neighborhoods = [],
+    isPending: neighborhoodsPending,
+    isError: neighborhoodsError,
+    refetch: refetchNeighborhoods,
+  } = useNeighborhoods();
   const featuredQuery = useFeaturedProperties();
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -27,11 +47,26 @@ export function HomePage() {
     return list.filter((p) => p.tags?.includes(activeCategory));
   }, [featuredQuery.data, activeCategory]);
 
-  if (contentPending || !content) {
+  if (contentPending) {
+    return (
+      <AppPage wrapMain={false}>
+        <HomePageSkeleton />
+      </AppPage>
+    );
+  }
+
+  if (contentError || !content) {
     return (
       <AppPage wrapMain={false}>
         <Box px={pagePx} py={10}>
-          <Text color="ink.2">Loading…</Text>
+          <ErrorState
+            title="Couldn’t load the homepage"
+            description="Please check your connection and try again."
+            onRetry={() => {
+              void refetchContent();
+            }}
+            mt={0}
+          />
         </Box>
       </AppPage>
     );
@@ -52,15 +87,72 @@ export function HomePage() {
       />
 
       <Box as="main" px={pagePx} pb={{ base: 6, md: 8, lg: '20px' }}>
-        {featuredQuery.isError ? (
-          <Text color="danger" mt="44px">
-            Could not load featured apartments.
-          </Text>
+        {featuredQuery.isPending ? (
+          <Box mt="44px">
+            <SectionHeader
+              title="Featured apartments"
+              subtitle="Handpicked stays our guests love"
+            />
+            <PropertyCardSkeletonGrid count={4} />
+          </Box>
+        ) : featuredQuery.isError ? (
+          <ErrorState
+            title="Couldn’t load featured apartments"
+            description="Featured stays are temporarily unavailable."
+            onRetry={() => {
+              void featuredQuery.refetch();
+            }}
+            compact
+          />
+        ) : filteredFeatured.length === 0 ? (
+          <EmptyState
+            title="No featured apartments yet"
+            description="Check back soon, or browse all available stays."
+            actionLabel="Explore stays"
+            actionHref="/search"
+            icon={<Building2 size={22} strokeWidth={1.9} />}
+          />
         ) : (
           <FeaturedProperties properties={filteredFeatured} />
         )}
 
-        <NeighborhoodGrid neighborhoods={neighborhoods} />
+        {neighborhoodsPending ? (
+          <Box mt={{ base: 10, md: '52px' }}>
+            <SectionHeader
+              title="Explore by neighbourhood"
+              subtitle="Find the right base for work, rest or a weekend away"
+            />
+            <Grid
+              templateColumns={{
+                base: '1fr',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(4, 1fr)',
+              }}
+              gap={{ base: 3, md: 4, lg: '20px' }}
+            >
+              {Array.from({ length: 4 }).map((_, i) => (
+                <NeighborhoodTileSkeleton key={i} />
+              ))}
+            </Grid>
+          </Box>
+        ) : neighborhoodsError ? (
+          <ErrorState
+            title="Couldn’t load neighbourhoods"
+            description="Area guides are temporarily unavailable."
+            onRetry={() => {
+              void refetchNeighborhoods();
+            }}
+            compact
+          />
+        ) : neighborhoods.length === 0 ? (
+          <EmptyState
+            title="No neighbourhoods listed"
+            description="We’re adding more areas soon."
+            icon={<MapPin size={22} strokeWidth={1.9} />}
+          />
+        ) : (
+          <NeighborhoodGrid neighborhoods={neighborhoods} />
+        )}
       </Box>
 
       <TrustSection
@@ -69,5 +161,28 @@ export function HomePage() {
         items={content.trust.items}
       />
     </AppPage>
+  );
+}
+
+function HomePageSkeleton() {
+  return (
+    <Box px={pagePx} pb={10} aria-busy="true">
+      <Skeleton
+        h={{ base: '120px', md: '420px', lg: '560px' }}
+        borderRadius={{ base: 'full', md: '28px' }}
+        mt={{ base: 3, md: 6 }}
+        mb={6}
+      />
+      <Flex gap="10px" overflow="hidden" mb={8}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} h="40px" w="110px" borderRadius="full" />
+        ))}
+      </Flex>
+      <Skeleton h="28px" w="240px" mb={3} borderRadius="full" />
+      <SkeletonText lines={1} lastWidth="180px" />
+      <Box mt={6}>
+        <PropertyCardSkeletonGrid count={4} />
+      </Box>
+    </Box>
   );
 }

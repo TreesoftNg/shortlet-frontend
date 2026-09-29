@@ -3,12 +3,15 @@
 import { useNeighborhood, useProperties } from '@/data/hooks';
 import type { PropertyListParams, PropertySort } from '@/data/api';
 import { DEMO_STAY } from '@/data/demo-stay';
+import { nightsBetween } from '@/shared/lib/format';
 import { useMemo } from 'react';
 
 export type SearchFilters = {
   neighborhood?: string;
   guests: number;
   nights: number;
+  checkIn: string;
+  checkOut: string;
   minBedrooms: number | null;
   amenities: string[];
   sort: PropertySort;
@@ -17,6 +20,8 @@ export type SearchFilters = {
 export const defaultSearchFilters: SearchFilters = {
   guests: DEMO_STAY.guests,
   nights: DEMO_STAY.nights,
+  checkIn: DEMO_STAY.checkIn,
+  checkOut: DEMO_STAY.checkOut,
   minBedrooms: null,
   amenities: [],
   sort: 'recommended',
@@ -38,6 +43,13 @@ export function useSearchProperties(filters: SearchFilters) {
 
 export function useSearchNeighborhood(slug?: string) {
   return useNeighborhood(slug);
+}
+
+export function syncSearchNights(filters: SearchFilters): SearchFilters {
+  return {
+    ...filters,
+    nights: nightsBetween(filters.checkIn, filters.checkOut),
+  };
 }
 
 export function useActiveFilterCount(filters: SearchFilters) {
