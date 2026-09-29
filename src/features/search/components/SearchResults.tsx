@@ -1,23 +1,38 @@
 'use client';
 
 import { PropertyCard } from '@/shared/components/PropertyCard';
+import {
+  EmptyState,
+  ErrorState,
+  PropertyCardSkeletonGrid,
+} from '@/shared/components';
 import { useSearchUiStore } from '@/features/search/store/search-ui-store';
 import type { Property } from '@/data/types';
 import { Box, Flex, Grid, Heading, Text } from '@chakra-ui/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type SearchResultsProps = {
   properties: Property[];
   locationLabel: string;
+  datesLabel: string;
   nights: number;
   guests: number;
+  isPending?: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
+  onClearFilters?: () => void;
 };
 
 export function SearchResults({
   properties,
   locationLabel,
+  datesLabel,
   nights,
   guests,
+  isPending,
+  isError,
+  onRetry,
+  onClearFilters,
 }: SearchResultsProps) {
   const activePropertyId = useSearchUiStore((s) => s.activePropertyId);
   const setActivePropertyId = useSearchUiStore((s) => s.setActivePropertyId);
@@ -36,19 +51,34 @@ export function SearchResults({
           fontWeight="700"
           letterSpacing="-0.01em"
         >
-          {properties.length} apartment{properties.length === 1 ? '' : 's'}
-          {locationLabel ? ` in ${locationLabel}` : ''}
+          {isPending
+            ? 'Searching apartments'
+            : `${properties.length} apartment${properties.length === 1 ? '' : 's'}${locationLabel ? ` in ${locationLabel}` : ''}`}
         </Heading>
         <Text color="ink.2" fontSize="14px" mt={1}>
-          Oct 12 – 16 · {nights} nights · {guests} guests · Prices include all
-          fees
+          {datesLabel} · {nights} night{nights === 1 ? '' : 's'} · {guests}{' '}
+          guest{guests === 1 ? '' : 's'} · Prices include all fees
         </Text>
       </Box>
 
-      {properties.length === 0 ? (
-        <Text mt={10} color="ink.2">
-          No apartments match these filters. Try clearing a filter.
-        </Text>
+      {isPending ? (
+        <Box mt="20px">
+          <PropertyCardSkeletonGrid count={6} />
+        </Box>
+      ) : isError ? (
+        <ErrorState
+          title="Couldn’t load apartments"
+          description="Search results are temporarily unavailable. Try again in a moment."
+          onRetry={onRetry}
+        />
+      ) : properties.length === 0 ? (
+        <EmptyState
+          title="No apartments match these filters"
+          description="Try clearing a filter or searching a different area."
+          actionLabel="Clear filters"
+          onAction={onClearFilters}
+          icon={<Building2 size={22} strokeWidth={1.9} />}
+        />
       ) : (
         <Grid
           templateColumns={{
@@ -72,7 +102,7 @@ export function SearchResults({
         </Grid>
       )}
 
-      {properties.length > 0 ? (
+      {!isPending && !isError && properties.length > 0 ? (
         <Flex justify="center" gap="8px" mt="40px" mb="10px">
           {[
             { label: <ChevronLeft size={16} />, key: 'prev' },

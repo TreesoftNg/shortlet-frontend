@@ -1,9 +1,9 @@
 'use client';
 
-import { AppButton, SectionHeader, StatusBadge, Surface } from '@/shared/components';
+import { AppButton, EmptyState, SectionHeader, StatusBadge, Surface } from '@/shared/components';
 import type { Booking } from '@/data/types';
 import { Box, Flex, Grid, Text } from '@chakra-ui/react';
-import { Star } from 'lucide-react';
+import { CalendarDays, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -12,6 +12,8 @@ type PastTripsGridProps = {
   title?: string;
   showViewAll?: boolean;
   onViewAll?: () => void;
+  emptyTitle?: string;
+  emptyDescription?: string;
 };
 
 export function PastTripsGrid({
@@ -19,12 +21,18 @@ export function PastTripsGrid({
   title = "Where you've been",
   showViewAll = true,
   onViewAll,
+  emptyTitle = 'No trips in this list yet',
+  emptyDescription = 'When you have trips here, they will show up in this grid.',
 }: PastTripsGridProps) {
   if (!bookings.length) {
     return (
-      <Text color="ink.2" mt={8}>
-        No trips in this list yet.
-      </Text>
+      <EmptyState
+        title={emptyTitle}
+        description={emptyDescription}
+        actionLabel="Explore stays"
+        actionHref="/search"
+        icon={<CalendarDays size={22} strokeWidth={1.9} />}
+      />
     );
   }
 

@@ -10,6 +10,7 @@ import {
   type PaymentMethod,
 } from '@/features/checkout/hooks/useCheckoutData';
 import { DEMO_STAY } from '@/data/demo-stay';
+import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import { formatNaira } from '@/shared/lib/format';
 import {
   Box,
@@ -20,7 +21,7 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
-import { ChevronLeft, Lock, Timer } from 'lucide-react';
+import { Building2, ChevronLeft, Lock, Timer } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -54,9 +55,15 @@ export function CheckoutPage() {
     return (
       <Box>
         <CheckoutHeader />
-        <Box p={10} textAlign="center">
-          <Heading mb={4}>No property selected</Heading>
-          <Button onClick={() => router.push('/search')}>Browse stays</Button>
+        <Box px={{ base: 4, md: 10 }} py={10} maxW="720px" mx="auto">
+          <EmptyState
+            title="No property selected"
+            description="Pick a stay first, then come back to complete checkout."
+            actionLabel="Browse stays"
+            actionHref="/search"
+            mt={0}
+            icon={<Building2 size={22} strokeWidth={1.9} />}
+          />
         </Box>
       </Box>
     );
@@ -66,9 +73,7 @@ export function CheckoutPage() {
     return (
       <Box>
         <CheckoutHeader />
-        <Box p={10} textAlign="center">
-          <Text color="ink.2">Loading checkout…</Text>
-        </Box>
+        <CheckoutPageSkeleton />
       </Box>
     );
   }
@@ -77,9 +82,14 @@ export function CheckoutPage() {
     return (
       <Box>
         <CheckoutHeader />
-        <Box p={10} textAlign="center">
-          <Heading mb={4}>Property not found</Heading>
-          <Button onClick={() => router.push('/search')}>Back to search</Button>
+        <Box px={{ base: 4, md: 10 }} py={10} maxW="720px" mx="auto">
+          <ErrorState
+            title="Property not found"
+            description="This checkout link is invalid or the stay is no longer available."
+            actionLabel="Back to search"
+            actionHref="/search"
+            mt={0}
+          />
         </Box>
       </Box>
     );
@@ -353,6 +363,26 @@ export function CheckoutPage() {
           </Box>
         </Grid>
       </Box>
+    </Box>
+  );
+}
+
+function CheckoutPageSkeleton() {
+  return (
+    <Box
+      px={{ base: 4, md: 10, lg: '160px' }}
+      py={{ base: 6, md: '44px' }}
+      aria-busy="true"
+    >
+      <Skeleton h="28px" w="200px" mb={8} borderRadius="full" />
+      <Grid templateColumns={{ base: '1fr', lg: '1.2fr 0.8fr' }} gap={8}>
+        <Box>
+          <SkeletonText lines={3} />
+          <Skeleton h="120px" mt={6} borderRadius="lg" />
+          <Skeleton h="160px" mt={6} borderRadius="lg" />
+        </Box>
+        <Skeleton h="320px" borderRadius="22px" />
+      </Grid>
     </Box>
   );
 }

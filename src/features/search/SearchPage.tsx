@@ -6,18 +6,20 @@ import { SearchMiniBar } from '@/features/search/components/SearchMiniBar';
 import { SearchResults } from '@/features/search/components/SearchResults';
 import {
   defaultSearchFilters,
+  syncSearchNights,
   useActiveFilterCount,
   useSearchNeighborhood,
   useSearchProperties,
   type SearchFilters,
 } from '@/features/search/hooks/useSearchData';
-import { DEMO_STAY } from '@/data/demo-stay';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
+import { formatDatesRangeLabel } from '@/shared/lib/format';
 import { Box, Grid } from '@chakra-ui/react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 export function SearchPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const neighborhoodParam = searchParams.get('neighborhood') ?? undefined;
 
@@ -33,7 +35,12 @@ export function SearchPage() {
     }));
   }, [neighborhoodParam]);
 
-  const { data: properties = [] } = useSearchProperties(filters);
+  const {
+    data: properties = [],
+    isPending: propertiesPending,
+    isError: propertiesError,
+    refetch: refetchProperties,
+  } = useSearchProperties(filters);
   const { data: neighborhood } = useSearchNeighborhood(filters.neighborhood);
   const activeFilterCount = useActiveFilterCount(filters);
 
@@ -53,12 +60,28 @@ export function SearchPage() {
       ? `${neighborhood.name}, ${neighborhood.city}`
       : locationLabel;
 
+  const datesLabel = formatDatesRangeLabel(filters.checkIn, filters.checkOut);
+
+  const handleFiltersChange = (next: SearchFilters) => {
+    const synced = syncSearchNights(next);
+    setFilters(synced);
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (synced.neighborhood) {
+      params.set('neighborhood', synced.neighborhood);
+    } else {
+      params.delete('neighborhood');
+    }
+    const query = params.toString();
+    router.replace(query ? `/search?${query}` : '/search', { scroll: false });
+  };
+
   return (
     <Box bg="bg" maxW="1440px" mx="auto" minH="100vh">
       <SearchMiniBar
+        filters={filters}
         locationLabel={miniLocation}
-        datesLabel={DEMO_STAY.datesRangeLabel}
-        guestsLabel={`${filters.guests} guests`}
+        onChange={handleFiltersChange}
       />
 
       <SearchFiltersBar
@@ -74,8 +97,21 @@ export function SearchPage() {
         <SearchResults
           properties={properties}
           locationLabel={locationLabel}
+          datesLabel={datesLabel}
           nights={filters.nights}
           guests={filters.guests}
+          isPending={propertiesPending}
+          isError={propertiesError}
+          onRetry={() => {
+            void refetchProperties();
+          }}
+          onClearFilters={() => {
+            setFilters({
+              ...defaultSearchFilters,
+              neighborhood: undefined,
+            });
+            router.replace('/search', { scroll: false });
+          }}
         />
         <Box
           position={{ lg: 'sticky' }}
