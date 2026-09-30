@@ -41,8 +41,21 @@ function apiBaseUrl(): string {
   return base.replace(/\/$/, '');
 }
 
+function tenantSlug(): string {
+  const slug = process.env.NEXT_PUBLIC_TENANT_SLUG?.trim().toLowerCase();
+  if (!slug) {
+    throw new WaitlistApiError(
+      'Waitlist is temporarily unavailable. Please try again later.',
+      503,
+      'CONFIG_MISSING',
+    );
+  }
+  return slug;
+}
+
 export async function joinWaitlist(email: string): Promise<WaitlistSuccess> {
   const url = `${apiBaseUrl()}/api/v1/public/waitlist`;
+  const slug = tenantSlug();
 
   let response: Response;
   try {
@@ -51,6 +64,7 @@ export async function joinWaitlist(email: string): Promise<WaitlistSuccess> {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        'X-Tenant-Slug': slug,
       },
       body: JSON.stringify({
         email: email.trim().toLowerCase(),
