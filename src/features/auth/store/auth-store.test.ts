@@ -2,49 +2,49 @@ import {
   useAuthStore,
   useIsAuthenticated,
 } from '@/features/auth/store/auth-store';
-import { mockAuthUser } from '@/features/auth/types';
+import { sampleAuthUser } from '@/features/auth/types';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
+
+const session = {
+  user: { ...sampleAuthUser, email: 'guest@example.com' },
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
+};
 
 describe('useAuthStore', () => {
   beforeEach(() => {
     act(() => {
-      useAuthStore.setState({ user: null });
+      useAuthStore.getState().logout();
     });
     localStorage.clear();
   });
 
   it('starts logged out', () => {
     expect(useAuthStore.getState().user).toBeNull();
+    expect(useAuthStore.getState().accessToken).toBeNull();
     const { result } = renderHook(() => useIsAuthenticated());
     expect(result.current).toBe(false);
   });
 
-  it('logs in with the provided email', () => {
+  it('stores the session from the customer API', () => {
     act(() => {
-      useAuthStore.getState().login('guest@example.com');
+      useAuthStore.getState().setSession(session);
     });
 
-    const user = useAuthStore.getState().user;
-    expect(user?.email).toBe('guest@example.com');
-    expect(user?.firstName).toBe(mockAuthUser.firstName);
+    expect(useAuthStore.getState().user?.email).toBe('guest@example.com');
+    expect(useAuthStore.getState().accessToken).toBe('access-token');
 
     const { result } = renderHook(() => useIsAuthenticated());
     expect(result.current).toBe(true);
   });
 
-  it('falls back to the mock email when blank', () => {
-    act(() => {
-      useAuthStore.getState().login('');
-    });
-    expect(useAuthStore.getState().user?.email).toBe(mockAuthUser.email);
-  });
-
   it('clears the session on logout', () => {
     act(() => {
-      useAuthStore.getState().login('guest@example.com');
+      useAuthStore.getState().setSession(session);
       useAuthStore.getState().logout();
     });
     expect(useAuthStore.getState().user).toBeNull();
+    expect(useAuthStore.getState().accessToken).toBeNull();
   });
 });

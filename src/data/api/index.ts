@@ -1,4 +1,18 @@
 export { request, delay } from './client';
+export { http, ApiError } from './http';
+export {
+  createCustomerAccount,
+  loginCustomer,
+  resendCustomerOtp,
+  verifyCustomerOtp,
+} from './customers';
+export type {
+  CreateCustomerAccountInput,
+  CustomerLoginInput,
+  CustomerLoginResult,
+  ResendEmailOtpInput,
+  VerifyEmailOtpInput,
+} from './customers';
 
 export { getWebsiteContent } from './content';
 

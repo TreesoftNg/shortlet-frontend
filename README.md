@@ -18,7 +18,17 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Learn More
+## Staging API
+
+Customer auth (`/auth`) calls the [Customers](https://api-staging.sunmadeapartments.com/api/docs#/Customers) endpoints through a Next rewrite at `/backend/*`. Listings still use mock data.
+
+Optional env:
+
+```
+API_BASE_URL=https://api-staging.sunmadeapartments.com
+NEXT_PUBLIC_TENANT_SLUG=sunmade
+```
+
 
 To learn more about Next.js, take a look at the following resources:
 
