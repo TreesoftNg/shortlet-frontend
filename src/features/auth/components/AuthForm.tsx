@@ -14,6 +14,7 @@ import {
 } from '@/features/auth/lib/password';
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import type { AuthMode } from '@/features/auth/types';
+import { PasswordField } from '@/features/auth/components/PasswordField';
 import { AppButton, LabeledField } from '@/shared/components';
 import {
   Box,
@@ -23,7 +24,7 @@ import {
   Input,
   Text,
 } from '@chakra-ui/react';
-import { Check, Eye, EyeOff } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -88,10 +89,10 @@ export function AuthForm() {
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [otp, setOtp] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [emailFocused, setEmailFocused] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -141,6 +142,10 @@ export function AuthForm() {
       }
       if (!isValidGuestPassword(password)) {
         setError(GUEST_PASSWORD_HINT);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.');
         return;
       }
     }
@@ -371,39 +376,27 @@ export function AuthForm() {
             />
           </LabeledField>
 
-          <LabeledField label="Password" mb="12px">
-            <Flex align="center" justify="space-between" gap={2}>
-              <Input
-                {...fieldInputProps}
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={isSignIn ? 'Password' : 'Create a password'}
-                aria-label="Password"
-                autoComplete={isSignIn ? 'current-password' : 'new-password'}
-              />
-              <Box
-                as="button"
-                color="ink.3"
-                bg="transparent"
-                border="none"
-                cursor="pointer"
-                p={0}
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? (
-                  <EyeOff size={18} strokeWidth={1.9} />
-                ) : (
-                  <Eye size={18} strokeWidth={1.9} />
-                )}
-              </Box>
-            </Flex>
-          </LabeledField>
+          <PasswordField
+            value={password}
+            onChange={setPassword}
+            placeholder={isSignIn ? 'Password' : 'Create a password'}
+            autoComplete={isSignIn ? 'current-password' : 'new-password'}
+            mb={!isSignIn ? '8px' : '12px'}
+          />
           {!isSignIn ? (
-            <Text color="ink.3" fontSize="12px" mb="12px">
-              {GUEST_PASSWORD_HINT}
-            </Text>
+            <>
+              <Text color="ink.3" fontSize="12px" mb="12px">
+                {GUEST_PASSWORD_HINT}
+              </Text>
+              <PasswordField
+                label="Confirm password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                placeholder="Confirm password"
+                aria-label="Confirm password"
+                autoComplete="new-password"
+              />
+            </>
           ) : null}
 
           {isSignIn ? (

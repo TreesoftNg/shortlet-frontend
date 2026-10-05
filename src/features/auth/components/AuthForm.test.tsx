@@ -75,6 +75,10 @@ describe('AuthForm', () => {
       'ada@sunmadeapartments.com',
     );
     await user.type(screen.getByLabelText('Password'), 'Sunmade-guest-1');
+    await user.type(
+      screen.getByLabelText('Confirm password'),
+      'Sunmade-guest-1',
+    );
     await user.click(screen.getByRole('button', { name: /^continue$/i }));
 
     expect(createCustomerAccount).toHaveBeenCalled();
