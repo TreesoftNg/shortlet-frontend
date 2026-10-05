@@ -26,3 +26,17 @@ export type {
 } from './property';
 
 export type { Booking, BookingStatus, TripTab } from './booking';
+
+export type {
+  PublicUnitAmenity,
+  PublicUnitCard,
+  PublicUnitDetail,
+  PublicUnitLocation,
+  PublicUnitMedia,
+  PublicUnitPropertyRef,
+  PublicUnitReviewItem,
+  PublicUnitReviews,
+  PublicUnitsListMeta,
+  PublicUnitsListResult,
+  PublicUnitsTab,
+} from './public-unit';

@@ -39,12 +39,12 @@ function shortDateLabel(iso: string) {
 
 function buildSearchHref(draft: StayDraft) {
   const params = new URLSearchParams();
+  params.set('tab', 'all');
   if (draft.neighborhood) params.set('neighborhood', draft.neighborhood);
   if (draft.checkIn) params.set('checkIn', draft.checkIn);
   if (draft.checkOut) params.set('checkOut', draft.checkOut);
   if (draft.guests) params.set('guests', String(draft.guests));
-  const query = params.toString();
-  return query ? `/search?${query}` : '/search';
+  return `/search?${params.toString()}`;
 }
 
 export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {

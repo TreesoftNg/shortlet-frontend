@@ -1,44 +1,74 @@
 'use client';
 
-import { useNeighborhood, useProperties } from '@/data/hooks';
-import type { PropertyListParams, PropertySort } from '@/data/api';
+import { useNeighborhood, usePublicUnits } from '@/data/hooks';
+import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
+import type { PropertySort } from '@/data/api';
+import type { Property, PublicUnitsTab } from '@/data/types';
 import { DEMO_STAY } from '@/data/demo-stay';
 import { nightsBetween } from '@/shared/lib/format';
 import { useMemo } from 'react';
 
 export type SearchFilters = {
+  /** Public units API tab (all | studios | one_bedroom | …). */
+  tab: PublicUnitsTab;
   neighborhood?: string;
   guests: number;
   nights: number;
   checkIn: string;
   checkOut: string;
-  minBedrooms: number | null;
-  amenities: string[];
   sort: PropertySort;
 };
 
 export const defaultSearchFilters: SearchFilters = {
+  tab: 'all',
   guests: DEMO_STAY.guests,
   nights: DEMO_STAY.nights,
   checkIn: DEMO_STAY.checkIn,
   checkOut: DEMO_STAY.checkOut,
-  minBedrooms: null,
-  amenities: [],
   sort: 'recommended',
 };
 
-function toParams(filters: SearchFilters): PropertyListParams {
-  return {
-    neighborhood: filters.neighborhood,
-    guests: filters.guests,
-    minBedrooms: filters.minBedrooms ?? undefined,
-    amenities: filters.amenities.length ? filters.amenities : undefined,
-    sort: filters.sort,
-  };
+function sortProperties(list: Property[], sort: PropertySort) {
+  switch (sort) {
+    case 'price_asc':
+      return [...list].sort(
+        (a, b) => a.pricing.nightly_rate - b.pricing.nightly_rate,
+      );
+    case 'price_desc':
+      return [...list].sort(
+        (a, b) => b.pricing.nightly_rate - a.pricing.nightly_rate,
+      );
+    case 'rating':
+      return [...list].sort(
+        (a, b) => b.review_summary.rating - a.review_summary.rating,
+      );
+    default:
+      return list;
+  }
 }
 
 export function useSearchProperties(filters: SearchFilters) {
-  return useProperties(toParams(filters));
+  const tab = toPublicUnitsTab(filters.tab);
+  const query = usePublicUnits({ tab, limit: 100 });
+
+  const data = useMemo(() => {
+    let list = query.data ?? [];
+    if (filters.guests > 0) {
+      list = list.filter((p) => (p.capacity.max ?? 0) >= filters.guests);
+    }
+    if (filters.neighborhood) {
+      const q = filters.neighborhood.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.address.city.toLowerCase().includes(q) ||
+          p.address.display.toLowerCase().includes(q) ||
+          (p.address.street?.toLowerCase().includes(q) ?? false),
+      );
+    }
+    return sortProperties(list, filters.sort);
+  }, [query.data, filters.guests, filters.neighborhood, filters.sort]);
+
+  return { ...query, data };
 }
 
 export function useSearchNeighborhood(slug?: string) {
@@ -52,11 +82,4 @@ export function syncSearchNights(filters: SearchFilters): SearchFilters {
   };
 }
 
-export function useActiveFilterCount(filters: SearchFilters) {
-  return useMemo(() => {
-    let count = 0;
-    if (filters.minBedrooms) count += 1;
-    count += filters.amenities.length;
-    return count;
-  }, [filters]);
-}
+export { toPublicUnitsTab };

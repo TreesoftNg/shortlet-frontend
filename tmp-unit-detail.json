@@ -1,0 +1,213 @@
+﻿{
+    "success":  true,
+    "data":  {
+                 "id":  "aa84b9c6-b348-4cf9-8597-88e3f79119b0",
+                 "tenantId":  "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                 "name":  "Charming 1bedroom with outdoor furniture",
+                 "summary":  "Spacious apartments with a pool and gym near the Lekki waterfront.",
+                 "description":  "Family-friendly apartments close to restaurants, beaches and the Lekki toll gate.",
+                 "pictureUrl":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/1f9e1ed2-d3e8-51f1-afd0-c20a141a794e/medium.webp",
+                 "propertyType":  "serviced_apartment",
+                 "roomType":  "Entire Home",
+                 "floor":  null,
+                 "guests":  2,
+                 "bedrooms":  1,
+                 "beds":  1,
+                 "bathrooms":  "1.0",
+                 "currency":  "NGN",
+                 "nightlyRate":  "75000.00",
+                 "cleaningFee":  "15000.00",
+                 "weeklyDiscountPercent":  "10.00",
+                 "monthlyDiscountPercent":  "20.00",
+                 "minNights":  1,
+                 "maxNights":  null,
+                 "checkInTime":  "15:00",
+                 "checkOutTime":  "11:00",
+                 "timezone":  "Africa/Lagos",
+                 "instantBook":  true,
+                 "houseRules":  "No smoking inside the property or anywhere on the premises.\nNo parties.\nNo pets.\nQuiet hours are 11:00 PM to 8:00 AM.\nPlease switch off appliances when you go out.\nWash used dishes and put rubbish in the bins outside.",
+                 "location":  {
+                                  "number":  null,
+                                  "street":  null,
+                                  "line2":  null,
+                                  "city":  "Lagos",
+                                  "state":  "Lagos",
+                                  "country":  "NG",
+                                  "zip":  null,
+                                  "neighbourhood":  null,
+                                  "display":  null,
+                                  "latitude":  null,
+                                  "longitude":  null
+                              },
+                 "property":  {
+                                  "id":  "31c96ef0-3651-5e13-9f97-e050a1983bef",
+                                  "name":  "Sunmade Apartments, Lekki",
+                                  "slug":  "sunmade-lekki-phase-1",
+                                  "summary":  "Spacious apartments with a pool and gym near the Lekki waterfront.",
+                                  "description":  "Family-friendly apartments close to restaurants, beaches and the Lekki toll gate."
+                              },
+                 "amenities":  [
+                                   {
+                                       "id":  "db25c234-86ca-5435-9a72-f09283513ab1",
+                                       "name":  "24/7 power",
+                                       "category":  "Essentials"
+                                   },
+                                   {
+                                       "id":  "2d7e7948-61c8-50bb-9fa4-bc471ea50868",
+                                       "name":  "24/7 security",
+                                       "category":  "Building"
+                                   },
+                                   {
+                                       "id":  "58b37708-5df9-5b36-a7bd-e17d5c5310fe",
+                                       "name":  "Air conditioning",
+                                       "category":  "Essentials"
+                                   },
+                                   {
+                                       "id":  "01d212f8-4714-5704-bc66-0347791dcc48",
+                                       "name":  "Balcony",
+                                       "category":  "Outdoor"
+                                   },
+                                   {
+                                       "id":  "224803f6-c614-5181-925e-d2dcd1ab750a",
+                                       "name":  "First aid kit",
+                                       "category":  "Safety"
+                                   },
+                                   {
+                                       "id":  "88dcdbba-39cc-50de-91c4-8f34bf03f444",
+                                       "name":  "Free parking",
+                                       "category":  "Building"
+                                   },
+                                   {
+                                       "id":  "3e7aa39f-1d14-5304-9427-3ce8b31d42ef",
+                                       "name":  "Gym",
+                                       "category":  "Building"
+                                   },
+                                   {
+                                       "id":  "6a609114-a94c-5a01-b1a3-2b61580497ff",
+                                       "name":  "Kitchen",
+                                       "category":  "Kitchen"
+                                   },
+                                   {
+                                       "id":  "a065aa05-38a1-5503-9481-ec1faabfcff8",
+                                       "name":  "Outdoor furniture",
+                                       "category":  "Outdoor"
+                                   },
+                                   {
+                                       "id":  "f026e7fe-edf2-5f40-a392-6da25ce756a5",
+                                       "name":  "Smart TV",
+                                       "category":  "Essentials"
+                                   },
+                                   {
+                                       "id":  "6f90e20e-8205-594e-ac62-f3fa8d1d007f",
+                                       "name":  "Swimming pool",
+                                       "category":  "Building"
+                                   },
+                                   {
+                                       "id":  "842a0efb-6cd2-5ecd-87ed-b1e1b18672d2",
+                                       "name":  "Wi-Fi",
+                                       "category":  "Essentials"
+                                   }
+                               ],
+                 "media":  [
+                               {
+                                   "id":  "1f9e1ed2-d3e8-51f1-afd0-c20a141a794e",
+                                   "unitId":  "aa84b9c6-b348-4cf9-8597-88e3f79119b0",
+                                   "kind":  "photo",
+                                   "sortOrder":  0,
+                                   "isCover":  true,
+                                   "caption":  null,
+                                   "altText":  null,
+                                   "url":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/1f9e1ed2-d3e8-51f1-afd0-c20a141a794e/master.jpg",
+                                   "thumbnailUrl":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/1f9e1ed2-d3e8-51f1-afd0-c20a141a794e/thumb.webp",
+                                   "sizes":  {
+                                                 "thumb":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/1f9e1ed2-d3e8-51f1-afd0-c20a141a794e/thumb.webp",
+                                                 "medium":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/1f9e1ed2-d3e8-51f1-afd0-c20a141a794e/medium.webp",
+                                                 "large":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/1f9e1ed2-d3e8-51f1-afd0-c20a141a794e/large.webp"
+                                             },
+                                   "width":  2000,
+                                   "height":  1334,
+                                   "durationSeconds":  null,
+                                   "sizeBytes":  268556,
+                                   "link":  null,
+                                   "createdAt":  "2026-10-05T11:40:17.658Z"
+                               },
+                               {
+                                   "id":  "82cf4520-5c7e-543b-86e5-f875b8070186",
+                                   "unitId":  "aa84b9c6-b348-4cf9-8597-88e3f79119b0",
+                                   "kind":  "photo",
+                                   "sortOrder":  1,
+                                   "isCover":  false,
+                                   "caption":  null,
+                                   "altText":  null,
+                                   "url":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/82cf4520-5c7e-543b-86e5-f875b8070186/master.jpg",
+                                   "thumbnailUrl":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/82cf4520-5c7e-543b-86e5-f875b8070186/thumb.webp",
+                                   "sizes":  {
+                                                 "thumb":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/82cf4520-5c7e-543b-86e5-f875b8070186/thumb.webp",
+                                                 "medium":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/82cf4520-5c7e-543b-86e5-f875b8070186/medium.webp",
+                                                 "large":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/82cf4520-5c7e-543b-86e5-f875b8070186/large.webp"
+                                             },
+                                   "width":  2000,
+                                   "height":  1328,
+                                   "durationSeconds":  null,
+                                   "sizeBytes":  206969,
+                                   "link":  null,
+                                   "createdAt":  "2026-10-05T11:40:17.658Z"
+                               },
+                               {
+                                   "id":  "580c8586-0334-5f9b-8439-95158978a362",
+                                   "unitId":  "aa84b9c6-b348-4cf9-8597-88e3f79119b0",
+                                   "kind":  "photo",
+                                   "sortOrder":  2,
+                                   "isCover":  false,
+                                   "caption":  null,
+                                   "altText":  null,
+                                   "url":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/580c8586-0334-5f9b-8439-95158978a362/master.jpg",
+                                   "thumbnailUrl":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/580c8586-0334-5f9b-8439-95158978a362/thumb.webp",
+                                   "sizes":  {
+                                                 "thumb":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/580c8586-0334-5f9b-8439-95158978a362/thumb.webp",
+                                                 "medium":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/580c8586-0334-5f9b-8439-95158978a362/medium.webp",
+                                                 "large":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/580c8586-0334-5f9b-8439-95158978a362/large.webp"
+                                             },
+                                   "width":  2000,
+                                   "height":  1333,
+                                   "durationSeconds":  null,
+                                   "sizeBytes":  310171,
+                                   "link":  null,
+                                   "createdAt":  "2026-10-05T11:40:17.658Z"
+                               },
+                               {
+                                   "id":  "4cf7e952-b0fd-5633-bf4f-c825a287ea3b",
+                                   "unitId":  "aa84b9c6-b348-4cf9-8597-88e3f79119b0",
+                                   "kind":  "photo",
+                                   "sortOrder":  3,
+                                   "isCover":  false,
+                                   "caption":  null,
+                                   "altText":  null,
+                                   "url":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/4cf7e952-b0fd-5633-bf4f-c825a287ea3b/master.jpg",
+                                   "thumbnailUrl":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/4cf7e952-b0fd-5633-bf4f-c825a287ea3b/thumb.webp",
+                                   "sizes":  {
+                                                 "thumb":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/4cf7e952-b0fd-5633-bf4f-c825a287ea3b/thumb.webp",
+                                                 "medium":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/4cf7e952-b0fd-5633-bf4f-c825a287ea3b/medium.webp",
+                                                 "large":  "http://localhost:4000/media/tenants/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0/photos/4cf7e952-b0fd-5633-bf4f-c825a287ea3b/large.webp"
+                                             },
+                                   "width":  2000,
+                                   "height":  1500,
+                                   "durationSeconds":  null,
+                                   "sizeBytes":  422187,
+                                   "link":  null,
+                                   "createdAt":  "2026-10-05T11:40:17.658Z"
+                               }
+                           ],
+                 "reviews":  {
+                                 "averageRating":  null,
+                                 "totalCount":  0,
+                                 "items":  [
+
+                                           ]
+                             }
+             },
+    "message":  "Stay loaded",
+    "meta":  {
+                 "requestId":  "279869c5-e652-4fc7-ab23-7ec1e4526804"
+             }
+}

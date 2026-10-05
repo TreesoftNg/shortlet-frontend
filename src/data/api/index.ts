@@ -28,6 +28,9 @@ export {
 } from './properties';
 export type { PropertyListParams, PropertySort } from './properties';
 
+export { getPublicUnits, getPublicUnitById } from './public-units';
+export type { PublicUnitsParams } from './public-units';
+
 export { getReviewsByPropertyId } from './reviews';
 
 export {

@@ -12,12 +12,15 @@ import {
   getNeighborhoodBySlug,
   getNeighborhoods,
   getProperties,
-  getPropertyBySlug,
+  getPublicUnitById,
+  getPublicUnits,
   getReviewsByPropertyId,
   getWebsiteContent,
   type PropertyListParams,
+  type PublicUnitsParams,
 } from '@/data/api';
 import { DEMO_STAY } from '@/data/demo-stay';
+import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
 import { queryKeys } from '@/data/query-keys';
 import type { Property, TripTab, Unit } from '@/data/types';
 import { useQuery } from '@tanstack/react-query';
@@ -58,12 +61,28 @@ export function useNeighborhood(slug?: string) {
   });
 }
 
+// ── Public units (live browse API) ────────────────────────────────────────
+
+export function usePublicUnits(params: PublicUnitsParams = {}) {
+  const normalised: PublicUnitsParams = {
+    ...params,
+    tab: toPublicUnitsTab(params.tab),
+  };
+  return useQuery({
+    queryKey: queryKeys.publicUnits.list(normalised),
+    queryFn: () => getPublicUnits(normalised),
+    ...readOptions,
+  });
+}
+
 // ── Properties ────────────────────────────────────────────────────────────
 
-export function useFeaturedProperties() {
+/** Featured strip on home — powered by GET /api/v1/public/units?tab=… */
+export function useFeaturedProperties(categoryOrTab = 'all') {
+  const tab = toPublicUnitsTab(categoryOrTab);
   return useQuery({
-    queryKey: queryKeys.properties.featured(),
-    queryFn: () => getProperties({ featured: true }),
+    queryKey: queryKeys.properties.featured(tab),
+    queryFn: () => getPublicUnits({ tab, limit: 4 }),
     ...readOptions,
   });
 }
@@ -76,10 +95,22 @@ export function useProperties(params: PropertyListParams = {}) {
   });
 }
 
+/** Full public unit detail (property + reviews) from one API response. */
+export function usePublicUnitDetail(id: string) {
+  return useQuery({
+    queryKey: queryKeys.properties.detail(id),
+    queryFn: () => getPublicUnitById(id),
+    enabled: Boolean(id),
+    ...readOptions,
+  });
+}
+
+/** Property-only view of the public unit detail (shared cache with usePublicUnitDetail). */
 export function useProperty(slug: string) {
   return useQuery({
     queryKey: queryKeys.properties.detail(slug),
-    queryFn: () => getPropertyBySlug(slug),
+    queryFn: () => getPublicUnitById(slug),
+    select: (result) => result?.property ?? null,
     enabled: Boolean(slug),
     ...readOptions,
   });

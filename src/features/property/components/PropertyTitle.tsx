@@ -1,10 +1,9 @@
 'use client';
 
 import { badgeLabel, formatLocation } from '@/shared/lib/format';
-import { tokens } from '@/shared/theme/tokens';
 import type { Property } from '@/data/types';
 import { Box, Flex, Heading, Text } from '@chakra-ui/react';
-import { Award, Heart, Share, Star } from 'lucide-react';
+import { Award, Check, Share, Star } from 'lucide-react';
 import { useState } from 'react';
 
 type PropertyTitleProps = {
@@ -12,8 +11,20 @@ type PropertyTitleProps = {
 };
 
 export function PropertyTitle({ property }: PropertyTitleProps) {
-  const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
   const badge = property.badges[0];
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers / denied clipboard
+      window.prompt('Copy this link', url);
+    }
+  };
 
   return (
     <Flex
@@ -41,14 +52,23 @@ export function PropertyTitle({ property }: PropertyTitleProps) {
           fontSize="14px"
           color="ink.2"
         >
-          <Flex align="center" gap="4px" fontWeight="600" color="ink">
-            <Star size={14} fill="currentColor" stroke="none" />
-            {property.review_summary.rating.toFixed(2)}
-          </Flex>
-          <Text>·</Text>
-          <Text textDecoration="underline" fontWeight="600" color="ink">
-            {property.review_summary.count} reviews
-          </Text>
+          {property.review_summary.count > 0 ? (
+            <>
+              <Flex align="center" gap="4px" fontWeight="600" color="ink">
+                <Star size={14} fill="currentColor" stroke="none" />
+                {property.review_summary.rating.toFixed(2)}
+              </Flex>
+              <Text>·</Text>
+              <Text textDecoration="underline" fontWeight="600" color="ink">
+                {property.review_summary.count} review
+                {property.review_summary.count === 1 ? '' : 's'}
+              </Text>
+            </>
+          ) : (
+            <Text fontWeight="600" color="ink">
+              New
+            </Text>
+          )}
           {badge ? (
             <>
               <Text>·</Text>
@@ -75,29 +95,28 @@ export function PropertyTitle({ property }: PropertyTitleProps) {
         </Flex>
       </Box>
 
-      <Flex gap="18px" fontWeight="600" fontSize="14px" flexShrink={0}>
-        <Flex as="button" align="center" gap="6px" textDecoration="underline" bg="transparent" border="none" cursor="pointer">
+      <Flex
+        as="button"
+        align="center"
+        gap="6px"
+        textDecoration="underline"
+        bg="transparent"
+        border="none"
+        cursor="pointer"
+        fontWeight="600"
+        fontSize="14px"
+        flexShrink={0}
+        onClick={() => {
+          void handleShare();
+        }}
+        aria-label={copied ? 'Link copied' : 'Copy link to share'}
+      >
+        {copied ? (
+          <Check size={16} strokeWidth={1.9} />
+        ) : (
           <Share size={16} strokeWidth={1.9} />
-          Share
-        </Flex>
-        <Flex
-          as="button"
-          align="center"
-          gap="6px"
-          textDecoration="underline"
-          bg="transparent"
-          border="none"
-          cursor="pointer"
-          onClick={() => setSaved((v) => !v)}
-        >
-          <Heart
-            size={16}
-            strokeWidth={1.9}
-            fill={saved ? tokens.colors.brand[500] : 'none'}
-            color={saved ? tokens.colors.brand[500] : 'currentColor'}
-          />
-          Save
-        </Flex>
+        )}
+        {copied ? 'Copied' : 'Share'}
       </Flex>
     </Flex>
   );

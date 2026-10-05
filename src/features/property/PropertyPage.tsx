@@ -2,6 +2,7 @@
 
 import { BookingCard } from '@/features/property/components/BookingCard';
 import { PropertyAmenities } from '@/features/property/components/PropertyAmenities';
+import { PropertyDescription } from '@/features/property/components/PropertyDescription';
 import { PropertyGallery } from '@/features/property/components/PropertyGallery';
 import { PropertyHeaderBar } from '@/features/property/components/PropertyHeaderBar';
 import { PropertyHighlights } from '@/features/property/components/PropertyHighlights';
@@ -9,15 +10,10 @@ import { PropertyReviews } from '@/features/property/components/PropertyReviews'
 import { PropertyTitle } from '@/features/property/components/PropertyTitle';
 import { StayCalendar } from '@/features/property/components/StayCalendar';
 import { UnitPicker } from '@/features/property/components/UnitPicker';
-import {
-  useProperty,
-  usePropertyReviews,
-} from '@/features/property/hooks/usePropertyData';
+import { usePublicUnitDetail } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
-import { useNeighborhoods } from '@/data/hooks';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
 import {
-  EmptyState,
   ErrorState,
   Skeleton,
   SkeletonText,
@@ -34,9 +30,10 @@ type PropertyPageProps = {
 
 export function PropertyPage({ slug }: PropertyPageProps) {
   const router = useRouter();
-  const { data: property, isError, isPending } = useProperty(slug);
-  const { data: reviews = [] } = usePropertyReviews(property?.id);
-  const { data: neighborhoods = [] } = useNeighborhoods();
+  const { data, isError, isPending } = usePublicUnitDetail(slug);
+  const property = data?.property;
+  const reviews = data?.reviews ?? [];
+  const houseRules = data?.houseRules ?? null;
   const selectedUnitId = usePropertyBookingStore((s) => s.selectedUnitId);
   const setSelectedUnitId = usePropertyBookingStore((s) => s.setSelectedUnitId);
   const checkIn = usePropertyBookingStore((s) => s.checkIn);
@@ -76,13 +73,9 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   const nightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;
   const capacity = property.capacity;
-  const locationLabel = shortArea(property.address.display);
-  const neighborhood = neighborhoods.find(
-    (n) => n.id === property.neighborhood_id,
-  );
-  const searchHref = neighborhood
-    ? `/search?neighborhood=${neighborhood.slug}`
-    : '/search';
+  const locationLabel =
+    shortArea(property.address.display) || property.address.city || 'Lagos';
+  const searchHref = '/search?tab=all';
 
   return (
     <Box bg="bg" maxW="1440px" mx="auto" minH="100vh" pb={{ base: '100px', md: 0 }}>
@@ -157,17 +150,10 @@ export function PropertyPage({ slug }: PropertyPageProps) {
               <PropertyHighlights highlights={property.highlights} />
             </Box>
 
-            <Text
-              py="28px"
-              color="ink.2"
-              borderBottom="1px solid"
-              borderColor="line"
-            >
-              {property.description}{' '}
-              <Text as="b" color="ink" textDecoration="underline" fontWeight="700">
-                Show more
-              </Text>
-            </Text>
+            <PropertyDescription
+              description={property.description}
+              houseRules={houseRules}
+            />
 
             <Box borderBottom="1px solid" borderColor="line">
               <UnitPicker units={property.units} />

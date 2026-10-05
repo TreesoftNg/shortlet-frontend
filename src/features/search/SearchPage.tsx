@@ -7,11 +7,13 @@ import { SearchResults } from '@/features/search/components/SearchResults';
 import {
   defaultSearchFilters,
   syncSearchNights,
-  useActiveFilterCount,
+  toPublicUnitsTab,
   useSearchNeighborhood,
   useSearchProperties,
   type SearchFilters,
 } from '@/features/search/hooks/useSearchData';
+import { useWebsiteContent } from '@/data/hooks';
+import { websiteContent } from '@/data/mocks/content';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
 import { formatDatesRangeLabel } from '@/shared/lib/format';
 import { Box, Grid } from '@chakra-ui/react';
@@ -21,6 +23,10 @@ import { useEffect, useMemo, useState } from 'react';
 export function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: content } = useWebsiteContent();
+  const categories = content?.categories ?? websiteContent.categories;
+
+  const tabParam = toPublicUnitsTab(searchParams.get('tab'));
   const neighborhoodParam = searchParams.get('neighborhood') ?? undefined;
   const checkInParam = searchParams.get('checkIn') ?? undefined;
   const checkOutParam = searchParams.get('checkOut') ?? undefined;
@@ -30,6 +36,7 @@ export function SearchPage() {
   const [filters, setFilters] = useState<SearchFilters>(() =>
     syncSearchNights({
       ...defaultSearchFilters,
+      tab: tabParam,
       neighborhood: neighborhoodParam,
       checkIn: checkInParam ?? defaultSearchFilters.checkIn,
       checkOut: checkOutParam ?? defaultSearchFilters.checkOut,
@@ -44,6 +51,7 @@ export function SearchPage() {
     setFilters((prev) =>
       syncSearchNights({
         ...prev,
+        tab: tabParam,
         neighborhood: neighborhoodParam,
         checkIn: checkInParam ?? prev.checkIn,
         checkOut: checkOutParam ?? prev.checkOut,
@@ -53,7 +61,13 @@ export function SearchPage() {
             : prev.guests,
       }),
     );
-  }, [neighborhoodParam, checkInParam, checkOutParam, guestsFromUrl]);
+  }, [
+    tabParam,
+    neighborhoodParam,
+    checkInParam,
+    checkOutParam,
+    guestsFromUrl,
+  ]);
 
   const {
     data: properties = [],
@@ -62,7 +76,6 @@ export function SearchPage() {
     refetch: refetchProperties,
   } = useSearchProperties(filters);
   const { data: neighborhood } = useSearchNeighborhood(filters.neighborhood);
-  const activeFilterCount = useActiveFilterCount(filters);
 
   const locationLabel = useMemo(() => {
     if (neighborhood) return neighborhood.name;
@@ -87,12 +100,12 @@ export function SearchPage() {
     setFilters(synced);
 
     const params = new URLSearchParams();
+    params.set('tab', synced.tab);
     if (synced.neighborhood) params.set('neighborhood', synced.neighborhood);
     if (synced.checkIn) params.set('checkIn', synced.checkIn);
     if (synced.checkOut) params.set('checkOut', synced.checkOut);
     if (synced.guests) params.set('guests', String(synced.guests));
-    const query = params.toString();
-    router.replace(query ? `/search?${query}` : '/search', { scroll: false });
+    router.replace(`/search?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -104,9 +117,9 @@ export function SearchPage() {
       />
 
       <SearchFiltersBar
+        categories={categories}
         filters={filters}
-        activeFilterCount={activeFilterCount}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
       />
 
       <Grid
@@ -125,11 +138,10 @@ export function SearchPage() {
             void refetchProperties();
           }}
           onClearFilters={() => {
-            setFilters({
+            handleFiltersChange({
               ...defaultSearchFilters,
               neighborhood: undefined,
             });
-            router.replace('/search', { scroll: false });
           }}
         />
         <Box
