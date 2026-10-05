@@ -22,18 +22,38 @@ export function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const neighborhoodParam = searchParams.get('neighborhood') ?? undefined;
+  const checkInParam = searchParams.get('checkIn') ?? undefined;
+  const checkOutParam = searchParams.get('checkOut') ?? undefined;
+  const guestsParam = searchParams.get('guests');
+  const guestsFromUrl = guestsParam ? Number(guestsParam) : undefined;
 
-  const [filters, setFilters] = useState<SearchFilters>({
-    ...defaultSearchFilters,
-    neighborhood: neighborhoodParam,
-  });
+  const [filters, setFilters] = useState<SearchFilters>(() =>
+    syncSearchNights({
+      ...defaultSearchFilters,
+      neighborhood: neighborhoodParam,
+      checkIn: checkInParam ?? defaultSearchFilters.checkIn,
+      checkOut: checkOutParam ?? defaultSearchFilters.checkOut,
+      guests:
+        guestsFromUrl && guestsFromUrl > 0
+          ? Math.min(16, guestsFromUrl)
+          : defaultSearchFilters.guests,
+    }),
+  );
 
   useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      neighborhood: neighborhoodParam,
-    }));
-  }, [neighborhoodParam]);
+    setFilters((prev) =>
+      syncSearchNights({
+        ...prev,
+        neighborhood: neighborhoodParam,
+        checkIn: checkInParam ?? prev.checkIn,
+        checkOut: checkOutParam ?? prev.checkOut,
+        guests:
+          guestsFromUrl && guestsFromUrl > 0
+            ? Math.min(16, guestsFromUrl)
+            : prev.guests,
+      }),
+    );
+  }, [neighborhoodParam, checkInParam, checkOutParam, guestsFromUrl]);
 
   const {
     data: properties = [],
@@ -66,12 +86,11 @@ export function SearchPage() {
     const synced = syncSearchNights(next);
     setFilters(synced);
 
-    const params = new URLSearchParams(searchParams.toString());
-    if (synced.neighborhood) {
-      params.set('neighborhood', synced.neighborhood);
-    } else {
-      params.delete('neighborhood');
-    }
+    const params = new URLSearchParams();
+    if (synced.neighborhood) params.set('neighborhood', synced.neighborhood);
+    if (synced.checkIn) params.set('checkIn', synced.checkIn);
+    if (synced.checkOut) params.set('checkOut', synced.checkOut);
+    if (synced.guests) params.set('guests', String(synced.guests));
     const query = params.toString();
     router.replace(query ? `/search?${query}` : '/search', { scroll: false });
   };

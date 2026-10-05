@@ -1,10 +1,7 @@
 /**
  * Shared API client helpers.
  *
- * Today every endpoint is mocked with a short delay so React Query loading /
- * caching behaviour matches a real network. When we wire Nest, replace
- * `request()` with `fetch` / an HTTP client — keep the same function names in
- * `src/data/api/*` so feature hooks do not change.
+ * Listings / bookings still use this mock wrapper. Customer auth uses `http.ts`.
  */
 
 const DEFAULT_DELAY_MS = 200;

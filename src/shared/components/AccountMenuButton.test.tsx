@@ -27,7 +27,7 @@ vi.mock('next/navigation', () => ({
 describe('AccountMenuButton', () => {
   beforeEach(() => {
     act(() => {
-      useAuthStore.setState({ user: null });
+      useAuthStore.getState().logout();
     });
     localStorage.clear();
   });
@@ -43,7 +43,18 @@ describe('AccountMenuButton', () => {
 
   it('links the mobile avatar to account when signed in', () => {
     act(() => {
-      useAuthStore.getState().login('guest@example.com');
+      useAuthStore.getState().setSession({
+        user: {
+          id: 'usr_001',
+          email: 'guest@example.com',
+          firstName: 'Temitope',
+          lastName: 'Aladesiun',
+          username: 'aladesiun.t',
+          avatarInitials: 'TA',
+        },
+        accessToken: 'token',
+        refreshToken: null,
+      });
     });
 
     renderWithProviders(<AccountMenuButton />);
@@ -72,7 +83,18 @@ describe('AccountMenuButton', () => {
   it('opens the desktop menu with account and log out when signed in', async () => {
     const user = userEvent.setup();
     act(() => {
-      useAuthStore.getState().login('guest@example.com');
+      useAuthStore.getState().setSession({
+        user: {
+          id: 'usr_001',
+          email: 'guest@example.com',
+          firstName: 'Temitope',
+          lastName: 'Aladesiun',
+          username: 'aladesiun.t',
+          avatarInitials: 'TA',
+        },
+        accessToken: 'token',
+        refreshToken: null,
+      });
     });
 
     renderWithProviders(<AccountMenuButton />);
