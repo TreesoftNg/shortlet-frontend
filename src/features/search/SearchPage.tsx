@@ -10,10 +10,10 @@ import {
   toPublicUnitsTab,
   useSearchNeighborhood,
   useSearchProperties,
+  SEARCH_PAGE_SIZE,
   type SearchFilters,
 } from '@/features/search/hooks/useSearchData';
-import { useWebsiteContent } from '@/data/hooks';
-import { websiteContent } from '@/data/mocks/content';
+import { SEARCH_CATEGORIES } from '@/features/search/lib/categories';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
 import { formatDatesRangeLabel } from '@/shared/lib/format';
 import { Box, Grid } from '@chakra-ui/react';
@@ -23,8 +23,6 @@ import { useEffect, useMemo, useState } from 'react';
 export function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: content } = useWebsiteContent();
-  const categories = content?.categories ?? websiteContent.categories;
 
   const tabParam = toPublicUnitsTab(searchParams.get('tab'));
   const neighborhoodParam = searchParams.get('neighborhood') ?? undefined;
@@ -32,6 +30,11 @@ export function SearchPage() {
   const checkOutParam = searchParams.get('checkOut') ?? undefined;
   const guestsParam = searchParams.get('guests');
   const guestsFromUrl = guestsParam ? Number(guestsParam) : undefined;
+  const pageFromUrl = Number(searchParams.get('page') ?? '1');
+  const pageParam =
+    Number.isFinite(pageFromUrl) && pageFromUrl >= 1
+      ? Math.floor(pageFromUrl)
+      : 1;
 
   const [filters, setFilters] = useState<SearchFilters>(() =>
     syncSearchNights({
@@ -44,6 +47,7 @@ export function SearchPage() {
         guestsFromUrl && guestsFromUrl > 0
           ? Math.min(16, guestsFromUrl)
           : defaultSearchFilters.guests,
+      page: pageParam,
     }),
   );
 
@@ -59,6 +63,7 @@ export function SearchPage() {
           guestsFromUrl && guestsFromUrl > 0
             ? Math.min(16, guestsFromUrl)
             : prev.guests,
+        page: pageParam,
       }),
     );
   }, [
@@ -67,10 +72,12 @@ export function SearchPage() {
     checkInParam,
     checkOutParam,
     guestsFromUrl,
+    pageParam,
   ]);
 
   const {
     data: properties = [],
+    meta,
     isPending: propertiesPending,
     isError: propertiesError,
     refetch: refetchProperties,
@@ -85,7 +92,7 @@ export function SearchPage() {
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
     }
-    return 'Lagos';
+    return 'Anywhere';
   }, [filters.neighborhood, neighborhood]);
 
   const miniLocation =
@@ -95,8 +102,14 @@ export function SearchPage() {
 
   const datesLabel = formatDatesRangeLabel(filters.checkIn, filters.checkOut);
 
-  const handleFiltersChange = (next: SearchFilters) => {
-    const synced = syncSearchNights(next);
+  const handleFiltersChange = (
+    next: SearchFilters,
+    options?: { keepPage?: boolean },
+  ) => {
+    const synced = syncSearchNights({
+      ...next,
+      page: options?.keepPage ? Math.max(1, next.page || 1) : 1,
+    });
     setFilters(synced);
 
     const params = new URLSearchParams();
@@ -105,7 +118,15 @@ export function SearchPage() {
     if (synced.checkIn) params.set('checkIn', synced.checkIn);
     if (synced.checkOut) params.set('checkOut', synced.checkOut);
     if (synced.guests) params.set('guests', String(synced.guests));
+    if (synced.page > 1) params.set('page', String(synced.page));
     router.replace(`/search?${params.toString()}`, { scroll: false });
+  };
+
+  const handlePageChange = (page: number) => {
+    handleFiltersChange({ ...filters, page }, { keepPage: true });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -117,7 +138,7 @@ export function SearchPage() {
       />
 
       <SearchFiltersBar
-        categories={categories}
+        categories={[...SEARCH_CATEGORIES]}
         filters={filters}
         onChange={handleFiltersChange}
       />
@@ -132,6 +153,14 @@ export function SearchPage() {
           datesLabel={datesLabel}
           nights={filters.nights}
           guests={filters.guests}
+          meta={
+            meta ?? {
+              page: filters.page,
+              limit: SEARCH_PAGE_SIZE,
+              total: properties.length,
+              totalPages: 1,
+            }
+          }
           isPending={propertiesPending}
           isError={propertiesError}
           onRetry={() => {
@@ -143,11 +172,12 @@ export function SearchPage() {
               neighborhood: undefined,
             });
           }}
+          onPageChange={handlePageChange}
         />
         <Box
           position={{ lg: 'sticky' }}
-          top={{ lg: '140px' }}
-          h={{ lg: 'calc(100vh - 140px)' }}
+          top={{ lg: '144px' }}
+          h={{ lg: 'calc(100vh - 144px)' }}
           display={{ base: 'none', lg: 'block' }}
         >
           <SearchMap properties={properties} />

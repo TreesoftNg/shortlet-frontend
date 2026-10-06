@@ -26,6 +26,13 @@ export type {
 } from './property';
 
 export type { Booking, BookingStatus, TripTab } from './booking';
+export type {
+  ApiBooking,
+  BookingGuestInput,
+  BookingQuote,
+  CreateBookingInput,
+  CreateBookingResult,
+} from './booking-api';
 
 export type {
   PublicUnitAmenity,

@@ -1,8 +1,8 @@
 'use client';
 
 import { useNeighborhoods } from '@/data/hooks';
-import { DEMO_STAY } from '@/data/demo-stay';
 import { pagePx } from '@/shared/layout';
+import { getDefaultStay, minBookableDate } from '@/shared/lib/default-stay';
 import {
   guestsLabel,
   parseISODate,
@@ -37,13 +37,17 @@ function shortDateLabel(iso: string) {
   });
 }
 
-function buildSearchHref(draft: StayDraft) {
+function buildSearchHref(draft: StayDraft, options: { includeDates: boolean; includeGuests: boolean }) {
   const params = new URLSearchParams();
   params.set('tab', 'all');
   if (draft.neighborhood) params.set('neighborhood', draft.neighborhood);
-  if (draft.checkIn) params.set('checkIn', draft.checkIn);
-  if (draft.checkOut) params.set('checkOut', draft.checkOut);
-  if (draft.guests) params.set('guests', String(draft.guests));
+  if (options.includeDates) {
+    if (draft.checkIn) params.set('checkIn', draft.checkIn);
+    if (draft.checkOut) params.set('checkOut', draft.checkOut);
+  }
+  if (options.includeGuests && draft.guests) {
+    params.set('guests', String(draft.guests));
+  }
   return `/search?${params.toString()}`;
 }
 
@@ -52,11 +56,12 @@ export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {
   const mobileRef = useRef<HTMLDivElement>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const { data: neighborhoods = [] } = useNeighborhoods();
+  const stayDefaults = useMemo(() => getDefaultStay(), []);
 
   const [draft, setDraft] = useState<StayDraft>({
-    checkIn: DEMO_STAY.checkIn,
-    checkOut: DEMO_STAY.checkOut,
-    guests: DEMO_STAY.guests,
+    checkIn: stayDefaults.checkIn,
+    checkOut: stayDefaults.checkOut,
+    guests: stayDefaults.guests,
   });
   const [open, setOpen] = useState<SearchField | null>(null);
   const [datesTouched, setDatesTouched] = useState(false);
@@ -103,7 +108,12 @@ export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {
 
   const goSearch = () => {
     setOpen(null);
-    router.push(buildSearchHref(draft));
+    router.push(
+      buildSearchHref(draft, {
+        includeDates: datesTouched,
+        includeGuests: guestsTouched,
+      }),
+    );
   };
 
   const summaryLine = [
@@ -503,7 +513,7 @@ function SearchPanel({
               <Input
                 type="date"
                 value={draft.checkIn}
-                min={DEMO_STAY.checkIn}
+                min={minBookableDate()}
                 onChange={(e) => applyDates(e.target.value, draft.checkOut)}
                 borderColor="line"
                 borderRadius="12px"

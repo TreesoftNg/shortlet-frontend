@@ -43,6 +43,8 @@ type HttpOptions = {
   method?: HttpMethod;
   body?: unknown;
   token?: string | null;
+  /** Guest booking access token from create-booking (x-booking-token). */
+  bookingToken?: string | null;
   headers?: Record<string, string>;
 };
 
@@ -95,10 +97,18 @@ function toApiError(status: number, payload: unknown): ApiError {
   });
 }
 
-export async function http<T = unknown>(
+export type ApiListMeta = {
+  requestId?: string;
+  page?: number;
+  limit?: number;
+  total?: number;
+  totalPages?: number;
+};
+
+async function requestJson(
   path: string,
   options: HttpOptions = {},
-): Promise<T> {
+): Promise<{ ok: boolean; status: number; payload: unknown }> {
   const headers: Record<string, string> = {
     Accept: 'application/json',
     'x-tenant-slug': getTenantSlug(),
@@ -113,17 +123,43 @@ export async function http<T = unknown>(
     headers.Authorization = `Bearer ${options.token}`;
   }
 
+  if (options.bookingToken) {
+    headers['x-booking-token'] = options.bookingToken;
+  }
+
   const response = await fetch(apiUrl(path), {
     method: options.method ?? (options.body !== undefined ? 'POST' : 'GET'),
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 
-  const payload = await parseBody(response);
+  return {
+    ok: response.ok,
+    status: response.status,
+    payload: await parseBody(response),
+  };
+}
 
-  if (!response.ok) {
-    throw toApiError(response.status, payload);
-  }
-
+export async function http<T = unknown>(
+  path: string,
+  options: HttpOptions = {},
+): Promise<T> {
+  const { ok, status, payload } = await requestJson(path, options);
+  if (!ok) throw toApiError(status, payload);
   return unwrapApiData<T>(payload);
+}
+
+/** Same as `http`, but keeps list pagination fields from the envelope `meta`. */
+export async function httpWithMeta<T = unknown>(
+  path: string,
+  options: HttpOptions = {},
+): Promise<{ data: T; meta: ApiListMeta }> {
+  const { ok, status, payload } = await requestJson(path, options);
+  if (!ok) throw toApiError(status, payload);
+  const data = unwrapApiData<T>(payload);
+  const meta =
+    isRecord(payload) && isRecord(payload.meta)
+      ? (payload.meta as ApiListMeta)
+      : {};
+  return { data, meta };
 }

@@ -51,6 +51,16 @@ export const queryKeys = {
       [...queryKeys.reviews.all, 'property', propertyId] as const,
   },
 
+  quotes: {
+    all: ['quotes'] as const,
+    unit: (params: {
+      unitId: string;
+      checkIn: string;
+      checkOut: string;
+      adults: number;
+    }) => [...queryKeys.quotes.all, 'unit', params] as const,
+  },
+
   bookings: {
     all: ['bookings'] as const,
     lists: () => [...queryKeys.bookings.all, 'list'] as const,

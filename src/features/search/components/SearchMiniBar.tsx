@@ -1,10 +1,13 @@
 'use client';
 
 import { useNeighborhoods } from '@/data/hooks';
-import { DEMO_STAY } from '@/data/demo-stay';
 import type { SearchFilters } from '@/features/search/hooks/useSearchData';
 import { AccountMenuButton } from '@/shared/components/AccountMenuButton';
 import { SunmadeLogo } from '@/shared/components/brand';
+import {
+  getStayDatePresets,
+  minBookableDate,
+} from '@/shared/lib/default-stay';
 import {
   formatDatesRangeLabel,
   guestsLabel,
@@ -15,7 +18,7 @@ import {
 import { Box, Flex, Input, Text } from '@chakra-ui/react';
 import { Minus, Plus, Search } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type SearchField = 'location' | 'dates' | 'guests';
 
@@ -25,13 +28,6 @@ type SearchMiniBarProps = {
   onChange: (next: SearchFilters) => void;
 };
 
-const DATE_PRESETS = [
-  { label: 'Oct 12 – 16', checkIn: '2026-10-12', checkOut: '2026-10-16' },
-  { label: 'Oct 17 – 20', checkIn: '2026-10-17', checkOut: '2026-10-20' },
-  { label: 'Oct 24 – 28', checkIn: '2026-10-24', checkOut: '2026-10-28' },
-  { label: 'Nov 1 – 5', checkIn: '2026-11-01', checkOut: '2026-11-05' },
-] as const;
-
 export function SearchMiniBar({
   filters,
   locationLabel,
@@ -40,6 +36,8 @@ export function SearchMiniBar({
   const [open, setOpen] = useState<SearchField | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const { data: neighborhoods = [] } = useNeighborhoods();
+  const datePresets = useMemo(() => getStayDatePresets(), []);
+  const earliestDate = minBookableDate();
 
   const datesLabel = formatDatesRangeLabel(filters.checkIn, filters.checkOut);
   const guestsText = guestsLabel(filters.guests);
@@ -264,7 +262,7 @@ export function SearchMiniBar({
                   <DateField
                     label="Check in"
                     value={filters.checkIn}
-                    min={DEMO_STAY.checkIn}
+                    min={earliestDate}
                     onChange={(value) => setDates(value, filters.checkOut)}
                   />
                   <DateField
@@ -278,7 +276,7 @@ export function SearchMiniBar({
                   Quick picks
                 </Text>
                 <Flex gap="8px" flexWrap="wrap">
-                  {DATE_PRESETS.map((preset) => {
+                  {datePresets.map((preset) => {
                     const selected =
                       filters.checkIn === preset.checkIn &&
                       filters.checkOut === preset.checkOut;

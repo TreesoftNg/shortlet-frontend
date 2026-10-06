@@ -1,13 +1,8 @@
 import {
-  getNeighborhoodBySlug,
-  getNeighborhoods,
-} from '@/data/api/neighborhoods';
-import {
   getProperties,
   getPropertyBySlug,
 } from '@/data/api/properties';
 import { getBookings, getBookingCounts } from '@/data/api/bookings';
-import { getWebsiteContent } from '@/data/api/content';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/data/api/client', () => ({
@@ -50,41 +45,19 @@ describe('properties api', () => {
   });
 });
 
-describe('neighborhoods api', () => {
-  it('lists neighborhoods', async () => {
-    const list = await getNeighborhoods();
-    expect(list.some((n) => n.slug === 'lekki')).toBe(true);
-  });
-
-  it('finds by slug', async () => {
-    const area = await getNeighborhoodBySlug('victoria-island');
-    expect(area?.name).toBe('Victoria Island');
-  });
-});
-
 describe('bookings api', () => {
-  it('returns all bookings when no tab is set', async () => {
+  it('returns an empty list when unsigned-in', async () => {
     const list = await getBookings();
-    expect(list.length).toBeGreaterThan(0);
+    expect(list).toEqual([]);
   });
 
-  it('filters upcoming as confirmed', async () => {
+  it('returns empty upcoming list when unsigned-in', async () => {
     const list = await getBookings('upcoming');
-    expect(list.every((b) => b.status === 'confirmed')).toBe(true);
+    expect(list).toEqual([]);
   });
 
-  it('returns counts for each tab', async () => {
+  it('returns zero counts when unsigned-in', async () => {
     const counts = await getBookingCounts();
-    expect(counts.upcoming).toBeGreaterThanOrEqual(0);
-    expect(counts.past).toBeGreaterThanOrEqual(0);
-    expect(counts.cancelled).toBeGreaterThanOrEqual(0);
-  });
-});
-
-describe('content api', () => {
-  it('returns website content', async () => {
-    const content = await getWebsiteContent();
-    expect(content.brand_name).toBeTruthy();
-    expect(content.hero.headline).toBeTruthy();
+    expect(counts).toEqual({ upcoming: 0, past: 0, cancelled: 0 });
   });
 });

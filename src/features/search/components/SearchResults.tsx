@@ -7,9 +7,11 @@ import {
   PropertyCardSkeletonGrid,
 } from '@/shared/components';
 import { useSearchUiStore } from '@/features/search/store/search-ui-store';
-import type { Property } from '@/data/types';
+import { paginationItems } from '@/shared/lib/pagination';
+import type { PublicUnitsListMeta, Property } from '@/data/types';
 import { Box, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 type SearchResultsProps = {
   properties: Property[];
@@ -17,10 +19,12 @@ type SearchResultsProps = {
   datesLabel: string;
   nights: number;
   guests: number;
+  meta: PublicUnitsListMeta;
   isPending?: boolean;
   isError?: boolean;
   onRetry?: () => void;
   onClearFilters?: () => void;
+  onPageChange?: (page: number) => void;
 };
 
 export function SearchResults({
@@ -29,13 +33,19 @@ export function SearchResults({
   datesLabel,
   nights,
   guests,
+  meta,
   isPending,
   isError,
   onRetry,
   onClearFilters,
+  onPageChange,
 }: SearchResultsProps) {
   const activePropertyId = useSearchUiStore((s) => s.activePropertyId);
   const setActivePropertyId = useSearchUiStore((s) => s.setActivePropertyId);
+  const total = meta.total;
+  const totalPages = Math.max(1, meta.totalPages);
+  const currentPage = Math.min(Math.max(1, meta.page), totalPages);
+  const showPager = totalPages > 1 && Boolean(onPageChange);
 
   return (
     <Box
@@ -53,7 +63,7 @@ export function SearchResults({
         >
           {isPending
             ? 'Searching apartments'
-            : `${properties.length} apartment${properties.length === 1 ? '' : 's'}${locationLabel ? ` in ${locationLabel}` : ''}`}
+            : `${total} apartment${total === 1 ? '' : 's'}${locationLabel ? ` in ${locationLabel}` : ''}`}
         </Heading>
         <Text color="ink.2" fontSize="14px" mt={1}>
           {datesLabel} · {nights} night{nights === 1 ? '' : 's'} · {guests}{' '}
@@ -102,34 +112,88 @@ export function SearchResults({
         </Grid>
       )}
 
-      {!isPending && !isError && properties.length > 0 ? (
-        <Flex justify="center" gap="8px" mt="40px" mb="10px">
-          {[
-            { label: <ChevronLeft size={16} />, key: 'prev' },
-            { label: '1', key: '1', on: true },
-            { label: '2', key: '2' },
-            { label: '3', key: '3' },
-            { label: '…', key: 'ellipsis' },
-            { label: '8', key: '8' },
-            { label: <ChevronRight size={16} />, key: 'next' },
-          ].map((page) => (
-            <Flex
-              key={page.key}
-              w="38px"
-              h="38px"
-              borderRadius="full"
-              align="center"
-              justify="center"
-              fontWeight="600"
-              fontSize="14px"
-              bg={page.on ? 'ink' : 'transparent'}
-              color={page.on ? 'white' : 'ink'}
-            >
-              {page.label}
-            </Flex>
-          ))}
+      {!isPending && !isError && properties.length > 0 && showPager ? (
+        <Flex justify="center" align="center" gap="8px" mt="40px" mb="10px">
+          <PageButton
+            label="Previous page"
+            disabled={currentPage <= 1}
+            onClick={() => onPageChange?.(currentPage - 1)}
+          >
+            <ChevronLeft size={16} />
+          </PageButton>
+          {paginationItems(currentPage, totalPages).map((item, index) =>
+            item.type === 'ellipsis' ? (
+              <Flex
+                key={`ellipsis-${index}`}
+                w="38px"
+                h="38px"
+                align="center"
+                justify="center"
+                fontWeight="600"
+                fontSize="14px"
+                color="ink.3"
+              >
+                …
+              </Flex>
+            ) : (
+              <PageButton
+                key={item.page}
+                label={`Page ${item.page}`}
+                active={item.page === currentPage}
+                onClick={() => onPageChange?.(item.page)}
+              >
+                {item.page}
+              </PageButton>
+            ),
+          )}
+          <PageButton
+            label="Next page"
+            disabled={currentPage >= totalPages}
+            onClick={() => onPageChange?.(currentPage + 1)}
+          >
+            <ChevronRight size={16} />
+          </PageButton>
         </Flex>
       ) : null}
     </Box>
+  );
+}
+
+function PageButton({
+  children,
+  label,
+  onClick,
+  active = false,
+  disabled = false,
+}: {
+  children: ReactNode;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <Flex
+      as="button"
+      type="button"
+      aria-label={label}
+      aria-current={active ? 'page' : undefined}
+      disabled={disabled}
+      onClick={onClick}
+      w="38px"
+      h="38px"
+      borderRadius="full"
+      align="center"
+      justify="center"
+      fontWeight="600"
+      fontSize="14px"
+      bg={active ? 'ink' : 'transparent'}
+      color={active ? 'white' : 'ink'}
+      opacity={disabled ? 0.35 : 1}
+      cursor={disabled ? 'not-allowed' : 'pointer'}
+      _hover={disabled || active ? undefined : { bg: 'bg.soft' }}
+    >
+      {children}
+    </Flex>
   );
 }

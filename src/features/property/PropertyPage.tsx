@@ -8,7 +8,6 @@ import { PropertyHeaderBar } from '@/features/property/components/PropertyHeader
 import { PropertyHighlights } from '@/features/property/components/PropertyHighlights';
 import { PropertyReviews } from '@/features/property/components/PropertyReviews';
 import { PropertyTitle } from '@/features/property/components/PropertyTitle';
-import { StayCalendar } from '@/features/property/components/StayCalendar';
 import { UnitPicker } from '@/features/property/components/UnitPicker';
 import { usePublicUnitDetail } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
@@ -18,7 +17,7 @@ import {
   Skeleton,
   SkeletonText,
 } from '@/shared/components';
-import { formatNaira, nightsBetween, shortArea } from '@/shared/lib/format';
+import { formatNaira, shortArea } from '@/shared/lib/format';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { Building2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -38,7 +37,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   const setSelectedUnitId = usePropertyBookingStore((s) => s.setSelectedUnitId);
   const checkIn = usePropertyBookingStore((s) => s.checkIn);
   const checkOut = usePropertyBookingStore((s) => s.checkOut);
-  const nights = nightsBetween(checkIn, checkOut);
+  const guests = usePropertyBookingStore((s) => s.guests);
 
   useEffect(() => {
     if (property?.units[0] && !selectedUnitId) {
@@ -162,11 +161,6 @@ export function PropertyPage({ slug }: PropertyPageProps) {
             <Box borderBottom="1px solid" borderColor="line">
               <PropertyAmenities labels={property.amenity_labels} />
             </Box>
-
-            <StayCalendar
-              areaLabel={property.address.display}
-              nights={nights}
-            />
           </Box>
 
           <Box display={{ base: 'none', lg: 'block' }}>
@@ -228,7 +222,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
           _hover={{ bg: 'brand.600' }}
           onClick={() =>
             router.push(
-              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}`,
+              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`,
             )
           }
         >

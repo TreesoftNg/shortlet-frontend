@@ -101,6 +101,12 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
   const lastSideIndex = Math.max(0, rest.length - 1);
   const lastMdVisibleIndex = Math.min(1, lastSideIndex);
 
+  const tileProps = {
+    border: '1px solid',
+    borderColor: 'line',
+    bg: 'bg.soft',
+  } as const;
+
   return (
     <Box
       position="relative"
@@ -117,6 +123,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
         p={0}
         border="none"
         cursor="pointer"
+        bg="bg.soft"
         onClick={() => openAt(0)}
       >
         <Image
@@ -165,6 +172,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
           position="relative"
           gridRow={rest.length === 0 ? 'auto' : 'span 2'}
           overflow="hidden"
+          {...tileProps}
         >
           <Box
             as="button"
@@ -202,6 +210,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
               lg: 'block',
             }}
             overflow="hidden"
+            {...tileProps}
           >
             <Box
               as="button"

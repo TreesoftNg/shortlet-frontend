@@ -1,4 +1,4 @@
-import { ApiError, http } from '@/data/api/http';
+import { ApiError, http, httpWithMeta, type ApiListMeta } from '@/data/api/http';
 import {
   mapPublicUnitDetailToProperty,
   mapPublicUnitToProperty,
@@ -9,6 +9,7 @@ import type { Property } from '@/data/types';
 import type {
   PublicUnitCard,
   PublicUnitDetail,
+  PublicUnitsListMeta,
   PublicUnitsTab,
 } from '@/data/types/public-unit';
 
@@ -21,6 +22,32 @@ export type PublicUnitsParams = {
 };
 
 export type { PublicUnitDetailMapped };
+
+export type PublicUnitsPage = {
+  items: Property[];
+  meta: PublicUnitsListMeta;
+};
+
+function toListMeta(
+  meta: ApiListMeta,
+  fallback: { page: number; limit: number; count: number },
+): PublicUnitsListMeta {
+  const page = Number(meta.page);
+  const limit = Number(meta.limit);
+  const total = Number(meta.total);
+  const totalPages = Number(meta.totalPages);
+  return {
+    requestId:
+      typeof meta.requestId === 'string' ? meta.requestId : undefined,
+    page: Number.isFinite(page) && page > 0 ? page : fallback.page,
+    limit: Number.isFinite(limit) && limit > 0 ? limit : fallback.limit,
+    total: Number.isFinite(total) ? total : fallback.count,
+    totalPages:
+      Number.isFinite(totalPages) && totalPages > 0
+        ? totalPages
+        : Math.max(1, Math.ceil(fallback.count / Math.max(fallback.limit, 1))),
+  };
+}
 
 function buildQuery(params: PublicUnitsParams): string {
   const qs = new URLSearchParams();
@@ -35,12 +62,20 @@ function buildQuery(params: PublicUnitsParams): string {
 /** GET /api/v1/public/units — browse stays by home-page tab / price filters. */
 export async function getPublicUnits(
   params: PublicUnitsParams = {},
-): Promise<Property[]> {
+): Promise<PublicUnitsPage> {
   const query = buildQuery(params);
-  const items = await http<PublicUnitCard[]>(
+  const { data, meta } = await httpWithMeta<PublicUnitCard[]>(
     `/api/v1/public/units?${query}`,
   );
-  return (Array.isArray(items) ? items : []).map(mapPublicUnitToProperty);
+  const items = (Array.isArray(data) ? data : []).map(mapPublicUnitToProperty);
+  return {
+    items,
+    meta: toListMeta(meta, {
+      page: params.page ?? 1,
+      limit: params.limit ?? items.length,
+      count: items.length,
+    }),
+  };
 }
 
 /** GET /api/v1/public/units/:id — single stay detail (amenities + reviews included). */

@@ -1,6 +1,6 @@
 'use client';
 
-import { useNeighborhoods } from '@/features/home/hooks/useHomeData';
+import { useNeighborhoods } from '@/data/hooks';
 import {
   AppButton,
   AppPage,
@@ -9,10 +9,8 @@ import {
   NeighborhoodTile,
   NeighborhoodTileSkeleton,
   PageHero,
-  Skeleton,
 } from '@/shared/components';
-import type { Neighborhood } from '@/data/types';
-import { Box, Flex, Grid, Heading, Text } from '@chakra-ui/react';
+import { Box, Flex, Grid, Text } from '@chakra-ui/react';
 import { MapPin } from 'lucide-react';
 
 export function LocationsPage() {
@@ -23,15 +21,12 @@ export function LocationsPage() {
     refetch,
   } = useNeighborhoods();
 
-  const lagos = neighborhoods.filter((n) => n.city === 'Lagos');
-  const abuja = neighborhoods.filter((n) => n.city === 'Abuja');
-
   return (
     <AppPage mainPt={{ base: 8, md: 12 }}>
       <PageHero
         eyebrow="Destinations"
         title="Locations"
-        description="Browse Sunmade neighbourhoods across Lagos and Abuja, then jump into available apartments in each area."
+        description="Browse Sunmade neighbourhoods from the live catalogue, then jump into available apartments in each area."
       />
 
       {isPending ? (
@@ -54,10 +49,22 @@ export function LocationsPage() {
           icon={<MapPin size={22} strokeWidth={1.9} />}
         />
       ) : (
-        <>
-          <CitySection title="Lagos" areas={lagos} />
-          <CitySection title="Abuja" areas={abuja} mt={{ base: 10, md: 12 }} />
-        </>
+        <Grid
+          templateColumns={{
+            base: '1fr',
+            sm: 'repeat(2, 1fr)',
+            lg: 'repeat(3, 1fr)',
+          }}
+          gap={{ base: 3, md: 4 }}
+        >
+          {neighborhoods.map((area) => (
+            <NeighborhoodTile
+              key={area.id}
+              neighborhood={area}
+              height={{ base: '200px', md: '240px' }}
+            />
+          ))}
+        </Grid>
       )}
 
       <Flex
@@ -84,88 +91,23 @@ export function LocationsPage() {
   );
 }
 
-function CitySection({
-  title,
-  areas,
-  mt,
-}: {
-  title: string;
-  areas: Neighborhood[];
-  mt?: { base: number; md: number };
-}) {
-  if (!areas.length) {
-    return (
-      <Box mt={mt}>
-        <Heading
-          as="h2"
-          fontSize={{ base: '22px', md: '26px' }}
-          fontWeight="700"
-          letterSpacing="-0.01em"
-          mb="18px"
-        >
-          {title}
-        </Heading>
-        <EmptyState
-          title={`No ${title} areas listed`}
-          description="More neighbourhoods are coming soon."
-          compact
-          mt={0}
-          icon={<MapPin size={20} strokeWidth={1.9} />}
-        />
-      </Box>
-    );
-  }
-
-  return (
-    <Box mt={mt}>
-      <Heading
-        as="h2"
-        fontSize={{ base: '22px', md: '26px' }}
-        fontWeight="700"
-        letterSpacing="-0.01em"
-        mb="18px"
-      >
-        {title}
-      </Heading>
-      <Grid
-        templateColumns={{
-          base: '1fr',
-          sm: 'repeat(2, 1fr)',
-          lg: 'repeat(3, 1fr)',
-        }}
-        gap={{ base: 3, md: 4 }}
-      >
-        {areas.map((area) => (
-          <NeighborhoodTile
-            key={area.id}
-            neighborhood={area}
-            height={{ base: '200px', md: '240px' }}
-          />
-        ))}
-      </Grid>
-    </Box>
-  );
-}
-
 function LocationsSkeleton() {
   return (
-    <Box aria-busy="true" mt={2}>
-      <Skeleton h="28px" w="100px" mb="18px" borderRadius="full" />
-      <Grid
-        templateColumns={{
-          base: '1fr',
-          sm: 'repeat(2, 1fr)',
-          lg: 'repeat(3, 1fr)',
-        }}
-        gap={{ base: 3, md: 4 }}
-      >
-        {Array.from({ length: 3 }).map((_, i) => (
-          <NeighborhoodTileSkeleton
-            key={i}
-            height={{ base: '200px', md: '240px' }}
-          />
-        ))}
-      </Grid>
-    </Box>
+    <Grid
+      aria-busy="true"
+      templateColumns={{
+        base: '1fr',
+        sm: 'repeat(2, 1fr)',
+        lg: 'repeat(3, 1fr)',
+      }}
+      gap={{ base: 3, md: 4 }}
+    >
+      {Array.from({ length: 3 }).map((_, i) => (
+        <NeighborhoodTileSkeleton
+          key={i}
+          height={{ base: '200px', md: '240px' }}
+        />
+      ))}
+    </Grid>
   );
 }

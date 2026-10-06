@@ -47,15 +47,42 @@ describe('public units api', () => {
     );
     vi.stubGlobal('fetch', fetchMock);
 
-    const list = await getPublicUnits({ tab: 'all', limit: 4 });
+    const page = await getPublicUnits({ tab: 'all', limit: 4 });
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/backend/api/v1/public/units?tab=all&limit=4',
       expect.objectContaining({ method: 'GET' }),
     );
-    expect(list).toHaveLength(1);
-    expect(list[0]?.name).toBe('Studio One');
-    expect(list[0]?.pricing.nightly_rate).toBe(40000);
+    expect(page.items).toHaveLength(1);
+    expect(page.items[0]?.name).toBe('Studio One');
+    expect(page.items[0]?.pricing.nightly_rate).toBe(40000);
+    expect(page.meta).toMatchObject({
+      page: 1,
+      limit: 20,
+      total: 1,
+      totalPages: 1,
+    });
+  });
+
+  it('loads a later page', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        success: true,
+        data: [],
+        meta: { page: 2, limit: 4, total: 30, totalPages: 3 },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const page = await getPublicUnits({ tab: 'all', page: 2, limit: 4 });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/backend/api/v1/public/units?tab=all&page=2&limit=4',
+      expect.anything(),
+    );
+    expect(page.meta.page).toBe(2);
+    expect(page.meta.totalPages).toBe(3);
+    expect(page.items).toEqual([]);
   });
 
   it('maps UI category ids into API tab query values', async () => {

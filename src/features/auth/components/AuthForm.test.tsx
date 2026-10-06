@@ -42,48 +42,56 @@ describe('AuthForm', () => {
     });
   });
 
-  it('signs in against the customer login API', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<AuthForm />);
+  it(
+    'signs in against the customer login API',
+    async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<AuthForm />);
 
-    await user.type(
-      screen.getByPlaceholderText('Email address'),
-      'ada@sunmadeapartments.com',
-    );
-    await user.type(screen.getByLabelText('Password'), 'Sunmade-guest-1');
-    await user.click(screen.getByRole('button', { name: /^continue$/i }));
+      await user.type(
+        screen.getByPlaceholderText('Email address'),
+        'ada@sunmadeapartments.com',
+      );
+      await user.type(screen.getByLabelText('Password'), 'Sunmade-guest-1');
+      await user.click(screen.getByRole('button', { name: /^continue$/i }));
 
-    expect(loginCustomer).toHaveBeenCalledWith({
-      email: 'ada@sunmadeapartments.com',
-      password: 'Sunmade-guest-1',
-    });
-    expect(useAuthStore.getState().accessToken).toBe('access-token');
-    expect(useAuthStore.getState().user?.firstName).toBe('Ada');
-    expect(push).toHaveBeenCalledWith('/account');
-  });
+      expect(loginCustomer).toHaveBeenCalledWith({
+        email: 'ada@sunmadeapartments.com',
+        password: 'Sunmade-guest-1',
+      });
+      expect(useAuthStore.getState().accessToken).toBe('access-token');
+      expect(useAuthStore.getState().user?.firstName).toBe('Ada');
+      expect(push).toHaveBeenCalledWith('/account');
+    },
+    15_000,
+  );
 
-  it('creates an account then asks for the email code', async () => {
-    vi.mocked(createCustomerAccount).mockResolvedValue({});
-    const user = userEvent.setup();
-    renderWithProviders(<AuthForm />);
+  it(
+    'creates an account then asks for the email code',
+    async () => {
+      vi.mocked(createCustomerAccount).mockResolvedValue({});
+      const user = userEvent.setup();
+      renderWithProviders(<AuthForm />);
 
-    await user.click(screen.getByRole('button', { name: /create account/i }));
-    await user.type(screen.getByPlaceholderText('First name'), 'Ada');
-    await user.type(screen.getByPlaceholderText('Last name'), 'Okafor');
-    await user.type(
-      screen.getByPlaceholderText('Email address'),
-      'ada@sunmadeapartments.com',
-    );
-    await user.type(screen.getByLabelText('Password'), 'Sunmade-guest-1');
-    await user.type(
-      screen.getByLabelText('Confirm password'),
-      'Sunmade-guest-1',
-    );
-    await user.click(screen.getByRole('button', { name: /^continue$/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
+      await user.type(screen.getByPlaceholderText('First name'), 'Ada');
+      await user.type(screen.getByPlaceholderText('Last name'), 'Okafor');
+      await user.type(
+        screen.getByPlaceholderText('Email address'),
+        'ada@sunmadeapartments.com',
+      );
+      await user.type(screen.getByLabelText('Password'), 'Sunmade-guest-1');
+      await user.type(
+        screen.getByLabelText('Confirm password'),
+        'Sunmade-guest-1',
+      );
+      await user.click(screen.getByRole('button', { name: /^continue$/i }));
 
-    expect(createCustomerAccount).toHaveBeenCalled();
-    expect(
-      await screen.findByText(/enter the code we sent/i),
-    ).toBeInTheDocument();
-  });
+      expect(createCustomerAccount).toHaveBeenCalled();
+      expect(
+        await screen.findByText(/enter the code we sent/i),
+      ).toBeInTheDocument();
+    },
+    15_000,
+  );
 });

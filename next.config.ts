@@ -1,7 +1,8 @@
 import type { NextConfig } from 'next';
 
 const apiOrigin =
-  process.env.API_BASE_URL ?? 'http://localhost:4000';
+  process.env.API_BASE_URL ??
+  'https://api-staging.sunmadeapartments.com';
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -40,6 +41,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['@chakra-ui/react'],
   },
+  transpilePackages: ['flutterwave-react-v3'],
 };
 
 export default nextConfig;

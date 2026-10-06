@@ -83,6 +83,10 @@ export function SearchFiltersBar({
       maxW="1440px"
       mx="auto"
       w="full"
+      bg="bg"
+      position="sticky"
+      top={{ base: '64px', md: '72px', lg: '80px' }}
+      zIndex={30}
       css={{
         scrollbarWidth: 'none',
         '&::-webkit-scrollbar': { display: 'none' },

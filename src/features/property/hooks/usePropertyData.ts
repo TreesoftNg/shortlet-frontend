@@ -1,3 +1,3 @@
 'use client';
 
-export { useProperty, usePublicUnitDetail } from '@/data/hooks';
+export { useProperty, usePublicUnitDetail, useUnitQuote } from '@/data/hooks';

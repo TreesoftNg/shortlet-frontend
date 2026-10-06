@@ -29,12 +29,24 @@ export {
 export type { PropertyListParams, PropertySort } from './properties';
 
 export { getPublicUnits, getPublicUnitById } from './public-units';
-export type { PublicUnitsParams } from './public-units';
+export type { PublicUnitsParams, PublicUnitsPage } from './public-units';
 
 export { getReviewsByPropertyId } from './reviews';
 
 export {
+  cancelBooking,
+  createBooking,
   getBookingById,
   getBookingCounts,
   getBookings,
+  getGuestBooking,
+  getMyBookingById,
+  getMyBookings,
+  getUnitQuote,
+  verifyBookingPayment,
+} from './bookings';
+export type {
+  BookingQuote,
+  CreateBookingInput,
+  CreateBookingResult,
 } from './bookings';

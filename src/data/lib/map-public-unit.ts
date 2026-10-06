@@ -62,11 +62,22 @@ function emptyReviewSummary() {
   };
 }
 
+function slugifyLocation(value: string | null | undefined): string {
+  return (value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 /** Map a public unit browse card into the Property shape used by listing cards. */
 export function mapPublicUnitToProperty(unit: PublicUnitCard): Property {
   const picture = toAppMediaUrl(unit.pictureUrl);
   const nightly = toNumber(unit.nightlyRate);
   const bathrooms = toNumber(unit.bathrooms);
+  const neighborhoodId =
+    slugifyLocation(unit.location?.neighbourhood) ||
+    slugifyLocation(unit.location?.city);
 
   return {
     id: unit.id,
@@ -98,7 +109,7 @@ export function mapPublicUnitToProperty(unit: PublicUnitCard): Property {
     listings: [],
     property_type: unit.propertyType,
     room_type: unit.roomType,
-    neighborhood_id: '',
+    neighborhood_id: neighborhoodId,
     featured: true,
     badges: [],
     images: picture
