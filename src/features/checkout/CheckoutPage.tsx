@@ -4,13 +4,11 @@ import { CheckoutHeader } from '@/features/checkout/components/CheckoutHeader';
 import { CheckoutSummary } from '@/features/checkout/components/CheckoutSummary';
 import { FlutterwaveCheckoutLauncher } from '@/features/checkout/components/FlutterwaveCheckoutLauncher';
 import type { FlutterwavePaySession } from '@/features/checkout/components/FlutterwaveCheckoutLauncher';
-import { PaymentMethods } from '@/features/checkout/components/PaymentMethods';
 import {
   useCheckoutGuest,
   useCheckoutProperty,
   useCheckoutQuote,
   useCreateBooking,
-  type PaymentMethod,
 } from '@/features/checkout/hooks/useCheckoutData';
 import { getFlutterwavePublicKey } from '@/features/checkout/lib/flutterwave';
 import { ApiError } from '@/data/api/http';
@@ -66,9 +64,8 @@ export function CheckoutPage() {
   const guestProfile = useCheckoutGuest();
   const createBooking = useCreateBooking();
 
-  const [holdSeconds, setHoldSeconds] = useState(stayDefaults.nights * 60 * 14 + 52);
+  const [holdSeconds, setHoldSeconds] = useState(14 * 60 + 52);
   const [purpose, setPurpose] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -227,7 +224,7 @@ export function CheckoutPage() {
           title: 'Sunmade Apartments',
           description: `Stay at ${quote.property.public_name}`,
           redirectUrl: confirmationUrl,
-          paymentMethod,
+          paymentMethod: 'card',
         });
         return;
       }
@@ -297,7 +294,7 @@ export function CheckoutPage() {
         >
           <Box>
             <Flex
-              align="center"
+              align="flex-start"
               gap="10px"
               bg="#FDF3E1"
               color="#8A5A08"
@@ -307,13 +304,18 @@ export function CheckoutPage() {
               fontSize="14px"
               fontWeight="600"
               mb="18px"
+              lineHeight="1.45"
             >
-              <Timer size={18} strokeWidth={1.9} />
-              We&apos;re holding {unitLabel} for you for{' '}
-              <Text as="b" fontWeight="800">
-                {formatHold(holdSeconds)}
-              </Text>{' '}
-              minutes after you start payment.
+              <Box flexShrink={0} mt="1px">
+                <Timer size={18} strokeWidth={1.9} />
+              </Box>
+              <Text as="span">
+                We&apos;re holding {unitLabel} for you for{' '}
+                <Text as="b" fontWeight="800">
+                  {formatHold(holdSeconds)}
+                </Text>{' '}
+                minutes after you start payment.
+              </Text>
             </Flex>
 
             <Box py="26px" borderBottom="1px solid" borderColor="line" pt="6px">
@@ -467,13 +469,6 @@ export function CheckoutPage() {
                   outline="none"
                 />
               </Box>
-            </Box>
-
-            <Box py="26px" borderBottom="1px solid" borderColor="line">
-              <PaymentMethods
-                value={paymentMethod}
-                onChange={setPaymentMethod}
-              />
             </Box>
 
             <Box py="26px">

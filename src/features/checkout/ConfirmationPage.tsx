@@ -16,15 +16,7 @@ import { formatNaira } from '@/shared/lib/format';
 import { SunmadeLogo } from '@/shared/components/brand';
 import type { Booking } from '@/data/types';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
-import {
-  CalendarPlus,
-  Check,
-  CircleCheck,
-  Download,
-  Mail,
-  Menu,
-  MessageCircle,
-} from 'lucide-react';
+import { Check, CircleCheck, Menu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -266,21 +258,6 @@ export function ConfirmationPage() {
             </Grid>
           </Box>
         </Box>
-
-        <Flex gap={4} mt={6} color="ink.2" fontSize="14px" flexWrap="wrap">
-          <Flex align="center" gap={2}>
-            <Mail size={16} /> Email receipt
-          </Flex>
-          <Flex align="center" gap={2}>
-            <Download size={16} /> Download
-          </Flex>
-          <Flex align="center" gap={2}>
-            <CalendarPlus size={16} /> Add to calendar
-          </Flex>
-          <Flex align="center" gap={2}>
-            <MessageCircle size={16} /> Message host
-          </Flex>
-        </Flex>
       </Box>
     </Box>
   );

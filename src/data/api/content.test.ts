@@ -1,5 +1,9 @@
 import { getWebsiteContent } from '@/data/api/content';
-import { buildWebsiteContent, formatAreaList } from '@/data/lib/brand-defaults';
+import {
+  BRAND_DEFAULTS,
+  buildWebsiteContent,
+  formatAreaList,
+} from '@/data/lib/brand-defaults';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/data/api/neighborhoods', () => ({
@@ -21,18 +25,6 @@ vi.mock('@/data/api/neighborhoods', () => ({
       property_count: 1,
     },
   ]),
-}));
-
-vi.mock('@/data/api/public-units', () => ({
-  getPublicUnits: vi.fn(async () => ({
-    items: [
-      {
-        id: 'u1',
-        picture: '/backend/media/unit.webp',
-      },
-    ],
-    meta: { page: 1, limit: 1, total: 1, totalPages: 1 },
-  })),
 }));
 
 describe('brand defaults', () => {
@@ -60,10 +52,10 @@ describe('content api', () => {
     vi.clearAllMocks();
   });
 
-  it('assembles website content from neighbourhoods and units', async () => {
+  it('keeps the brand hero image and uses live neighbourhood names', async () => {
     const content = await getWebsiteContent();
     expect(content.brand_name).toContain('Sunmade');
     expect(content.hero.subheadline).toContain('Ikeja');
-    expect(content.hero.image).toBe('/backend/media/unit.webp');
+    expect(content.hero.image).toBe(BRAND_DEFAULTS.hero.fallbackImage);
   });
 });
