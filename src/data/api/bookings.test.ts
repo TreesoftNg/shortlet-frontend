@@ -38,6 +38,7 @@ describe('mapApiBookingToBooking', () => {
 
     expect(booking.reference).toBe('SMD-123');
     expect(booking.status).toBe('confirmed');
+    expect(booking.unit_id).toBe('unit-1');
     expect(booking.guests).toBe(2);
     expect(booking.amount_paid).toBe(577025);
     expect(booking.property_image).toBe('/backend/media/photo.webp');

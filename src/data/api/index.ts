@@ -31,7 +31,12 @@ export type { PropertyListParams, PropertySort } from './properties';
 export { getPublicUnits, getPublicUnitById } from './public-units';
 export type { PublicUnitsParams, PublicUnitsPage } from './public-units';
 
-export { getReviewsByPropertyId } from './reviews';
+export {
+  createCustomerReview,
+  getReviewsByPropertyId,
+  mapCustomerReview,
+} from './reviews';
+export type { CreateReviewInput, CustomerReview } from './reviews';
 
 export {
   cancelBooking,

@@ -140,12 +140,16 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
               px="10px"
               py="4px"
               borderRadius="full"
-              bg="#E6F6EC"
-              color="ok"
+              bg={booking.status === 'confirmed' ? '#E6F6EC' : 'bg.soft'}
+              color={booking.status === 'confirmed' ? 'ok' : 'ink.2'}
               fontSize="12px"
               fontWeight="700"
             >
-              Confirmed · Paid
+              {booking.status === 'confirmed'
+                ? 'Confirmed · Paid'
+                : booking.status === 'pending'
+                  ? 'Awaiting payment'
+                  : booking.status}
             </Flex>
           </Box>
         </Grid>

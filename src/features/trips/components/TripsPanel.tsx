@@ -65,8 +65,6 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
     return null;
   }
 
-  const upcoming = tab === 'upcoming' ? list[0] : null;
-  const gridBookings = tab === 'upcoming' ? [] : list;
   const isPending = countsPending || listPending;
   const isError = countsError || listError;
   const loadError = countsErr ?? listErr;
@@ -118,9 +116,7 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
         <TripsPanelSkeleton tab={tab} />
       ) : tab === 'upcoming' ? (
         <>
-          {upcoming ? (
-            <UpcomingTripCard booking={upcoming} />
-          ) : (
+          {list.length === 0 ? (
             <EmptyState
               title="No upcoming trips"
               description="Ready for your next stay? Explore apartments across Lagos and Abuja."
@@ -130,12 +126,18 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
               compact
               mt={2}
             />
+          ) : (
+            <Box display="flex" flexDirection="column" gap={{ base: 4, md: 5 }}>
+              {list.map((booking) => (
+                <UpcomingTripCard key={booking.id} booking={booking} />
+              ))}
+            </Box>
           )}
           <PastPreview onViewAll={() => setTab('past')} />
         </>
       ) : (
         <PastTripsGrid
-          bookings={gridBookings}
+          bookings={list}
           title={tab === 'past' ? "Where you've been" : 'Cancelled trips'}
           showViewAll={false}
           emptyTitle={

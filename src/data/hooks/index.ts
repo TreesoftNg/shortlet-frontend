@@ -8,6 +8,7 @@
 
 import {
   createBooking,
+  createCustomerReview,
   getBookings,
   getNeighborhoodBySlug,
   getNeighborhoods,
@@ -19,6 +20,7 @@ import {
   getWebsiteContent,
   verifyBookingPayment,
   type CreateBookingInput,
+  type CreateReviewInput,
   type PropertyListParams,
   type PublicUnitsParams,
 } from '@/data/api';
@@ -39,7 +41,12 @@ import {
   formatDatesRangeLabel,
   parseISODate,
 } from '@/shared/lib/format';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 /** Shared query defaults for list/detail reads. */
@@ -147,6 +154,32 @@ export function usePropertyReviews(propertyId: string | undefined) {
         : Promise.resolve([]),
     enabled: Boolean(propertyId),
     ...readOptions,
+  });
+}
+
+/** POST /api/v1/reviews — submit a customer review for a completed booking. */
+export function useCreateReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateReviewInput) => {
+      const accessToken = useAuthStore.getState().getValidAccessToken();
+      if (!accessToken) {
+        throw new Error('Sign in to leave a review.');
+      }
+      return createCustomerReview(input, accessToken);
+    },
+    onSuccess: (review) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
+      if (review.unitId) {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.reviews.byProperty(review.unitId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.properties.detail(review.unitId),
+        });
+      }
+    },
   });
 }
 

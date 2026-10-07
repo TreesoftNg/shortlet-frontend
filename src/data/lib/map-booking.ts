@@ -221,14 +221,15 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
   const nights =
     api.nights ??
     (checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 1);
-  const unitOrPropertyId =
-    api.property?.id || api.unitId || api.unit?.id || id;
+  const unitId = api.unitId || api.unit?.id || '';
+  const unitOrPropertyId = api.property?.id || unitId || id;
 
   return {
     id,
     reference: api.reference || id.slice(0, 8).toUpperCase(),
     property_id: unitOrPropertyId,
-    property_slug: api.unitId || api.unit?.id || api.property?.slug || id,
+    unit_id: unitId,
+    property_slug: unitId || api.property?.slug || id,
     property_name: api.unit?.name || api.property?.name || 'Stay',
     property_image: image,
     unit_label: unitName,

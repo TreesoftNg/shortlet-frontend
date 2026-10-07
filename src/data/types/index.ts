@@ -47,3 +47,5 @@ export type {
   PublicUnitsListResult,
   PublicUnitsTab,
 } from './public-unit';
+
+export type { CreateReviewInput, CustomerReview } from './review-api';
