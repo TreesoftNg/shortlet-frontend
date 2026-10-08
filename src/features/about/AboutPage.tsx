@@ -63,7 +63,9 @@ export function AboutPage() {
           bg="bg.soft"
         >
           {contentPending ? (
-            <Skeleton position="absolute" inset={0} borderRadius="inherit" />
+            <Box position="absolute" inset={0}>
+              <Skeleton h="100%" borderRadius="inherit" />
+            </Box>
           ) : content?.hero.image ? (
             <Image
               src={content.hero.image}
