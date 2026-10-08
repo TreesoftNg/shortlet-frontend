@@ -173,27 +173,31 @@ function PageButton({
   disabled?: boolean;
 }) {
   return (
-    <Flex
+    <Box
       as="button"
-      type="button"
       aria-label={label}
       aria-current={active ? 'page' : undefined}
-      disabled={disabled}
-      onClick={onClick}
+      display="inline-flex"
+      alignItems="center"
+      justifyContent="center"
       w="38px"
       h="38px"
       borderRadius="full"
-      align="center"
-      justify="center"
       fontWeight="600"
       fontSize="14px"
       bg={active ? 'ink' : 'transparent'}
       color={active ? 'white' : 'ink'}
       opacity={disabled ? 0.35 : 1}
       cursor={disabled ? 'not-allowed' : 'pointer'}
+      border="none"
       _hover={disabled || active ? undefined : { bg: 'bg.soft' }}
+      {...({
+        type: 'button',
+        disabled,
+        onClick: disabled ? undefined : onClick,
+      } as object)}
     >
       {children}
-    </Flex>
+    </Box>
   );
 }
