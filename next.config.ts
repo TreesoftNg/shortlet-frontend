@@ -1,7 +1,8 @@
 import type { NextConfig } from 'next';
 
 const apiOrigin =
-  process.env.API_BASE_URL ?? 'https://api-staging.sunmadeapartments.com';
+  process.env.API_BASE_URL ??
+  'https://api-staging.sunmadeapartments.com';
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -24,11 +25,23 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'i.pravatar.cc',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '4000',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api-staging.sunmadeapartments.com',
+        pathname: '/media/**',
+      },
     ],
   },
   experimental: {
     optimizePackageImports: ['@chakra-ui/react'],
   },
+  transpilePackages: ['flutterwave-react-v3'],
 };
 
 export default nextConfig;

@@ -10,6 +10,8 @@ export type Booking = {
   id: string;
   reference: string;
   property_id: string;
+  /** Unit id for POST /api/v1/reviews (CreateReviewDto.unitId). */
+  unit_id: string;
   property_slug: string;
   property_name: string;
   property_image: string;

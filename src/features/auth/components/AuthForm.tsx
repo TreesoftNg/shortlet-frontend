@@ -122,6 +122,7 @@ export function AuthForm() {
       }),
       accessToken: result.accessToken,
       refreshToken: result.refreshToken ?? null,
+      accessTokenExpiresAt: result.accessTokenExpiresAt ?? null,
     });
     router.push('/account');
   };

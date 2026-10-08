@@ -52,8 +52,8 @@ export function AccountPage() {
       <SectionHeader title="Profile" mt={0} mb="14px" />
       <ProfileCard user={user} />
 
-      <SectionHeader title="Trips" mt={{ base: 8, md: 10 }} mb={0} />
-      <TripsPanel />
+      <SectionHeader title="Trips" mt={{ base: 8, md: 10 }} mb="10px" />
+      <TripsPanel embedded />
     </AppPage>
   );
 }

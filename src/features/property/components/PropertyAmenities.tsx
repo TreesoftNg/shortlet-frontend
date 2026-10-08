@@ -13,6 +13,7 @@ import {
   Wifi,
   type LucideIcon,
 } from 'lucide-react';
+import { useState } from 'react';
 
 const amenityIcons: LucideIcon[] = [
   Wifi,
@@ -25,12 +26,16 @@ const amenityIcons: LucideIcon[] = [
   Dumbbell,
 ];
 
+const PREVIEW_COUNT = 8;
+
 type PropertyAmenitiesProps = {
   labels: string[];
 };
 
 export function PropertyAmenities({ labels }: PropertyAmenitiesProps) {
-  const shown = labels.slice(0, 8);
+  const [expanded, setExpanded] = useState(false);
+  const canExpand = labels.length > PREVIEW_COUNT;
+  const shown = expanded || !canExpand ? labels : labels.slice(0, PREVIEW_COUNT);
 
   return (
     <Box py="28px">
@@ -45,16 +50,25 @@ export function PropertyAmenities({ labels }: PropertyAmenitiesProps) {
         {shown.map((label, i) => {
           const Icon = amenityIcons[i % amenityIcons.length];
           return (
-            <Flex key={label} gap="14px" align="center" fontSize="15px">
+            <Flex key={`${label}-${i}`} gap="14px" align="center" fontSize="15px">
               <Icon size={22} strokeWidth={1.6} />
               {label}
             </Flex>
           );
         })}
       </Grid>
-      <Box mt="24px">
-        <AppButton variant="outline">Show all 32 amenities</AppButton>
-      </Box>
+      {canExpand ? (
+        <Box mt="24px">
+          <AppButton
+            variant="outline"
+            onClick={() => setExpanded((value) => !value)}
+          >
+            {expanded
+              ? 'Show fewer amenities'
+              : `Show all ${labels.length} amenities`}
+          </AppButton>
+        </Box>
+      ) : null}
     </Box>
   );
 }

@@ -2,7 +2,7 @@
  * Property-page UI selection only (not server data).
  */
 
-import { DEMO_STAY } from '@/data/demo-stay';
+import { getDefaultStay } from '@/shared/lib/default-stay';
 import { create } from 'zustand';
 
 type PropertyBookingUiState = {
@@ -16,12 +16,17 @@ type PropertyBookingUiState = {
   reset: () => void;
 };
 
-const defaults = {
-  selectedUnitId: null as string | null,
-  guests: DEMO_STAY.guests,
-  checkIn: DEMO_STAY.checkIn,
-  checkOut: DEMO_STAY.checkOut,
-};
+function buildDefaults() {
+  const stay = getDefaultStay();
+  return {
+    selectedUnitId: null as string | null,
+    guests: stay.guests,
+    checkIn: stay.checkIn,
+    checkOut: stay.checkOut,
+  };
+}
+
+const defaults = buildDefaults();
 
 export const usePropertyBookingStore = create<PropertyBookingUiState>(
   (set) => ({
@@ -29,6 +34,6 @@ export const usePropertyBookingStore = create<PropertyBookingUiState>(
     setSelectedUnitId: (id) => set({ selectedUnitId: id }),
     setGuests: (guests) => set({ guests: Math.min(16, Math.max(1, guests)) }),
     setDates: (checkIn, checkOut) => set({ checkIn, checkOut }),
-    reset: () => set({ ...defaults }),
+    reset: () => set({ ...buildDefaults() }),
   }),
 );

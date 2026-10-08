@@ -26,3 +26,26 @@ export type {
 } from './property';
 
 export type { Booking, BookingStatus, TripTab } from './booking';
+export type {
+  ApiBooking,
+  BookingGuestInput,
+  BookingQuote,
+  CreateBookingInput,
+  CreateBookingResult,
+} from './booking-api';
+
+export type {
+  PublicUnitAmenity,
+  PublicUnitCard,
+  PublicUnitDetail,
+  PublicUnitLocation,
+  PublicUnitMedia,
+  PublicUnitPropertyRef,
+  PublicUnitReviewItem,
+  PublicUnitReviews,
+  PublicUnitsListMeta,
+  PublicUnitsListResult,
+  PublicUnitsTab,
+} from './public-unit';
+
+export type { CreateReviewInput, CustomerReview } from './review-api';

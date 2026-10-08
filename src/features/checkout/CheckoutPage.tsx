@@ -2,28 +2,34 @@
 
 import { CheckoutHeader } from '@/features/checkout/components/CheckoutHeader';
 import { CheckoutSummary } from '@/features/checkout/components/CheckoutSummary';
-import { PaymentMethods } from '@/features/checkout/components/PaymentMethods';
+import { FlutterwaveCheckoutLauncher } from '@/features/checkout/components/FlutterwaveCheckoutLauncher';
+import type { FlutterwavePaySession } from '@/features/checkout/components/FlutterwaveCheckoutLauncher';
 import {
-  mockGuest,
+  useCheckoutGuest,
   useCheckoutProperty,
   useCheckoutQuote,
-  type PaymentMethod,
+  useCreateBooking,
 } from '@/features/checkout/hooks/useCheckoutData';
-import { DEMO_STAY } from '@/data/demo-stay';
+import { getFlutterwavePublicKey } from '@/features/checkout/lib/flutterwave';
+import { ApiError } from '@/data/api/http';
+import { saveBookingSession } from '@/data/lib/booking-session';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
+import { getDefaultStay } from '@/shared/lib/default-stay';
 import { formatNaira } from '@/shared/lib/format';
+import { resolvePayableAmount, toMoneyNumber } from '@/data/lib/map-booking';
 import {
   Box,
   Button,
   Flex,
   Grid,
   Heading,
+  Input,
   Text,
   Textarea,
 } from '@chakra-ui/react';
 import { Building2, ChevronLeft, Lock, Timer } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 function formatHold(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -36,13 +42,44 @@ export function CheckoutPage() {
   const searchParams = useSearchParams();
   const propertySlug = searchParams.get('property');
   const unitId = searchParams.get('unit');
+  const stayDefaults = useMemo(() => getDefaultStay(), []);
+  const checkIn = searchParams.get('checkIn') ?? stayDefaults.checkIn;
+  const checkOut = searchParams.get('checkOut') ?? stayDefaults.checkOut;
+  const guestsParam = Number(searchParams.get('guests'));
+  const guests =
+    guestsParam > 0 ? Math.min(16, guestsParam) : stayDefaults.guests;
 
   const { data: property, isPending, isError } = useCheckoutProperty(propertySlug);
-  const quote = useCheckoutQuote(property, unitId);
+  const stay = useMemo(
+    () => ({ checkIn, checkOut, guests }),
+    [checkIn, checkOut, guests],
+  );
+  const {
+    quote,
+    isPending: quotePending,
+    isError: quoteError,
+    error: quoteErr,
+    refetch: refetchQuote,
+  } = useCheckoutQuote(property, unitId, stay);
+  const guestProfile = useCheckoutGuest();
+  const createBooking = useCreateBooking();
 
-  const [holdSeconds, setHoldSeconds] = useState(DEMO_STAY.holdSeconds);
+  const [holdSeconds, setHoldSeconds] = useState(14 * 60 + 52);
   const [purpose, setPurpose] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
+  const [paySession, setPaySession] = useState<FlutterwavePaySession | null>(
+    null,
+  );
+
+  useEffect(() => {
+    setFirstName(guestProfile.firstName);
+    setLastName(guestProfile.lastName);
+    setEmail(guestProfile.email);
+  }, [guestProfile.firstName, guestProfile.lastName, guestProfile.email]);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -69,7 +106,7 @@ export function CheckoutPage() {
     );
   }
 
-  if (isPending) {
+  if (isPending || (property && quotePending && !quote)) {
     return (
       <Box>
         <CheckoutHeader />
@@ -78,16 +115,27 @@ export function CheckoutPage() {
     );
   }
 
-  if (isError || !property || !quote) {
+  if (isError || quoteError || !property || !quote) {
+    const unavailable =
+      quoteErr instanceof ApiError && quoteErr.code === 'BOOKING_UNAVAILABLE';
     return (
       <Box>
         <CheckoutHeader />
         <Box px={{ base: 4, md: 10 }} py={10} maxW="720px" mx="auto">
           <ErrorState
-            title="Property not found"
-            description="This checkout link is invalid or the stay is no longer available."
+            title={unavailable ? 'Dates unavailable' : 'Couldn’t load checkout'}
+            description={
+              unavailable
+                ? 'Those dates are no longer free. Pick different dates and try again.'
+                : quoteErr instanceof Error
+                  ? quoteErr.message
+                  : 'This checkout link is invalid or the stay is no longer available.'
+            }
             actionLabel="Back to search"
             actionHref="/search"
+            onRetry={() => {
+              void refetchQuote();
+            }}
             mt={0}
           />
         </Box>
@@ -96,6 +144,114 @@ export function CheckoutPage() {
   }
 
   const unitLabel = quote.unit?.name ?? 'Unit';
+
+  const handlePay = async () => {
+    setFormError(null);
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim()) {
+      setFormError('Please fill in your guest details.');
+      return;
+    }
+
+    const unitForBooking = quote.unit?.id || unitId || property.id;
+    if (!unitForBooking) {
+      setFormError('Missing unit for this booking.');
+      return;
+    }
+
+    try {
+      const origin = window.location.origin;
+      const expectedTotal = toMoneyNumber(
+        quote.apiQuote?.totalDueNow ?? quote.total,
+      );
+      // Include property so hosted Flutterwave return still has context;
+      // bookingId is recovered from sessionStorage after redirect.
+      const result = await createBooking.mutateAsync({
+        returnUrl: `${origin}/confirmation?property=${encodeURIComponent(property.slug)}`,
+        unitId: unitForBooking,
+        checkIn: quote.checkIn,
+        checkOut: quote.checkOut,
+        adults: Math.max(1, guests),
+        children: 0,
+        infants: 0,
+        guest: {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+        },
+        specialRequests: purpose.trim() || null,
+        acceptHouseRules: true,
+        expectedTotal,
+      });
+
+      const bookingId = result.id;
+      if (!bookingId) {
+        setFormError('Booking was created but no id was returned.');
+        return;
+      }
+
+      saveBookingSession(bookingId, result.accessToken);
+
+      const confirmationUrl = `${origin}/confirmation?bookingId=${encodeURIComponent(bookingId)}&property=${encodeURIComponent(property.slug)}`;
+      const publicKey = getFlutterwavePublicKey();
+      const txRef =
+        result.checkout?.reference || result.checkout?.paymentReference;
+      const checkoutUrl = result.checkout?.checkoutUrl;
+      const payableAmount = resolvePayableAmount(result);
+
+      // Prefer server-hosted checkout (amount set by API).
+      if (checkoutUrl) {
+        window.location.assign(checkoutUrl);
+        return;
+      }
+
+      if (publicKey && txRef && payableAmount != null) {
+        setPaySession({
+          publicKey,
+          txRef,
+          bookingId,
+          amount: payableAmount,
+          currency:
+            result.checkout?.currency ||
+            result.currency ||
+            quote.property.currency ||
+            'NGN',
+          customer: {
+            email: email.trim(),
+            name: `${firstName.trim()} ${lastName.trim()}`.trim(),
+            phone: phone.trim(),
+          },
+          title: 'Sunmade Apartments',
+          description: `Stay at ${quote.property.public_name}`,
+          redirectUrl: confirmationUrl,
+          paymentMethod: 'card',
+        });
+        return;
+      }
+
+      if (publicKey && txRef && payableAmount == null) {
+        setFormError(
+          'Payment amount was missing from the booking response. Please try again.',
+        );
+        return;
+      }
+
+      router.push(confirmationUrl);
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'PRICE_CHANGED') {
+        void refetchQuote();
+        setFormError('The price changed. Review the new total and try again.');
+        return;
+      }
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : 'Could not start payment.';
+      setFormError(message);
+    }
+  };
 
   return (
     <Box bg="bg" maxW="1440px" mx="auto" minH="100vh">
@@ -138,7 +294,7 @@ export function CheckoutPage() {
         >
           <Box>
             <Flex
-              align="center"
+              align="flex-start"
               gap="10px"
               bg="#FDF3E1"
               color="#8A5A08"
@@ -148,16 +304,20 @@ export function CheckoutPage() {
               fontSize="14px"
               fontWeight="600"
               mb="18px"
+              lineHeight="1.45"
             >
-              <Timer size={18} strokeWidth={1.9} />
-              We&apos;re holding {unitLabel} for you for{' '}
-              <Text as="b" fontWeight="800">
-                {formatHold(holdSeconds)}
-              </Text>{' '}
-              minutes.
+              <Box flexShrink={0} mt="1px">
+                <Timer size={18} strokeWidth={1.9} />
+              </Box>
+              <Text as="span">
+                We&apos;re holding {unitLabel} for you for{' '}
+                <Text as="b" fontWeight="800">
+                  {formatHold(holdSeconds)}
+                </Text>{' '}
+                minutes after you start payment.
+              </Text>
             </Flex>
 
-            {/* Step 1 — trip */}
             <Box py="26px" borderBottom="1px solid" borderColor="line" pt="6px">
               <Flex align="center" mb="16px">
                 <Flex
@@ -187,9 +347,6 @@ export function CheckoutPage() {
                     {quote.datesLabel}
                   </Text>
                 </Box>
-                <Text as="u" fontWeight="700" cursor="pointer">
-                  Edit
-                </Text>
               </Flex>
               <Flex justify="space-between">
                 <Box>
@@ -197,16 +354,12 @@ export function CheckoutPage() {
                     Guests
                   </Text>
                   <Text color="ink.2" fontSize="14px">
-                    {quote.guests} adults
+                    {quote.guests} adult{quote.guests === 1 ? '' : 's'}
                   </Text>
                 </Box>
-                <Text as="u" fontWeight="700" cursor="pointer">
-                  Edit
-                </Text>
               </Flex>
             </Box>
 
-            {/* Step 2 — guest */}
             <Box py="26px" borderBottom="1px solid" borderColor="line">
               <Flex
                 justify="space-between"
@@ -234,26 +387,30 @@ export function CheckoutPage() {
                     Guest details
                   </Text>
                 </Flex>
-                <Text color="ink.2" fontSize="14px">
-                  Signed in as{' '}
-                  <Text as="b" color="ink" fontWeight="700">
-                    {mockGuest.username}
+                {guestProfile.isSignedIn ? (
+                  <Text color="ink.2" fontSize="14px">
+                    Signed in as{' '}
+                    <Text as="b" color="ink" fontWeight="700">
+                      {guestProfile.username || guestProfile.email}
+                    </Text>
                   </Text>
-                </Text>
+                ) : null}
               </Flex>
 
               <Grid
                 templateColumns={{ base: '1fr', sm: '1fr 1fr' }}
                 gap="12px"
               >
-                {[
-                  { label: 'First name', value: mockGuest.firstName },
-                  { label: 'Last name', value: mockGuest.lastName },
-                  { label: 'Email', value: mockGuest.email },
-                  { label: 'Phone', value: mockGuest.phone },
-                ].map((field) => (
+                {(
+                  [
+                    ['First name', firstName, setFirstName],
+                    ['Last name', lastName, setLastName],
+                    ['Email', email, setEmail],
+                    ['Phone', phone, setPhone],
+                  ] as const
+                ).map(([label, value, setter]) => (
                   <Box
-                    key={field.label}
+                    key={label}
                     border="1px solid"
                     borderColor="#D5D5D0"
                     borderRadius="12px"
@@ -266,9 +423,17 @@ export function CheckoutPage() {
                       textTransform="uppercase"
                       letterSpacing="0.04em"
                     >
-                      {field.label}
+                      {label}
                     </Text>
-                    <Text fontSize="15px">{field.value}</Text>
+                    <Input
+                      unstyled
+                      value={value}
+                      onChange={(e) => setter(e.target.value)}
+                      fontSize="15px"
+                      mt={1}
+                      w="full"
+                      outline="none"
+                    />
                   </Box>
                 ))}
               </Grid>
@@ -306,34 +471,25 @@ export function CheckoutPage() {
               </Box>
             </Box>
 
-            {/* Step 3 — pay */}
-            <Box py="26px" borderBottom="1px solid" borderColor="line">
-              <PaymentMethods
-                value={paymentMethod}
-                onChange={setPaymentMethod}
-              />
-            </Box>
-
-            {/* Policy + pay CTA */}
             <Box py="26px">
               <Text fontSize="18px" fontWeight="700" mb="10px">
                 Cancellation policy
               </Text>
               <Text color="ink.2" fontSize="14px">
-                <Text as="b" color="ink" fontWeight="700">
-                  Free cancellation before Oct 10.{' '}
-                </Text>
-                Cancel before check-in on Oct 12 for a 50% refund. Caution
-                deposit is refunded within 48 hours after checkout.{' '}
-                <Text as="u" color="ink" fontWeight="700" cursor="pointer">
-                  Learn more
-                </Text>
+                Cancel before check-in for a partial refund according to the
+                house rules. Caution deposit is refunded after checkout.
               </Text>
 
               <Text color="ink.3" fontSize="13px" my="26px">
                 By selecting the button below, I agree to the House Rules,
                 Cancellation Policy and Terms of Service.
               </Text>
+
+              {formError ? (
+                <Text color="danger" fontSize="14px" mb="14px">
+                  {formError}
+                </Text>
+              ) : null}
 
               <Button
                 h="56px"
@@ -346,11 +502,10 @@ export function CheckoutPage() {
                 gap="8px"
                 w={{ base: 'full', sm: 'auto' }}
                 _hover={{ bg: 'brand.600' }}
-                onClick={() =>
-                  router.push(
-                    `/confirmation?property=${property.slug}${quote.unit ? `&unit=${quote.unit.id}` : ''}&method=${paymentMethod}&total=${quote.total}`,
-                  )
-                }
+                loading={createBooking.isPending}
+                onClick={() => {
+                  void handlePay();
+                }}
               >
                 <Lock size={18} strokeWidth={1.9} />
                 Pay {formatNaira(quote.total)}
@@ -363,6 +518,23 @@ export function CheckoutPage() {
           </Box>
         </Grid>
       </Box>
+      {paySession ? (
+        <FlutterwaveCheckoutLauncher
+          session={paySession}
+          onSuccess={(transactionId) => {
+            const params = new URLSearchParams({
+              bookingId: paySession.bookingId,
+              property: property.slug,
+            });
+            if (transactionId) params.set('transaction_id', transactionId);
+            setPaySession(null);
+            router.push(`/confirmation?${params.toString()}`);
+          }}
+          onClose={() => {
+            setPaySession(null);
+          }}
+        />
+      ) : null}
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { ApiError, http, unwrapApiData } from '@/data/api/http';
+import { ApiError, http, httpWithMeta, unwrapApiData } from '@/data/api/http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 function jsonResponse(body: unknown, status = 200) {
@@ -64,6 +64,24 @@ describe('http client', () => {
       status: 401,
       message: 'Email or password is incorrect',
       requestId: 'req-1',
+    });
+  });
+
+  it('keeps list meta on success envelopes', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          success: true,
+          data: [{ id: '1' }],
+          meta: { page: 2, limit: 12, total: 24, totalPages: 2 },
+        }),
+      ),
+    );
+
+    await expect(httpWithMeta('/api/v1/public/units')).resolves.toEqual({
+      data: [{ id: '1' }],
+      meta: { page: 2, limit: 12, total: 24, totalPages: 2 },
     });
   });
 

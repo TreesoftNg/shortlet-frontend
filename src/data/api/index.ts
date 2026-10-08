@@ -28,10 +28,30 @@ export {
 } from './properties';
 export type { PropertyListParams, PropertySort } from './properties';
 
-export { getReviewsByPropertyId } from './reviews';
+export { getPublicUnits, getPublicUnitById } from './public-units';
+export type { PublicUnitsParams, PublicUnitsPage } from './public-units';
 
 export {
+  createCustomerReview,
+  getReviewsByPropertyId,
+  mapCustomerReview,
+} from './reviews';
+export type { CreateReviewInput, CustomerReview } from './reviews';
+
+export {
+  cancelBooking,
+  createBooking,
   getBookingById,
   getBookingCounts,
   getBookings,
+  getGuestBooking,
+  getMyBookingById,
+  getMyBookings,
+  getUnitQuote,
+  verifyBookingPayment,
+} from './bookings';
+export type {
+  BookingQuote,
+  CreateBookingInput,
+  CreateBookingResult,
 } from './bookings';

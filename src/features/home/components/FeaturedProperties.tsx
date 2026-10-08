@@ -7,16 +7,26 @@ import { ArrowRight } from 'lucide-react';
 
 type FeaturedPropertiesProps = {
   properties: Property[];
+  /** Public units `tab` for View all → /search?tab=… */
+  viewAllTab?: string;
 };
 
-export function FeaturedProperties({ properties }: FeaturedPropertiesProps) {
+export function FeaturedProperties({
+  properties,
+  viewAllTab = 'all',
+}: FeaturedPropertiesProps) {
+  const viewAllHref =
+    viewAllTab && viewAllTab !== 'all'
+      ? `/search?tab=${encodeURIComponent(viewAllTab)}`
+      : '/search?tab=all';
+
   return (
     <Box>
       <SectionHeader
         title="Featured apartments"
         subtitle="Handpicked stays our guests love"
         action={
-          <AppButton href="/search" variant="outline" size="sm">
+          <AppButton href={viewAllHref} variant="outline" size="sm">
             View all <ArrowRight size={16} strokeWidth={1.9} />
           </AppButton>
         }

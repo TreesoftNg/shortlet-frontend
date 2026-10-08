@@ -23,6 +23,20 @@ describe('queryKeys', () => {
     ]);
   });
 
+  it('scopes featured and public unit lists by tab', () => {
+    expect(queryKeys.properties.featured('studios')).toEqual([
+      'properties',
+      'featured',
+      'studios',
+    ]);
+    const params = { tab: 'all' as const, limit: 4 };
+    expect(queryKeys.publicUnits.list(params)).toEqual([
+      'public-units',
+      'list',
+      params,
+    ]);
+  });
+
   it('scopes bookings by tab', () => {
     expect(queryKeys.bookings.list('upcoming')).toEqual([
       'bookings',

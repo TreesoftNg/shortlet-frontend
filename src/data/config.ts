@@ -1,8 +1,8 @@
 /**
  * Browser talks to `/backend/*` on this app. Next rewrites that prefix to
- * the staging API so we skip CORS (staging only allows sunmadeapartments.com).
+ * `API_BASE_URL` (default staging) so we skip CORS.
  *
- * Docs: https://api-staging.sunmadeapartments.com/api/docs#/Customers
+ * Docs: https://api-staging.sunmadeapartments.com/api/docs
  */
 export const API_PROXY_PREFIX = '/backend';
 
