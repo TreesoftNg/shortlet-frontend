@@ -1,8 +1,25 @@
 import type { NextConfig } from 'next';
 
-const apiOrigin =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  'https://api-staging.sunmadeapartments.com';
+const DEFAULT_API_ORIGIN = 'https://api-staging.sunmadeapartments.com';
+
+/** Env may be missing, blank, or wrapped in quotes on Vercel — never allow an invalid rewrite. */
+function resolveApiOrigin(): string {
+  const raw = (
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    process.env.API_BASE_URL ??
+    ''
+  )
+    .trim()
+    .replace(/^["']|["']$/g, '');
+
+  if (!raw || (!raw.startsWith('http://') && !raw.startsWith('https://'))) {
+    return DEFAULT_API_ORIGIN;
+  }
+
+  return raw.replace(/\/$/, '');
+}
+
+const apiOrigin = resolveApiOrigin();
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -10,7 +27,7 @@ const nextConfig: NextConfig = {
       afterFiles: [
         {
           source: '/backend/:path*',
-          destination: `${apiOrigin.replace(/\/$/, '')}/:path*`,
+          destination: `${apiOrigin}/:path*`,
         },
       ],
     };
