@@ -13,6 +13,7 @@ import {
   getNeighborhoodBySlug,
   getNeighborhoods,
   getProperties,
+  getPublicContactDetails,
   getPublicUnitById,
   getPublicUnits,
   getReviewsByPropertyId,
@@ -71,6 +72,18 @@ export function useNeighborhoods() {
     queryKey: queryKeys.neighborhoods.list(),
     queryFn: getNeighborhoods,
     ...readOptions,
+  });
+}
+
+export function usePublicContactDetails() {
+  return useQuery({
+    queryKey: queryKeys.contact.details(),
+    queryFn: getPublicContactDetails,
+    // Always re-read DB-backed Settings; never keep a stale sidebar.
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 }
 

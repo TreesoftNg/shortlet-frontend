@@ -27,6 +27,11 @@ export const queryKeys = {
       [...queryKeys.neighborhoods.all, 'detail', slug] as const,
   },
 
+  contact: {
+    all: ['contact'] as const,
+    details: () => [...queryKeys.contact.all, 'details'] as const,
+  },
+
   publicUnits: {
     all: ['public-units'] as const,
     lists: () => [...queryKeys.publicUnits.all, 'list'] as const,
