@@ -131,8 +131,8 @@ export function SearchMap({ properties }: SearchMapProps) {
           asChild
           position="absolute"
           left="50%"
-          bottom="48px"
-          transform="translateX(-50%)"
+          top="50%"
+          transform="translate(-50%, -50%)"
           w="300px"
           maxW="90%"
           bg="white"

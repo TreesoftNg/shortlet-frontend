@@ -1,7 +1,11 @@
 'use client';
 
-import { DEMO_STAY } from '@/data/demo-stay';
+import { ApiError } from '@/data/api/http';
+import { toMoneyNumber } from '@/data/lib/map-booking';
+import { useUnitQuote } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
+import { Skeleton } from '@/shared/components';
+import { minBookableDate } from '@/shared/lib/default-stay';
 import {
   formatNaira,
   guestsLabel,
@@ -14,7 +18,7 @@ import type { Property, Unit } from '@/data/types';
 import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
 import { ChevronDown, ChevronUp, Gem, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
 type BookingCardProps = {
   property: Property;
@@ -47,26 +51,46 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
     1,
     selectedUnit?.capacity.max ?? property.capacity.max ?? 16,
   );
+  const unitId = selectedUnit?.id ?? property.id;
 
-  const nightly =
+  const {
+    data: apiQuote,
+    isPending: quotePending,
+    isError: quoteError,
+    error: quoteErr,
+    refetch: refetchQuote,
+  } = useUnitQuote(
+    unitId && checkIn && checkOut && guests > 0
+      ? { unitId, checkIn, checkOut, adults: guests }
+      : null,
+  );
+
+  const listingNightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;
-  const stay = nightly * nights;
-  const cleaning = property.pricing.cleaning_fee;
-  const service = property.pricing.service_fee;
-  const deposit = property.pricing.caution_deposit;
-  const total = stay + cleaning + service + deposit;
+  const quoteNights = apiQuote?.nights || nights;
+  const stay = toMoneyNumber(apiQuote?.price.nightsSubtotal);
+  const nightly =
+    apiQuote && quoteNights > 0 ? stay / quoteNights : listingNightly;
+  const cleaning = toMoneyNumber(apiQuote?.price.cleaningFee);
+  const service = toMoneyNumber(apiQuote?.price.serviceFee?.amount);
+  const tax = toMoneyNumber(apiQuote?.price.tax?.amount);
+  const deposit = toMoneyNumber(apiQuote?.deposit.amount);
+  const total = toMoneyNumber(apiQuote?.totalDueNow);
+  const showQuote = Boolean(apiQuote);
+  const quoteBusy = quotePending && !apiQuote;
 
   const lines = useMemo(
     () => [
       {
-        label: `${formatNaira(nightly)} × ${nights} night${nights === 1 ? '' : 's'}`,
+        label: `${formatNaira(nightly)} × ${quoteNights} night${quoteNights === 1 ? '' : 's'}`,
         amount: stay,
       },
       { label: 'Cleaning fee', amount: cleaning },
       { label: 'Service fee', amount: service },
+      ...(tax > 0 ? [{ label: 'Tax', amount: tax }] : []),
       { label: 'Caution deposit (refundable)', amount: deposit },
     ],
-    [nightly, nights, stay, cleaning, service, deposit],
+    [nightly, quoteNights, stay, cleaning, service, tax, deposit],
   );
 
   const applyDates = (nextIn: string, nextOut: string) => {
@@ -113,7 +137,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
               label="Check-in"
               value={checkIn}
               display={shortDateLabel(checkIn)}
-              min={DEMO_STAY.checkIn}
+              min={minBookableDate()}
               editing={editingDate === 'checkIn'}
               borderRight
               onOpen={() => {
@@ -223,6 +247,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
         </Box>
 
         <Button
+          type="button"
           w="full"
           h="54px"
           borderRadius="12px"
@@ -233,7 +258,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           _hover={{ bg: 'brand.600' }}
           onClick={() =>
             router.push(
-              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}`,
+              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`,
             )
           }
         >
@@ -243,31 +268,60 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           You won&apos;t be charged yet
         </Text>
 
-        {lines.map((line) => (
-          <Flex
-            key={line.label}
-            justify="space-between"
-            my="12px"
-            color="ink.2"
-            fontSize="15px"
-          >
-            <Text textDecoration="underline">{line.label}</Text>
-            <Text>{formatNaira(line.amount)}</Text>
-          </Flex>
-        ))}
+        {quoteBusy ? (
+          <Box mt="12px" aria-busy="true">
+            <Skeleton h="18px" mb="14px" borderRadius="full" />
+            <Skeleton h="18px" mb="14px" borderRadius="full" />
+            <Skeleton h="18px" mb="14px" w="70%" borderRadius="full" />
+            <Skeleton h="22px" mt="8px" borderRadius="full" />
+          </Box>
+        ) : quoteError && !apiQuote ? (
+          <Box mt="16px">
+            <Text color="ink.2" fontSize="14px" mb="10px">
+              {quoteErr instanceof ApiError
+                ? quoteErr.message
+                : 'Couldn’t load the live price for these dates.'}
+            </Text>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                void refetchQuote();
+              }}
+            >
+              Try again
+            </Button>
+          </Box>
+        ) : showQuote ? (
+          <>
+            {lines.map((line) => (
+              <Flex
+                key={line.label}
+                justify="space-between"
+                my="12px"
+                color="ink.2"
+                fontSize="15px"
+              >
+                <Text textDecoration="underline">{line.label}</Text>
+                <Text>{formatNaira(line.amount)}</Text>
+              </Flex>
+            ))}
 
-        <Flex
-          justify="space-between"
-          fontWeight="800"
-          fontSize="16px"
-          pt="16px"
-          borderTop="1px solid"
-          borderColor="line"
-          mt="16px"
-        >
-          <Text>Total</Text>
-          <Text>{formatNaira(total)}</Text>
-        </Flex>
+            <Flex
+              justify="space-between"
+              fontWeight="800"
+              fontSize="16px"
+              pt="16px"
+              borderTop="1px solid"
+              borderColor="line"
+              mt="16px"
+            >
+              <Text>Total</Text>
+              <Text>{formatNaira(total)}</Text>
+            </Flex>
+          </>
+        ) : null}
       </Box>
 
       <Flex
@@ -369,7 +423,7 @@ function StepButton({
   disabled,
   ariaLabel,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick: () => void;
   disabled?: boolean;
   ariaLabel: string;

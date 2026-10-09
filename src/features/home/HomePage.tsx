@@ -10,6 +10,7 @@ import {
   useNeighborhoods,
   useWebsiteContent,
 } from '@/features/home/hooks/useHomeData';
+import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
 import {
   AppPage,
   EmptyState,
@@ -23,7 +24,7 @@ import {
 import { pagePx } from '@/shared/layout';
 import { Box, Flex, Grid } from '@chakra-ui/react';
 import { Building2, MapPin } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 export function HomePage() {
   const {
@@ -38,14 +39,12 @@ export function HomePage() {
     isError: neighborhoodsError,
     refetch: refetchNeighborhoods,
   } = useNeighborhoods();
-  const featuredQuery = useFeaturedProperties();
   const [activeCategory, setActiveCategory] = useState('all');
-
-  const filteredFeatured = useMemo(() => {
-    const list = featuredQuery.data ?? [];
-    if (activeCategory === 'all') return list;
-    return list.filter((p) => p.tags?.includes(activeCategory));
-  }, [featuredQuery.data, activeCategory]);
+  const activeTab = toPublicUnitsTab(activeCategory);
+  const featuredQuery = useFeaturedProperties(activeCategory);
+  const featured = featuredQuery.data ?? [];
+  const searchHref =
+    activeTab === 'all' ? '/search?tab=all' : `/search?tab=${activeTab}`;
 
   if (contentPending) {
     return (
@@ -104,16 +103,19 @@ export function HomePage() {
             }}
             compact
           />
-        ) : filteredFeatured.length === 0 ? (
+        ) : featured.length === 0 ? (
           <EmptyState
             title="No featured apartments yet"
             description="Check back soon, or browse all available stays."
             actionLabel="Explore stays"
-            actionHref="/search"
+            actionHref={searchHref}
             icon={<Building2 size={22} strokeWidth={1.9} />}
           />
         ) : (
-          <FeaturedProperties properties={filteredFeatured} />
+          <FeaturedProperties
+            properties={featured}
+            viewAllTab={activeTab}
+          />
         )}
 
         {neighborhoodsPending ? (

@@ -118,6 +118,14 @@ export function SiteFooter() {
         gap={4}
       >
         <Text>© 2026 Sunmade Apartments & Suites</Text>
+        <Text
+        mt="14px"
+        fontSize="12px"
+        color="ink.3"
+        textAlign={{ base: 'center', sm: 'left' }}
+      >
+        Built by Treesoft
+      </Text>
         <Flex gap="16px">
           <SocialIcon
             label="Instagram"
@@ -132,7 +140,10 @@ export function SiteFooter() {
             path="M4 4l6.5 8.2L4.2 20h2.4l5-6.1L16.8 20H20l-6.7-8.4L19.8 4h-2.4l-4.6 5.6L7.2 4z"
           />
         </Flex>
+      
       </Flex>
+
+      
     </Box>
   );
 }

@@ -1,6 +1,6 @@
 /**
  * Ephemeral search UI — map pin ↔ card hover sync.
- * Result lists come from React Query (`useProperties`), not this store.
+ * Result lists come from React Query (`usePublicUnits`), not this store.
  */
 
 import { create } from 'zustand';

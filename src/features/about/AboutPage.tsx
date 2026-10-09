@@ -1,50 +1,44 @@
 'use client';
 
-import { useWebsiteContent } from '@/features/home/hooks/useHomeData';
 import { TrustSection } from '@/features/home/components/TrustSection';
+import { useNeighborhoods, useWebsiteContent } from '@/features/home/hooks/useHomeData';
 import {
   AppButton,
   AppPage,
+  EmptyState,
   ErrorState,
+  NeighborhoodTile,
+  NeighborhoodTileSkeleton,
   PageHero,
   Skeleton,
   SkeletonText,
-  Surface,
 } from '@/shared/components';
 import { pagePx } from '@/shared/layout';
 import { Box, Flex, Grid, Heading, Text } from '@chakra-ui/react';
+import { MapPin } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 const story = [
-  'Sunmade Apartments & Suites is a shortlet brand built for guests who want verified, fully furnished apartments across Lagos and Abuja — without the guesswork of unverified listings.',
+  'Sunmade Apartments & Suites is a shortlet brand built for guests who want verified, fully furnished apartments — without the guesswork of unverified listings.',
   'Every stay is inspected, professionally cleaned, and supported round the clock. Book in minutes, check in with confidence, and settle into a space that feels like home.',
-];
-
-const cities = [
-  {
-    name: 'Lagos',
-    blurb:
-      'Lekki, Victoria Island, Ikoyi and more — close to work, nightlife and the waterfront.',
-    image:
-      'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=1200&q=80',
-  },
-  {
-    name: 'Abuja',
-    blurb:
-      'Calm, well-connected stays in Maitama and across the capital for business or leisure.',
-    image:
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=1200&q=80',
-  },
 ];
 
 export function AboutPage() {
   const {
     data: content,
-    isPending,
-    isError,
-    refetch,
+    isPending: contentPending,
+    isError: contentError,
+    refetch: refetchContent,
   } = useWebsiteContent();
+  const {
+    data: neighborhoods = [],
+    isPending: neighborhoodsPending,
+    isError: neighborhoodsError,
+    refetch: refetchNeighborhoods,
+  } = useNeighborhoods();
+
+  const locationsPending = neighborhoodsPending;
+  const locationsError = neighborhoodsError;
 
   return (
     <AppPage wrapMain={false}>
@@ -66,18 +60,22 @@ export function AboutPage() {
           h={{ base: '220px', md: '360px' }}
           borderRadius={{ base: '20px', md: '28px' }}
           overflow="hidden"
+          bg="bg.soft"
         >
-          <Image
-            src={
-              content?.hero.image ??
-              'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=2000&q=80'
-            }
-            alt="Sunmade apartment interior"
-            fill
-            sizes="100vw"
-            style={{ objectFit: 'cover' }}
-            priority
-          />
+          {contentPending ? (
+            <Box position="absolute" inset={0}>
+              <Skeleton h="100%" borderRadius="inherit" />
+            </Box>
+          ) : content?.hero.image ? (
+            <Image
+              src={content.hero.image}
+              alt="Sunmade apartment interior"
+              fill
+              sizes="100vw"
+              style={{ objectFit: 'cover' }}
+              priority
+            />
+          ) : null}
         </Box>
 
         <Box px={pagePx} mt={{ base: 8, md: 10 }} maxW="780px">
@@ -104,37 +102,58 @@ export function AboutPage() {
           >
             Where we operate
           </Heading>
-          <Grid
-            templateColumns={{ base: '1fr', md: '1fr 1fr' }}
-            gap={{ base: 4, md: 5 }}
-          >
-            {cities.map((city) => (
-              <Surface key={city.name} radius="lg" asChild>
-                <Link href="/locations">
-                  <Box position="relative" h="180px">
-                    <Image
-                      src={city.image}
-                      alt={city.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </Box>
-                  <Box p="18px 20px">
-                    <Text fontWeight="800" fontSize="18px">
-                      {city.name}
-                    </Text>
-                    <Text color="ink.2" fontSize="14px" mt="6px">
-                      {city.blurb}
-                    </Text>
-                  </Box>
-                </Link>
-              </Surface>
-            ))}
-          </Grid>
+
+          {locationsPending ? (
+            <Grid
+              templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+              gap={{ base: 4, md: 5 }}
+              aria-busy="true"
+            >
+              {Array.from({ length: 3 }).map((_, i) => (
+                <NeighborhoodTileSkeleton
+                  key={i}
+                  height={{ base: '180px', md: '200px' }}
+                />
+              ))}
+            </Grid>
+          ) : locationsError ? (
+            <ErrorState
+              title="Couldn’t load locations"
+              description="Neighbourhoods are temporarily unavailable."
+              onRetry={() => {
+                void refetchNeighborhoods();
+              }}
+              compact
+            />
+          ) : neighborhoods.length === 0 ? (
+            <EmptyState
+              title="No locations yet"
+              description="We’re adding Sunmade neighbourhoods soon."
+              actionLabel="Open search"
+              actionHref="/search"
+              icon={<MapPin size={22} strokeWidth={1.9} />}
+            />
+          ) : (
+            <Grid
+              templateColumns={{
+                base: '1fr',
+                md: 'repeat(2, 1fr)',
+                lg: 'repeat(3, 1fr)',
+              }}
+              gap={{ base: 4, md: 5 }}
+            >
+              {neighborhoods.map((area) => (
+                <NeighborhoodTile
+                  key={area.id}
+                  neighborhood={area}
+                  height={{ base: '180px', md: '200px' }}
+                />
+              ))}
+            </Grid>
+          )}
         </Box>
 
-        {isPending ? (
+        {contentPending ? (
           <Box px={pagePx} py={10} aria-busy="true">
             <Skeleton h="28px" w="200px" mb={3} borderRadius="full" />
             <SkeletonText lines={2} lastWidth="40%" />
@@ -148,13 +167,13 @@ export function AboutPage() {
               ))}
             </Grid>
           </Box>
-        ) : isError ? (
+        ) : contentError ? (
           <Box px={pagePx}>
             <ErrorState
               title="Couldn’t load brand details"
               description="Trust highlights are temporarily unavailable."
               onRetry={() => {
-                void refetch();
+                void refetchContent();
               }}
               compact
             />
@@ -183,7 +202,7 @@ export function AboutPage() {
               Ready to book your next stay?
             </Text>
             <Text color="ink.2" fontSize="14px" mt="4px">
-              Browse verified apartments across Lagos & Abuja.
+              Browse verified apartments in our live neighbourhoods.
             </Text>
           </Box>
           <AppButton href="/search">Explore stays</AppButton>

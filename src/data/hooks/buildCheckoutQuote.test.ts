@@ -24,7 +24,7 @@ describe('buildCheckoutQuote', () => {
   it('totals stay + cleaning + service + deposit', () => {
     const quote = buildCheckoutQuote(property, property.units[0]!.id);
     expect(quote.total).toBe(
-      quote.stay + quote.cleaning + quote.service + quote.deposit,
+      quote.stay + quote.cleaning + quote.service + quote.tax + quote.deposit,
     );
   });
 });

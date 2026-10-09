@@ -1,11 +1,13 @@
 'use client';
 
+import { LeaveReviewDialog } from '@/features/trips/components/LeaveReviewDialog';
 import { AppButton, EmptyState, SectionHeader, StatusBadge, Surface } from '@/shared/components';
 import type { Booking } from '@/data/types';
 import { Box, Flex, Grid, Text } from '@chakra-ui/react';
 import { CalendarDays, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 
 type PastTripsGridProps = {
   bookings: Booking[];
@@ -24,6 +26,8 @@ export function PastTripsGrid({
   emptyTitle = 'No trips in this list yet',
   emptyDescription = 'When you have trips here, they will show up in this grid.',
 }: PastTripsGridProps) {
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+
   if (!bookings.length) {
     return (
       <EmptyState
@@ -109,6 +113,7 @@ export function PastTripsGrid({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        setReviewBooking(booking);
                       }}
                     >
                       Leave a review
@@ -130,6 +135,14 @@ export function PastTripsGrid({
           </Surface>
         ))}
       </Grid>
+
+      <LeaveReviewDialog
+        booking={reviewBooking}
+        open={Boolean(reviewBooking)}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setReviewBooking(null);
+        }}
+      />
     </Box>
   );
 }

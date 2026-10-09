@@ -68,7 +68,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
             </Flex>
             <Flex align="center" gap="8px">
               <UserRound size={16} strokeWidth={1.9} />
-              Guest account
+              Customer
             </Flex>
           </Flex>
         </Box>

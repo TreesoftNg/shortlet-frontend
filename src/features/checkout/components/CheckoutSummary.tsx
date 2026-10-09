@@ -25,22 +25,32 @@ export function CheckoutSummary({ quote }: CheckoutSummaryProps) {
       bg="white"
     >
       <Flex gap="16px" pb="22px" borderBottom="1px solid" borderColor="line">
-        <Box
-          position="relative"
-          w="124px"
-          h="106px"
-          borderRadius="12px"
-          overflow="hidden"
-          flexShrink={0}
-        >
-          <Image
-            src={property.picture}
-            alt={property.public_name}
-            fill
-            sizes="124px"
-            style={{ objectFit: 'cover' }}
+        {property.picture ? (
+          <Box
+            position="relative"
+            w="124px"
+            h="106px"
+            borderRadius="12px"
+            overflow="hidden"
+            flexShrink={0}
+          >
+            <Image
+              src={property.picture}
+              alt={property.public_name}
+              fill
+              sizes="124px"
+              style={{ objectFit: 'cover' }}
+            />
+          </Box>
+        ) : (
+          <Box
+            w="124px"
+            h="106px"
+            borderRadius="12px"
+            bg="bg.soft"
+            flexShrink={0}
           />
-        </Box>
+        )}
         <Box>
           <Text color="ink.3" fontSize="13px">
             Entire apartment
@@ -77,6 +87,12 @@ export function CheckoutSummary({ quote }: CheckoutSummaryProps) {
         <Text>Service fee</Text>
         <Text>{formatNaira(service)}</Text>
       </Flex>
+      {quote.tax > 0 ? (
+        <Flex justify="space-between" my="12px" color="ink.2" fontSize="15px">
+          <Text>{quote.apiQuote?.price.tax?.name || 'Tax'}</Text>
+          <Text>{formatNaira(quote.tax)}</Text>
+        </Flex>
+      ) : null}
       <Flex justify="space-between" my="12px" color="ink.2" fontSize="15px" align="center">
         <Flex align="center" gap="4px" flexWrap="wrap">
           Caution deposit
@@ -85,7 +101,7 @@ export function CheckoutSummary({ quote }: CheckoutSummaryProps) {
             px="10px"
             py="2px"
             borderRadius="full"
-            bg="line.2"
+            bg="line.2" 
             color="ink.2"
             fontSize="12px"
             fontWeight="700"

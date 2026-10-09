@@ -118,7 +118,7 @@ export function PaymentMethods({ value, onChange }: PaymentMethodsProps) {
       })}
 
       <Text color="ink.3" fontSize="13px" mt="8px">
-        You&apos;ll complete payment on our secure payment partner&apos;s page.
+        You&apos;ll complete payment with Flutterwave (card, transfer, or USSD).
       </Text>
     </Box>
   );

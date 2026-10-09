@@ -5,6 +5,7 @@ export const bookings: Booking[] = [
     id: 'bk_001',
     reference: 'SMD-7Q4K-2291',
     property_id: '550e8400-e29b-41d4-a716-446655440001',
+    unit_id: '550e8400-e29b-41d4-a716-446655440001',
     property_slug: 'azure-2-bed-luxury-apartment',
     property_name: 'Azure 2-Bed Luxury Apartment',
     property_image:
@@ -30,6 +31,7 @@ export const bookings: Booking[] = [
     id: 'bk_002',
     reference: 'SMD-3M2P-8841',
     property_id: '550e8400-e29b-41d4-a716-446655440004',
+    unit_id: '550e8400-e29b-41d4-a716-446655440004',
     property_slug: 'maitama-garden-residence',
     property_name: 'Maitama Garden Residence',
     property_image:
@@ -55,6 +57,7 @@ export const bookings: Booking[] = [
     id: 'bk_003',
     reference: 'SMD-9K1L-4410',
     property_id: '550e8400-e29b-41d4-a716-446655440002',
+    unit_id: '550e8400-e29b-41d4-a716-446655440002',
     property_slug: 'the-palms-studio-suite',
     property_name: 'The Palms Studio Suite',
     property_image:
@@ -80,6 +83,7 @@ export const bookings: Booking[] = [
     id: 'bk_004',
     reference: 'SMD-5T8R-1102',
     property_id: '550e8400-e29b-41d4-a716-446655440006',
+    unit_id: '550e8400-e29b-41d4-a716-446655440006',
     property_slug: 'chevron-drive-loft',
     property_name: 'Chevron Drive Loft',
     property_image:
@@ -105,6 +109,7 @@ export const bookings: Booking[] = [
     id: 'bk_005',
     reference: 'SMD-2W9X-5503',
     property_id: '550e8400-e29b-41d4-a716-446655440005',
+    unit_id: '550e8400-e29b-41d4-a716-446655440005',
     property_slug: 'oniru-waterfront-suite',
     property_name: 'Oniru Waterfront Suite',
     property_image:

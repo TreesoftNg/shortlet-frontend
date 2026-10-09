@@ -11,6 +11,7 @@
  */
 
 import type { PropertyListParams } from '@/data/api/properties';
+import type { PublicUnitsParams } from '@/data/api/public-units';
 import type { TripTab } from '@/data/types';
 
 export const queryKeys = {
@@ -26,12 +27,20 @@ export const queryKeys = {
       [...queryKeys.neighborhoods.all, 'detail', slug] as const,
   },
 
+  publicUnits: {
+    all: ['public-units'] as const,
+    lists: () => [...queryKeys.publicUnits.all, 'list'] as const,
+    list: (params: PublicUnitsParams = {}) =>
+      [...queryKeys.publicUnits.lists(), params] as const,
+  },
+
   properties: {
     all: ['properties'] as const,
     lists: () => [...queryKeys.properties.all, 'list'] as const,
     list: (params: PropertyListParams) =>
       [...queryKeys.properties.lists(), params] as const,
-    featured: () => [...queryKeys.properties.all, 'featured'] as const,
+    featured: (tab = 'all') =>
+      [...queryKeys.properties.all, 'featured', tab] as const,
     detail: (slug: string) =>
       [...queryKeys.properties.all, 'detail', slug] as const,
   },
@@ -40,6 +49,16 @@ export const queryKeys = {
     all: ['reviews'] as const,
     byProperty: (propertyId: string) =>
       [...queryKeys.reviews.all, 'property', propertyId] as const,
+  },
+
+  quotes: {
+    all: ['quotes'] as const,
+    unit: (params: {
+      unitId: string;
+      checkIn: string;
+      checkOut: string;
+      adults: number;
+    }) => [...queryKeys.quotes.all, 'unit', params] as const,
   },
 
   bookings: {

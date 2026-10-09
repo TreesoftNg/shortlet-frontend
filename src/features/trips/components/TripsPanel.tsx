@@ -7,31 +7,100 @@ import {
   useBookingCounts,
   useBookings,
 } from '@/features/trips/hooks/useTripsData';
+import { ApiError } from '@/data/api/http';
+import {
+  isAuthApiError,
+  useAuthStore,
+  useIsAuthenticated,
+} from '@/features/auth/store/auth-store';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import type { TripTab } from '@/data/types';
 import { Box } from '@chakra-ui/react';
 import { CalendarDays, Plane } from 'lucide-react';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-export function TripsPanel() {
+export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
+  const router = useRouter();
+  const logout = useAuthStore((s) => s.logout);
+  const isAuthenticated = useIsAuthenticated();
   const [tab, setTab] = useState<TripTab>('upcoming');
   const {
     data: counts = { upcoming: 0, past: 0, cancelled: 0 },
     isPending: countsPending,
     isError: countsError,
+    error: countsErr,
     refetch: refetchCounts,
   } = useBookingCounts();
   const {
     data: list = [],
     isPending: listPending,
     isError: listError,
+    error: listErr,
     refetch: refetchList,
   } = useBookings(tab);
 
-  const upcoming = tab === 'upcoming' ? list[0] : null;
-  const gridBookings = tab === 'upcoming' ? [] : list;
+  useEffect(() => {
+    const err = countsErr ?? listErr;
+    if (!err || !isAuthApiError(err)) return;
+    logout();
+    router.replace('/auth');
+  }, [countsErr, listErr, logout, router]);
+
+  if (!isAuthenticated && !embedded) {
+    return (
+      <EmptyState
+        title="Sign in to see your trips"
+        description="Your confirmed, past and cancelled bookings will appear here."
+        actionLabel="Sign in"
+        actionHref="/auth"
+        icon={<Plane size={22} strokeWidth={1.9} />}
+        compact
+        mt={4}
+      />
+    );
+  }
+
+  if (!isAuthenticated && embedded) {
+    return null;
+  }
+
   const isPending = countsPending || listPending;
   const isError = countsError || listError;
+  const loadError = countsErr ?? listErr;
+  const errorDescription =
+    loadError instanceof ApiError
+      ? loadError.message
+      : 'Your bookings are temporarily unavailable.';
+
+  if (isError) {
+    if (isAuthApiError(loadError)) {
+      return (
+        <EmptyState
+          title="Sign in to see your trips"
+          description="Your session expired. Sign in again to load your bookings."
+          actionLabel="Sign in"
+          actionHref="/auth"
+          icon={<Plane size={22} strokeWidth={1.9} />}
+          compact
+          mt={4}
+        />
+      );
+    }
+
+    return (
+      <ErrorState
+        title="Couldn’t load trips"
+        description={errorDescription}
+        onRetry={() => {
+          void refetchCounts();
+          void refetchList();
+        }}
+        compact
+        mt={4}
+      />
+    );
+  }
 
   return (
     <>
@@ -39,37 +108,15 @@ export function TripsPanel() {
         <Box my={{ base: 4, md: '22px' }}>
           <Skeleton h="40px" w={{ base: '100%', md: '360px' }} borderRadius="full" />
         </Box>
-      ) : countsError ? (
-        <ErrorState
-          title="Couldn’t load trips"
-          description="Your bookings are temporarily unavailable."
-          onRetry={() => {
-            void refetchCounts();
-            void refetchList();
-          }}
-          compact
-          mt={4}
-        />
       ) : (
         <TripsTabs active={tab} counts={counts} onChange={setTab} />
       )}
 
-      {isError && !countsError ? (
-        <ErrorState
-          title="Couldn’t load this list"
-          description="Try again, or switch to another tab."
-          onRetry={() => {
-            void refetchList();
-          }}
-          compact
-        />
-      ) : isPending ? (
+      {isPending ? (
         <TripsPanelSkeleton tab={tab} />
       ) : tab === 'upcoming' ? (
         <>
-          {upcoming ? (
-            <UpcomingTripCard booking={upcoming} />
-          ) : (
+          {list.length === 0 ? (
             <EmptyState
               title="No upcoming trips"
               description="Ready for your next stay? Explore apartments across Lagos and Abuja."
@@ -79,12 +126,18 @@ export function TripsPanel() {
               compact
               mt={2}
             />
+          ) : (
+            <Box display="flex" flexDirection="column" gap={{ base: 4, md: 5 }}>
+              {list.map((booking) => (
+                <UpcomingTripCard key={booking.id} booking={booking} />
+              ))}
+            </Box>
           )}
           <PastPreview onViewAll={() => setTab('past')} />
         </>
       ) : (
         <PastTripsGrid
-          bookings={gridBookings}
+          bookings={list}
           title={tab === 'past' ? "Where you've been" : 'Cancelled trips'}
           showViewAll={false}
           emptyTitle={

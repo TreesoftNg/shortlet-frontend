@@ -22,14 +22,18 @@ export function NeighborhoodTile({
       borderRadius="18px"
       overflow="hidden"
     >
-      <Link href={`/search?neighborhood=${neighborhood.slug}`}>
-        <Image
-          src={neighborhood.image}
-          alt={neighborhood.name}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          style={{ objectFit: 'cover' }}
-        />
+      <Link href={`/search?tab=all&neighborhood=${neighborhood.slug}`}>
+        {neighborhood.image ? (
+          <Image
+            src={neighborhood.image}
+            alt={neighborhood.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            style={{ objectFit: 'cover' }}
+          />
+        ) : (
+          <Box position="absolute" inset={0} bg="bg.soft" />
+        )}
         <Box
           position="absolute"
           inset={0}
