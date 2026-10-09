@@ -25,7 +25,7 @@ Customer auth (`/auth`) calls the [Customers](https://api-staging.sunmadeapartme
 Optional env:
 
 ```
-API_BASE_URL=https://api-staging.sunmadeapartments.com
+NEXT_PUBLIC_API_BASE_URL=https://api-staging.sunmadeapartments.com
 NEXT_PUBLIC_TENANT_SLUG=sunmade
 ```
 

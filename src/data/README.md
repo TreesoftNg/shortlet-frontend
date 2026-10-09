@@ -24,7 +24,7 @@
  * Browser calls `/backend/api/v1/...` which Next rewrites to
  * `https://api-staging.sunmadeapartments.com/api/v1/...`
  * (avoids CORS; staging only allows the production Origin).
- * Send `x-tenant-slug: sunmade`. Override with `API_BASE_URL` /
+ * Send `x-tenant-slug: sunmade`. Override with `NEXT_PUBLIC_API_BASE_URL` /
  * `NEXT_PUBLIC_TENANT_SLUG` if needed.
  * Docs: https://api-staging.sunmadeapartments.com/api/docs#/Customers
  */

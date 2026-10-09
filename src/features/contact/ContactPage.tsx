@@ -1,5 +1,7 @@
 'use client';
 
+import { ApiError } from '@/data/api/http';
+import { submitContactMessage } from '@/data/api/contact';
 import {
   AppButton,
   AppPage,
@@ -34,16 +36,38 @@ const details = [
   },
 ];
 
+function errorMessage(error: unknown): string {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof Error && error.message) return error.message;
+  return 'Something went wrong. Please try again.';
+}
+
 export function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    if (!name.trim() || !email.trim() || !message.trim()) return;
-    setSent(true);
+  const handleSubmit = async () => {
+    if (!name.trim() || !email.trim() || !message.trim() || submitting) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await submitContactMessage({
+        name: name.trim(),
+        email: email.trim(),
+        subject: subject.trim() || undefined,
+        message: message.trim(),
+      });
+      setSent(true);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -97,6 +121,7 @@ export function ContactPage() {
                 onClick={() => {
                   setSent(false);
                   setMessage('');
+                  setError(null);
                 }}
               >
                 Send another message
@@ -109,10 +134,11 @@ export function ContactPage() {
                   unstyled
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Temitope Aladesiun"
+                  placeholder="Your name"
                   fontSize="15px"
                   w="full"
                   outline="none"
+                  disabled={submitting}
                 />
               </LabeledField>
               <LabeledField label="Email">
@@ -121,10 +147,11 @@ export function ContactPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="you@email.com"
                   fontSize="15px"
                   w="full"
                   outline="none"
+                  disabled={submitting}
                 />
               </LabeledField>
               <LabeledField label="Subject">
@@ -132,10 +159,11 @@ export function ContactPage() {
                   unstyled
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Booking question"
+                  placeholder="e.g. Booking question, check-in help, partnership"
                   fontSize="15px"
                   w="full"
                   outline="none"
+                  disabled={submitting}
                 />
               </LabeledField>
               <LabeledField label="Message">
@@ -143,17 +171,29 @@ export function ContactPage() {
                   unstyled
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="How can we help?"
+                  placeholder="Tell us how we can help…"
                   fontSize="15px"
                   w="full"
                   minH="140px"
                   outline="none"
                   resize="vertical"
+                  disabled={submitting}
                 />
               </LabeledField>
 
-              <AppButton size="lg" fullWidth onClick={handleSubmit}>
-                Send message
+              {error ? (
+                <Text color="red.500" fontSize="14px" fontWeight="600">
+                  {error}
+                </Text>
+              ) : null}
+
+              <AppButton
+                size="lg"
+                fullWidth
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting ? 'Sending…' : 'Send message'}
               </AppButton>
             </Flex>
           )}
