@@ -48,12 +48,12 @@ describe('toPublicUnitsTab', () => {
 });
 
 describe('toAppMediaUrl', () => {
-  it('rewrites absolute API media URLs through /backend', () => {
+  it('rewrites absolute API media URLs onto the configured API origin', () => {
     expect(
       toAppMediaUrl(
         'http://localhost:4000/media/tenants/t1/units/u1/photos/p1/medium.webp',
       ),
-    ).toBe('/backend/media/tenants/t1/units/u1/photos/p1/medium.webp');
+    ).toBe('https://api-staging.sunmadeapartments.com/media/tenants/t1/units/u1/photos/p1/medium.webp');
   });
 
   it('leaves non-media URLs unchanged', () => {
@@ -73,7 +73,7 @@ describe('mapPublicUnitToProperty', () => {
     expect(property.capacity.bathrooms).toBe(1);
     expect(property.address.display).toBe('Phase 1, Lekki, Lagos');
     expect(property.picture).toBe(
-      '/backend/media/tenants/t1/units/unit-1/photos/p1/medium.webp',
+      'https://api-staging.sunmadeapartments.com/media/tenants/t1/units/unit-1/photos/p1/medium.webp',
     );
     expect(property.images[0]?.url).toBe(property.picture);
   });

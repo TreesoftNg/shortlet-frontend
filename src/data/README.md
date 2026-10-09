@@ -20,12 +20,11 @@
  *
  * Do not put API responses in Zustand.
  *
- * ## Staging API (Customers)
- * Browser calls `/backend/api/v1/...` which Next rewrites to
- * `https://api-staging.sunmadeapartments.com/api/v1/...`
- * (avoids CORS; staging only allows the production Origin).
- * Send `x-tenant-slug: sunmade`. Override with `NEXT_PUBLIC_API_BASE_URL` /
- * `NEXT_PUBLIC_TENANT_SLUG` if needed.
+ * ## Staging API
+ * Browser calls `NEXT_PUBLIC_API_BASE_URL` directly
+ * (e.g. `https://api-staging.sunmadeapartments.com/api/v1/...`).
+ * Send `x-tenant-slug` from `NEXT_PUBLIC_TENANT_SLUG` (default `sunmade`).
+ * The API must allow your app Origin (CORS).
  * Docs: https://api-staging.sunmadeapartments.com/api/docs#/Customers
  */
 

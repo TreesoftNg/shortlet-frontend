@@ -30,7 +30,7 @@ describe('customers api', () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/create-account',
+      'https://api-staging.sunmadeapartments.com/api/v1/create-account',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
@@ -53,8 +53,8 @@ describe('customers api', () => {
     await verifyCustomerOtp({ email: 'guest@example.com', otp: '123456' });
     await resendCustomerOtp({ email: 'guest@example.com' });
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('/backend/api/v1/verify-otp');
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('/backend/api/v1/resend-otp');
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://api-staging.sunmadeapartments.com/api/v1/verify-otp');
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api-staging.sunmadeapartments.com/api/v1/resend-otp');
   });
 
   it('signs in and returns tokens', async () => {

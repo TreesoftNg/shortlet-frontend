@@ -20,8 +20,10 @@ function resolveApiOrigin(): string {
 }
 
 const apiOrigin = resolveApiOrigin();
+const apiHostname = new URL(apiOrigin).hostname;
 
 const nextConfig: NextConfig = {
+  // Optional legacy proxy — the browser now calls NEXT_PUBLIC_API_BASE_URL directly.
   async rewrites() {
     return {
       afterFiles: [
@@ -50,7 +52,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api-staging.sunmadeapartments.com',
+        hostname: apiHostname,
         pathname: '/media/**',
       },
     ],

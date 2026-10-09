@@ -1,4 +1,4 @@
-﻿import { getPublicUnitById, getPublicUnits } from '@/data/api/public-units';
+import { getPublicUnitById, getPublicUnits } from '@/data/api/public-units';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 function jsonResponse(body: unknown, status = 200) {
@@ -50,7 +50,7 @@ describe('public units api', () => {
     const page = await getPublicUnits({ tab: 'all', limit: 4 });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/public/units?tab=all&limit=4',
+      'https://api-staging.sunmadeapartments.com/api/v1/public/units?tab=all&limit=4',
       expect.objectContaining({ method: 'GET' }),
     );
     expect(page.items).toHaveLength(1);
@@ -77,7 +77,7 @@ describe('public units api', () => {
     const page = await getPublicUnits({ tab: 'all', page: 2, limit: 4 });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/public/units?tab=all&page=2&limit=4',
+      'https://api-staging.sunmadeapartments.com/api/v1/public/units?tab=all&page=2&limit=4',
       expect.anything(),
     );
     expect(page.meta.page).toBe(2);
@@ -94,7 +94,7 @@ describe('public units api', () => {
     await getPublicUnits({ tab: '1-bedroom' });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/public/units?tab=one_bedroom',
+      'https://api-staging.sunmadeapartments.com/api/v1/public/units?tab=one_bedroom',
       expect.anything(),
     );
   });
@@ -200,14 +200,14 @@ describe('public units api', () => {
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/public/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0',
+      'https://api-staging.sunmadeapartments.com/api/v1/public/units/aa84b9c6-b348-4cf9-8597-88e3f79119b0',
       expect.objectContaining({ method: 'GET' }),
     );
     expect(detail?.property.name).toBe('Charming 1bedroom');
     expect(detail?.property.pricing.nightly_rate).toBe(75000);
     expect(detail?.property.pricing.cleaning_fee).toBe(15000);
     expect(detail?.property.amenity_labels).toEqual(['Wi-Fi', 'Pool']);
-    expect(detail?.property.images[0]?.url).toBe('/backend/media/large.webp');
+    expect(detail?.property.images[0]?.url).toBe('https://api-staging.sunmadeapartments.com/media/large.webp');
     expect(detail?.property.units).toHaveLength(1);
     expect(detail?.property.review_summary).toEqual(
       expect.objectContaining({ rating: 5, count: 1 }),
