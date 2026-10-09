@@ -62,6 +62,7 @@ describe('useAuthStore', () => {
     });
     expect(useAuthStore.getState().user).toBeNull();
     expect(useAuthStore.getState().accessToken).toBeNull();
+    expect(localStorage.getItem('sunmade-auth')).toBeNull();
   });
 
   it('treats an expired JWT as logged out and clears it', () => {

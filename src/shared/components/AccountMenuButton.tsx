@@ -83,7 +83,9 @@ export function AccountMenuButton() {
         aria-label={isAuthenticated ? 'Your account' : 'Sign in'}
       >
         <Link href={accountHref}>
-          <AvatarBadge initials={user?.avatarInitials} />
+          <AvatarBadge
+            initials={isAuthenticated ? user?.avatarInitials : undefined}
+          />
         </Link>
       </Flex>
 
@@ -109,7 +111,9 @@ export function AccountMenuButton() {
               _open={{ boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}
             >
               <MenuIcon size={18} strokeWidth={1.9} />
-              <AvatarBadge initials={user?.avatarInitials} />
+              <AvatarBadge
+                initials={isAuthenticated ? user?.avatarInitials : undefined}
+              />
             </Flex>
           </Menu.Trigger>
 

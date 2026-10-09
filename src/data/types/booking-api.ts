@@ -120,6 +120,9 @@ export type ApiBooking = {
     checkoutUrl?: string | null;
   } | null;
   guest?: BookingGuestInput | null;
+  specialRequests?: string | null;
+  holdExpiresAt?: string | null;
+  cancellationReason?: string | null;
   yourRating?: number | null;
   reviewPending?: boolean | null;
 };

@@ -7,25 +7,27 @@
  */
 
 import {
+  cancelBooking,
   createBooking,
   createCustomerReview,
+  getBookingById,
   getBookings,
   getNeighborhoodBySlug,
   getNeighborhoods,
-  getProperties,
   getPublicContactDetails,
   getPublicUnitById,
   getPublicUnits,
-  getReviewsByPropertyId,
   getUnitQuote,
   getWebsiteContent,
+  startBookingPayment,
   verifyBookingPayment,
+  type CancelBookingInput,
   type CreateBookingInput,
   type CreateReviewInput,
-  type PropertyListParams,
   type PublicUnitsParams,
 } from '@/data/api';
 import { DEMO_STAY } from '@/data/demo-stay';
+import { getBookingAccessToken } from '@/data/lib/booking-session';
 import { bookingTab, toMoneyNumber } from '@/data/lib/map-booking';
 import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
 import { queryKeys } from '@/data/query-keys';
@@ -127,14 +129,6 @@ export function useFeaturedProperties(categoryOrTab = 'all') {
   });
 }
 
-export function useProperties(params: PropertyListParams = {}) {
-  return useQuery({
-    queryKey: queryKeys.properties.list(params),
-    queryFn: () => getProperties(params),
-    ...readOptions,
-  });
-}
-
 /** Full public unit detail (property + reviews) from one API response. */
 export function usePublicUnitDetail(id: string) {
   return useQuery({
@@ -157,18 +151,6 @@ export function useProperty(slug: string) {
 }
 
 // ── Reviews ───────────────────────────────────────────────────────────────
-
-export function usePropertyReviews(propertyId: string | undefined) {
-  return useQuery({
-    queryKey: queryKeys.reviews.byProperty(propertyId ?? ''),
-    queryFn: () =>
-      propertyId
-        ? getReviewsByPropertyId(propertyId)
-        : Promise.resolve([]),
-    enabled: Boolean(propertyId),
-    ...readOptions,
-  });
-}
 
 /** POST /api/v1/reviews — submit a customer review for a completed booking. */
 export function useCreateReview() {
@@ -279,6 +261,53 @@ export function useVerifyBookingPayment() {
         { transactionId: args.transactionId },
         { accessToken, bookingToken: args.bookingToken },
       );
+    },
+  });
+}
+
+export function useBooking(bookingId: string | undefined) {
+  const accessToken = useValidAccessToken();
+  return useQuery({
+    queryKey: [...queryKeys.bookings.detail(bookingId ?? ''), accessToken ?? 'anon'],
+    queryFn: () => getBookingById(bookingId!, accessToken),
+    enabled: Boolean(bookingId),
+    ...readOptions,
+  });
+}
+
+export function useCancelBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (args: {
+      bookingId: string;
+      reason?: string;
+      bookingToken?: string | null;
+    }) => {
+      const accessToken = useAuthStore.getState().getValidAccessToken();
+      const input: CancelBookingInput = { reason: args.reason };
+      return cancelBooking(args.bookingId, input, {
+        accessToken,
+        bookingToken: args.bookingToken ?? getBookingAccessToken(args.bookingId),
+      });
+    },
+    onSuccess: (booking) => {
+      queryClient.setQueryData(
+        [...queryKeys.bookings.detail(booking.id), useAuthStore.getState().getValidAccessToken() ?? 'anon'],
+        booking,
+      );
+      void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
+    },
+  });
+}
+
+export function useStartBookingPayment() {
+  return useMutation({
+    mutationFn: (args: { bookingId: string; returnUrl: string }) => {
+      const accessToken = useAuthStore.getState().getValidAccessToken();
+      return startBookingPayment(args.bookingId, args.returnUrl, {
+        accessToken,
+        bookingToken: getBookingAccessToken(args.bookingId),
+      });
     },
   });
 }

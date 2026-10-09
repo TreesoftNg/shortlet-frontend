@@ -2,11 +2,9 @@
  * Data layer conventions
  *
  * ## Where things live
- * - `api/`     — async functions only. Customer auth hits staging; listings
- *                still use mocks until those endpoints are wired.
+ * - `api/`     — async functions that call the live API (`http.ts`).
  * - `hooks/`   — React Query hooks. Features import server data from here.
  * - `query-keys.ts` — every query key. Invalidate via these factories.
- * - `mocks/`   — fixture data used only by `api/*`.
  * - `types/`   — shared DTOs.
  * - `demo-stay.ts` — temporary stay defaults (not Zustand).
  *

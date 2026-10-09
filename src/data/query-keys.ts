@@ -10,7 +10,6 @@
  *   queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all })
  */
 
-import type { PropertyListParams } from '@/data/api/properties';
 import type { PublicUnitsParams } from '@/data/api/public-units';
 import type { TripTab } from '@/data/types';
 
@@ -41,9 +40,6 @@ export const queryKeys = {
 
   properties: {
     all: ['properties'] as const,
-    lists: () => [...queryKeys.properties.all, 'list'] as const,
-    list: (params: PropertyListParams) =>
-      [...queryKeys.properties.lists(), params] as const,
     featured: (tab = 'all') =>
       [...queryKeys.properties.all, 'featured', tab] as const,
     detail: (slug: string) =>

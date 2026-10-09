@@ -2,7 +2,7 @@
 
 import type { SearchFilters } from '@/features/search/hooks/useSearchData';
 import { toCategoryId, toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
-import type { PropertySort } from '@/data/api';
+import type { PropertySort } from '@/data/types';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import {
   BedDouble,

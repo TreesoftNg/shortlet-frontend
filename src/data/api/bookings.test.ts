@@ -2,7 +2,6 @@ import {
   asApiBookingList,
   mapApiBookingToBooking,
   normalizeCreateBookingResult,
-  resolvePayableAmount,
   toMoneyNumber,
 } from '@/data/lib/map-booking';
 import { createBooking, getMyBookings, getUnitQuote } from '@/data/api/bookings';
@@ -84,28 +83,6 @@ describe('normalizeCreateBookingResult', () => {
     expect(result.checkout?.checkoutUrl).toBe('https://pay.example');
   });
 
-  it('resolves payable amount from the create-booking response only', () => {
-    expect(
-      resolvePayableAmount({
-        id: 'bk-1',
-        checkout: { amount: '125000.00' },
-      }),
-    ).toBe(125000);
-    expect(
-      resolvePayableAmount({
-        id: 'bk-2',
-        totalDueNow: '99000',
-      }),
-    ).toBe(99000);
-    expect(
-      resolvePayableAmount({
-        id: 'bk-3',
-        totalAmount: '445875.00',
-        amountPaid: '0.00',
-      }),
-    ).toBe(445875);
-    expect(resolvePayableAmount({ id: 'bk-4' })).toBeNull();
-  });
 });
 
 describe('bookings api', () => {

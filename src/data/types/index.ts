@@ -17,6 +17,7 @@ export type {
   PropertyBadge,
   PropertyHighlight,
   PropertyImage,
+  PropertySort,
   Review,
   ReviewCategoryScores,
   ReviewSummary,

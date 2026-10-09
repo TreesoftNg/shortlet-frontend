@@ -16,7 +16,7 @@ import {
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import type { TripTab } from '@/data/types';
 import { Box } from '@chakra-ui/react';
-import { CalendarDays, Plane } from 'lucide-react';
+import { Plane } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -198,16 +198,8 @@ function PastPreview({ onViewAll }: { onViewAll: () => void }) {
     );
   }
 
-  if (!past.length) {
-    return (
-      <EmptyState
-        title="No past trips yet"
-        description="When you complete a stay, it will show up here."
-        icon={<CalendarDays size={22} strokeWidth={1.9} />}
-        compact
-      />
-    );
-  }
+  // Keep the Upcoming tab clean — only preview past stays when some exist.
+  if (!past.length) return null;
 
   return (
     <PastTripsGrid
