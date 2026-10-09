@@ -2,39 +2,25 @@
 
 import { ApiError } from '@/data/api/http';
 import { submitContactMessage } from '@/data/api/contact';
+import { usePublicContactDetails } from '@/data/hooks';
 import {
   AppButton,
   AppPage,
   LabeledField,
   PageHero,
+  Skeleton,
   Surface,
 } from '@/shared/components';
 import { Box, Flex, Grid, Heading, Input, Text, Textarea } from '@chakra-ui/react';
 import { Check, Clock3, Mail, MessageCircle, Phone } from 'lucide-react';
-import { useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
-const details = [
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'hello@sunmadeapartments.com',
-  },
-  {
-    icon: Phone,
-    label: 'Phone',
-    value: '+234 800 000 0000',
-  },
-  {
-    icon: MessageCircle,
-    label: 'WhatsApp',
-    value: '+234 800 000 0000',
-  },
-  {
-    icon: Clock3,
-    label: 'Support hours',
-    value: '24/7 guest support',
-  },
-];
+type DetailItem = {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+};
 
 function errorMessage(error: unknown): string {
   if (error instanceof ApiError) return error.message;
@@ -43,6 +29,7 @@ function errorMessage(error: unknown): string {
 }
 
 export function ContactPage() {
+  const { data: contact, isLoading: contactLoading } = usePublicContactDetails();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
@@ -50,6 +37,29 @@ export function ContactPage() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const details = useMemo((): DetailItem[] => {
+    const items: DetailItem[] = [];
+    const email = contact?.supportEmail?.trim();
+    const phone = contact?.supportPhone?.trim();
+    const whatsapp = contact?.whatsapp?.trim();
+
+    if (email) {
+      items.push({ icon: Mail, label: 'Email', value: email });
+    }
+    if (phone) {
+      items.push({ icon: Phone, label: 'Phone', value: phone });
+    }
+    if (whatsapp) {
+      items.push({ icon: MessageCircle, label: 'WhatsApp', value: whatsapp });
+    }
+    items.push({
+      icon: Clock3,
+      label: 'Support hours',
+      value: '24/7 guest support',
+    });
+    return items;
+  }, [contact]);
 
   const handleSubmit = async () => {
     if (!name.trim() || !email.trim() || !message.trim() || submitting) return;
@@ -200,35 +210,47 @@ export function ContactPage() {
         </Surface>
 
         <Flex direction="column" gap="12px">
-          {details.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Surface key={item.label} radius="md" p="18px 20px">
-                <Flex align="center" gap="14px">
-                  <Flex
-                    w="44px"
-                    h="44px"
-                    borderRadius="12px"
-                    bg="bg.soft"
-                    color="brand.500"
-                    align="center"
-                    justify="center"
-                    flexShrink={0}
-                  >
-                    <Icon size={20} strokeWidth={1.9} />
+          {contactLoading
+            ? Array.from({ length: 4 }, (_, index) => (
+                <Surface key={index} radius="md" p="18px 20px">
+                  <Flex align="center" gap="14px">
+                    <Skeleton w="44px" h="44px" borderRadius="12px" />
+                    <Box flex="1" minW={0}>
+                      <Skeleton h="12px" w="64px" borderRadius="full" />
+                      <Skeleton h="16px" w="70%" mt="8px" borderRadius="full" />
+                    </Box>
                   </Flex>
-                  <Box>
-                    <Text fontSize="12px" fontWeight="700" color="ink.3">
-                      {item.label}
-                    </Text>
-                    <Text fontWeight="700" mt="2px">
-                      {item.value}
-                    </Text>
-                  </Box>
-                </Flex>
-              </Surface>
-            );
-          })}
+                </Surface>
+              ))
+            : details.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Surface key={item.label} radius="md" p="18px 20px">
+                    <Flex align="center" gap="14px">
+                      <Flex
+                        w="44px"
+                        h="44px"
+                        borderRadius="12px"
+                        bg="bg.soft"
+                        color="brand.500"
+                        align="center"
+                        justify="center"
+                        flexShrink={0}
+                      >
+                        <Icon size={20} strokeWidth={1.9} />
+                      </Flex>
+                      <Box>
+                        <Text fontSize="12px" fontWeight="700" color="ink.3">
+                          {item.label}
+                        </Text>
+                        <Text fontWeight="700" mt="2px">
+                          {item.value}
+                        </Text>
+                      </Box>
+                    </Flex>
+                  </Surface>
+                );
+              })}
         </Flex>
       </Grid>
     </AppPage>

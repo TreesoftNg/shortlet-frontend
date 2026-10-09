@@ -1,7 +1,7 @@
 export { request, delay } from './client';
 export { http, ApiError } from './http';
-export { submitContactMessage } from './contact';
-export type { SubmitContactInput } from './contact';
+export { getPublicContactDetails, submitContactMessage } from './contact';
+export type { PublicContactDetails, SubmitContactInput } from './contact';
 export {
   createCustomerAccount,
   loginCustomer,
