@@ -20,9 +20,9 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ## Staging API
 
-Customer auth (`/auth`) calls the [Customers](https://api-staging.sunmadeapartments.com/api/docs#/Customers) endpoints through a Next rewrite at `/backend/*`. Listings still use mock data.
+The browser calls the [staging API](https://api-staging.sunmadeapartments.com/api/docs) directly via `NEXT_PUBLIC_API_BASE_URL` (CORS must allow your app Origin).
 
-Optional env:
+Required env:
 
 ```
 NEXT_PUBLIC_API_BASE_URL=https://api-staging.sunmadeapartments.com

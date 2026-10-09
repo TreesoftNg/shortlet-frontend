@@ -1,4 +1,4 @@
-import { API_PROXY_PREFIX, getTenantSlug } from '@/data/config';
+import { getApiBaseUrl, getTenantSlug } from '@/data/config';
 
 export type ApiErrorBody = {
   success?: false;
@@ -50,7 +50,7 @@ type HttpOptions = {
 
 function apiUrl(path: string): string {
   const normalised = path.startsWith('/') ? path : `/${path}`;
-  return `${API_PROXY_PREFIX}${normalised}`;
+  return `${getApiBaseUrl()}${normalised}`;
 }
 
 async function parseBody(response: Response): Promise<unknown> {

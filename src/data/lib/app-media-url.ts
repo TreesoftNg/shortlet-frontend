@@ -1,22 +1,29 @@
-import { API_PROXY_PREFIX } from '@/data/config';
+import { getApiBaseUrl } from '@/data/config';
 
 /**
- * Point absolute API media URLs at the Next `/backend` rewrite so
- * `next/image` loads same-origin (avoids broken localhost optimizer fetches).
+ * Normalise API media paths onto `NEXT_PUBLIC_API_BASE_URL` so
+ * `next/image` can load them from the real API host.
  */
 export function toAppMediaUrl(url: string | null | undefined): string {
   if (!url) return '';
 
-  if (url.startsWith(`${API_PROXY_PREFIX}/`)) return url;
+  const base = getApiBaseUrl();
+
+  if (url.startsWith(`${base}/`)) return url;
+
+  // Legacy same-origin proxy paths from older builds.
+  if (url.startsWith('/backend/')) {
+    return `${base}${url.slice('/backend'.length)}`;
+  }
 
   if (url.startsWith('/media/')) {
-    return `${API_PROXY_PREFIX}${url}`;
+    return `${base}${url}`;
   }
 
   try {
     const parsed = new URL(url);
     if (parsed.pathname.startsWith('/media/')) {
-      return `${API_PROXY_PREFIX}${parsed.pathname}${parsed.search}`;
+      return `${base}${parsed.pathname}${parsed.search}`;
     }
   } catch {
     // leave non-URL strings alone

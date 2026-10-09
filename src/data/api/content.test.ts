@@ -13,7 +13,7 @@ vi.mock('@/data/api/neighborhoods', () => ({
       name: 'Ikeja',
       slug: 'ikeja',
       city: 'Ikeja',
-      image: '/backend/media/ikeja.webp',
+      image: 'https://api-staging.sunmadeapartments.com/media/ikeja.webp',
       property_count: 4,
     },
     {
@@ -21,7 +21,7 @@ vi.mock('@/data/api/neighborhoods', () => ({
       name: 'Lekki',
       slug: 'lekki',
       city: 'Lekki',
-      image: '/backend/media/lekki.webp',
+      image: 'https://api-staging.sunmadeapartments.com/media/lekki.webp',
       property_count: 1,
     },
   ]),
@@ -39,10 +39,10 @@ describe('brand defaults', () => {
   it('builds website content from live areas', () => {
     const content = buildWebsiteContent({
       areaNames: ['Ikeja', 'Lekki'],
-      heroImage: '/backend/media/unit.webp',
+      heroImage: 'https://api-staging.sunmadeapartments.com/media/unit.webp',
     });
     expect(content.hero.subheadline).toContain('Ikeja & Lekki');
-    expect(content.hero.image).toBe('/backend/media/unit.webp');
+    expect(content.hero.image).toBe('https://api-staging.sunmadeapartments.com/media/unit.webp');
     expect(content.categories.length).toBeGreaterThan(0);
   });
 });
