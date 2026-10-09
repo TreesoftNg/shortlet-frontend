@@ -1,4 +1,3 @@
-export { request, delay } from './client';
 export { http, ApiError } from './http';
 export { getPublicContactDetails, submitContactMessage } from './contact';
 export type { PublicContactDetails, SubmitContactInput } from './contact';
@@ -23,19 +22,11 @@ export {
   getNeighborhoods,
 } from './neighborhoods';
 
-export {
-  getProperties,
-  getPropertyById,
-  getPropertyBySlug,
-} from './properties';
-export type { PropertyListParams, PropertySort } from './properties';
-
 export { getPublicUnits, getPublicUnitById } from './public-units';
 export type { PublicUnitsParams, PublicUnitsPage } from './public-units';
 
 export {
   createCustomerReview,
-  getReviewsByPropertyId,
   mapCustomerReview,
 } from './reviews';
 export type { CreateReviewInput, CustomerReview } from './reviews';
@@ -50,6 +41,7 @@ export {
   getMyBookingById,
   getMyBookings,
   getUnitQuote,
+  startBookingPayment,
   verifyBookingPayment,
 } from './bookings';
 export type {
@@ -57,3 +49,5 @@ export type {
   CreateBookingInput,
   CreateBookingResult,
 } from './bookings';
+export type { CancelBookingInput } from '@/data/types/booking-api';
+export type { PropertySort } from '@/data/types';

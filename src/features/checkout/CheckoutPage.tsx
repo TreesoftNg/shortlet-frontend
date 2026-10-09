@@ -2,21 +2,18 @@
 
 import { CheckoutHeader } from '@/features/checkout/components/CheckoutHeader';
 import { CheckoutSummary } from '@/features/checkout/components/CheckoutSummary';
-import { FlutterwaveCheckoutLauncher } from '@/features/checkout/components/FlutterwaveCheckoutLauncher';
-import type { FlutterwavePaySession } from '@/features/checkout/components/FlutterwaveCheckoutLauncher';
 import {
   useCheckoutGuest,
   useCheckoutProperty,
   useCheckoutQuote,
   useCreateBooking,
 } from '@/features/checkout/hooks/useCheckoutData';
-import { getFlutterwavePublicKey } from '@/features/checkout/lib/flutterwave';
 import { ApiError } from '@/data/api/http';
 import { saveBookingSession } from '@/data/lib/booking-session';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import { getDefaultStay } from '@/shared/lib/default-stay';
 import { formatNaira } from '@/shared/lib/format';
-import { resolvePayableAmount, toMoneyNumber } from '@/data/lib/map-booking';
+import { toMoneyNumber } from '@/data/lib/map-booking';
 import {
   Box,
   Button,
@@ -71,9 +68,6 @@ export function CheckoutPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-  const [paySession, setPaySession] = useState<FlutterwavePaySession | null>(
-    null,
-  );
 
   useEffect(() => {
     setFirstName(guestProfile.firstName);
@@ -192,51 +186,15 @@ export function CheckoutPage() {
 
       saveBookingSession(bookingId, result.accessToken);
 
-      const confirmationUrl = `${origin}/confirmation?bookingId=${encodeURIComponent(bookingId)}&property=${encodeURIComponent(property.slug)}`;
-      const publicKey = getFlutterwavePublicKey();
-      const txRef =
-        result.checkout?.reference || result.checkout?.paymentReference;
-      const checkoutUrl = result.checkout?.checkoutUrl;
-      const payableAmount = resolvePayableAmount(result);
-
-      // Prefer server-hosted checkout (amount set by API).
-      if (checkoutUrl) {
-        window.location.assign(checkoutUrl);
-        return;
-      }
-
-      if (publicKey && txRef && payableAmount != null) {
-        setPaySession({
-          publicKey,
-          txRef,
-          bookingId,
-          amount: payableAmount,
-          currency:
-            result.checkout?.currency ||
-            result.currency ||
-            quote.property.currency ||
-            'NGN',
-          customer: {
-            email: email.trim(),
-            name: `${firstName.trim()} ${lastName.trim()}`.trim(),
-            phone: phone.trim(),
-          },
-          title: 'Sunmade Apartments',
-          description: `Stay at ${quote.property.public_name}`,
-          redirectUrl: confirmationUrl,
-          paymentMethod: 'card',
-        });
-        return;
-      }
-
-      if (publicKey && txRef && payableAmount == null) {
+      // Hosted checkout: amount is set server-side on the Flutterwave session.
+      const checkoutUrl = result.checkout?.checkoutUrl?.trim();
+      if (!checkoutUrl) {
         setFormError(
-          'Payment amount was missing from the booking response. Please try again.',
+          'Payment page could not be opened. Please try again or contact support.',
         );
         return;
       }
-
-      router.push(confirmationUrl);
+      window.location.assign(checkoutUrl);
     } catch (error) {
       if (error instanceof ApiError && error.code === 'PRICE_CHANGED') {
         void refetchQuote();
@@ -518,23 +476,6 @@ export function CheckoutPage() {
           </Box>
         </Grid>
       </Box>
-      {paySession ? (
-        <FlutterwaveCheckoutLauncher
-          session={paySession}
-          onSuccess={(transactionId) => {
-            const params = new URLSearchParams({
-              bookingId: paySession.bookingId,
-              property: property.slug,
-            });
-            if (transactionId) params.set('transaction_id', transactionId);
-            setPaySession(null);
-            router.push(`/confirmation?${params.toString()}`);
-          }}
-          onClose={() => {
-            setPaySession(null);
-          }}
-        />
-      ) : null}
     </Box>
   );
 }

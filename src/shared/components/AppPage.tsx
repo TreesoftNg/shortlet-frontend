@@ -46,6 +46,8 @@ export function AppPage({
           pt={mainPt}
           pb={mainPb ?? defaultPb}
           maxW={mainMaxW}
+          mx={mainMaxW ? 'auto' : undefined}
+          w="full"
         >
           {children}
         </Box>

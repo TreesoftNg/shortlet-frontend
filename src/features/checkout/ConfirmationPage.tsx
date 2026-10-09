@@ -8,7 +8,9 @@ import { getBookingById } from '@/data/api/bookings';
 import {
   getBookingAccessToken,
   getPendingBookingId,
+  restoreBookingSessionFromParams,
 } from '@/data/lib/booking-session';
+import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
 import { isAccessTokenExpired } from '@/features/auth/lib/access-token';
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
@@ -25,7 +27,9 @@ import { useEffect, useState } from 'react';
 export function ConfirmationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const authHydrated = useAuthHydrated();
   const bookingIdParam = searchParams.get('bookingId');
+  const bookingTokenParam = searchParams.get('bookingToken');
   const transactionId =
     searchParams.get('transaction_id') ?? searchParams.get('transactionId');
   const slug = searchParams.get('property');
@@ -49,20 +53,36 @@ export function ConfirmationPage() {
   } = useCheckoutProperty(slug);
 
   useEffect(() => {
+    restoreBookingSessionFromParams({
+      bookingId: bookingIdParam,
+      bookingToken: bookingTokenParam,
+    });
+
+    // Drop token from the address bar after restoring session (Referer hygiene).
+    if (bookingTokenParam && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('bookingToken')) {
+        url.searchParams.delete('bookingToken');
+        window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+      }
+    }
+
     if (bookingIdParam) {
       setBookingId(bookingIdParam);
       return;
     }
-    // Hosted Flutterwave return URL often omits bookingId — recover from session.
+    // Hosted Flutterwave return URL may omit bookingId — recover from session.
     const pending = getPendingBookingId();
     if (pending) setBookingId(pending);
     else setLoading(false);
-  }, [bookingIdParam]);
+  }, [bookingIdParam, bookingTokenParam]);
 
   useEffect(() => {
-    if (!bookingId) return;
+    if (!bookingId || !authHydrated) return;
 
     let cancelled = false;
+    const bookingToken =
+      bookingTokenParam?.trim() || getBookingAccessToken(bookingId);
 
     async function load() {
       setLoading(true);
@@ -72,11 +92,15 @@ export function ConfirmationPage() {
           const verified = await verifyPayment.mutateAsync({
             bookingId: bookingId!,
             transactionId,
-            bookingToken: getBookingAccessToken(bookingId),
+            bookingToken,
           });
           if (!cancelled) setBooking(verified);
         } else {
-          const loaded = await getBookingById(bookingId!, accessToken);
+          const loaded = await getBookingById(
+            bookingId!,
+            accessToken,
+            bookingToken,
+          );
           if (!cancelled) setBooking(loaded);
         }
       } catch (error) {
@@ -94,8 +118,8 @@ export function ConfirmationPage() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per booking/tx
-  }, [bookingId, transactionId, accessToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per booking/tx/auth
+  }, [bookingId, bookingTokenParam, transactionId, accessToken, authHydrated]);
 
   if (!bookingId && !slug) {
     return (
@@ -113,7 +137,7 @@ export function ConfirmationPage() {
     );
   }
 
-  if (loading || (slug && propertyPending && !booking)) {
+  if (loading || !authHydrated || (slug && propertyPending && !booking)) {
     return (
       <Box p={10} bg="bg.soft" minH="100vh" aria-busy="true">
         <Box maxW="720px" mx="auto">

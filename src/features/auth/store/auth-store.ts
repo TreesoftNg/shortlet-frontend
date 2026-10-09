@@ -5,7 +5,9 @@
  * Profile / bookings still come from React Query once those APIs exist.
  */
 
+import { clearBookingSession } from '@/data/lib/booking-session';
 import { isAccessTokenExpired } from '@/features/auth/lib/access-token';
+import { getQueryClient } from '@/shared/providers/query-provider';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AuthUser } from '@/features/auth/types';
@@ -28,13 +30,37 @@ type AuthState = {
   getValidAccessToken: () => string | null;
 };
 
+const emptySession = {
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  accessTokenExpiresAt: null,
+} as const;
+
+function clearPersistedAuth() {
+  try {
+    useAuthStore.persist.clearStorage();
+  } catch {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('sunmade-auth');
+    }
+  }
+}
+
+/** Drop React Query + guest booking session leftovers after auth ends. */
+function clearClientCaches() {
+  clearBookingSession();
+  try {
+    getQueryClient().clear();
+  } catch {
+    // Query client may be unavailable during early SSR/tests.
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      accessTokenExpiresAt: null,
+      ...emptySession,
       setSession: (session) =>
         set({
           user: session.user,
@@ -42,13 +68,11 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: session.refreshToken,
           accessTokenExpiresAt: session.accessTokenExpiresAt ?? null,
         }),
-      logout: () =>
-        set({
-          user: null,
-          accessToken: null,
-          refreshToken: null,
-          accessTokenExpiresAt: null,
-        }),
+      logout: () => {
+        set({ ...emptySession });
+        clearPersistedAuth();
+        clearClientCaches();
+      },
       getValidAccessToken: () => {
         const { accessToken, accessTokenExpiresAt } = get();
         if (!accessToken) return null;
@@ -67,6 +91,17 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         accessTokenExpiresAt: state.accessTokenExpiresAt,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state?.accessToken) return;
+        if (
+          isAccessTokenExpired(state.accessToken, state.accessTokenExpiresAt)
+        ) {
+          // Defer so rehydrate finishes before we wipe storage.
+          queueMicrotask(() => {
+            useAuthStore.getState().logout();
+          });
+        }
+      },
     },
   ),
 );
@@ -74,7 +109,10 @@ export const useAuthStore = create<AuthState>()(
 /** Clears a dead session left in localStorage after API/token expiry. */
 export function purgeExpiredAuthSession() {
   const state = useAuthStore.getState();
-  if (!state.accessToken) return;
+  if (!state.accessToken) {
+    if (state.user) state.logout();
+    return;
+  }
   if (isAccessTokenExpired(state.accessToken, state.accessTokenExpiresAt)) {
     state.logout();
   }

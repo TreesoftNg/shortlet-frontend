@@ -1,5 +1,12 @@
 import type { HospitableProperty } from './hospitable';
 
+/** Client-side listing sort (search / filters). */
+export type PropertySort =
+  | 'recommended'
+  | 'price_asc'
+  | 'price_desc'
+  | 'rating';
+
 /** Bookable inventory under a property (PRD Unit). */
 export type UnitStatus = 'available' | 'unavailable' | 'maintenance';
 

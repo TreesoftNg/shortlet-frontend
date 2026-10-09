@@ -13,6 +13,8 @@ const defaultLabel: Record<BookingStatus, string> = {
   completed: 'Completed',
   cancelled: 'Cancelled',
   pending: 'Pending',
+  expired: 'Expired',
+  checked_in: 'Checked in',
 };
 
 const statusStyles: Record<BookingStatus, { bg: string; color: string }> = {
@@ -20,10 +22,12 @@ const statusStyles: Record<BookingStatus, { bg: string; color: string }> = {
   completed: { bg: 'line.2', color: 'ink.2' },
   cancelled: { bg: '#FCEAEA', color: '#B42318' },
   pending: { bg: '#FFF6E8', color: '#B54708' },
+  expired: { bg: '#FCEAEA', color: '#B42318' },
+  checked_in: { bg: '#E6F6EC', color: 'ok' },
 };
 
 export function StatusBadge({ status, label }: StatusBadgeProps) {
-  const style = statusStyles[status];
+  const style = statusStyles[status] ?? statusStyles.cancelled;
 
   return (
     <Flex
@@ -38,7 +42,7 @@ export function StatusBadge({ status, label }: StatusBadgeProps) {
       display="inline-flex"
       align="center"
     >
-      {label ?? defaultLabel[status]}
+      {label ?? defaultLabel[status] ?? status}
     </Flex>
   );
 }
