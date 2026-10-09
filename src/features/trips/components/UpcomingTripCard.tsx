@@ -5,6 +5,7 @@ import { CoverImage } from '@/shared/components/CoverImage';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { MapPin, MessageCircle, PlaneLanding } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 type UpcomingTripCardProps = {
   booking: Booking;
@@ -12,6 +13,17 @@ type UpcomingTripCardProps = {
 
 export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
   const router = useRouter();
+  const [comingSoon, setComingSoon] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!comingSoon) return;
+    const timer = window.setTimeout(() => setComingSoon(null), 2500);
+    return () => window.clearTimeout(timer);
+  }, [comingSoon]);
+
+  function showComingSoon(feature: string) {
+    setComingSoon(`${feature} is coming soon`);
+  }
 
   return (
     <Grid
@@ -198,7 +210,7 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="ink"
             fontWeight="700"
             gap="8px"
-            onClick={() => router.push('/contact')}
+            onClick={() => showComingSoon('Messaging')}
           >
             <MessageCircle size={18} strokeWidth={1.9} />
             Message
@@ -211,19 +223,18 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="ink"
             fontWeight="700"
             gap="8px"
-            onClick={() => {
-              const query = encodeURIComponent(booking.location_label);
-              window.open(
-                `https://www.google.com/maps/search/?api=1&query=${query}`,
-                '_blank',
-                'noopener,noreferrer',
-              );
-            }}
+            onClick={() => showComingSoon('Directions')}
           >
             <MapPin size={18} strokeWidth={1.9} />
             Directions
           </Button>
         </Flex>
+
+        {comingSoon ? (
+          <Text color="ink.2" fontSize="13px" fontWeight="600" mt="10px">
+            {comingSoon}
+          </Text>
+        ) : null}
       </Flex>
     </Grid>
   );
