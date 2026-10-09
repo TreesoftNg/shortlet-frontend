@@ -30,5 +30,6 @@ export function getApiBaseUrl(): string {
 }
 
 export function getTenantSlug(): string {
-  return process.env.NEXT_PUBLIC_TENANT_SLUG ?? DEFAULT_TENANT_SLUG;
+  const slug = (process.env.NEXT_PUBLIC_TENANT_SLUG ?? '').trim();
+  return slug || DEFAULT_TENANT_SLUG;
 }
