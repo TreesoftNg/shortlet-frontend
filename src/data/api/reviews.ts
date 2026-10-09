@@ -1,7 +1,4 @@
 import { http } from '@/data/api/http';
-import { request } from '@/data/api/client';
-import { reviews } from '@/data/mocks';
-import type { Review } from '@/data/types';
 import type {
   CreateReviewInput,
   CustomerReview,
@@ -38,12 +35,6 @@ export function mapCustomerReview(payload: unknown): CustomerReview {
     canRespond: Boolean(record.canRespond),
     createdAt: String(record.createdAt ?? ''),
   };
-}
-
-export async function getReviewsByPropertyId(
-  propertyId: string,
-): Promise<Review[]> {
-  return request(reviews.filter((review) => review.property_id === propertyId));
 }
 
 /**

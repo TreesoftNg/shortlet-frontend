@@ -7,9 +7,9 @@ import {
   formatNairaShort,
 } from '@/shared/lib/format';
 import type { Property } from '@/data/types';
+import { CoverImage } from '@/shared/components/CoverImage';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { Minus, Plus, Star } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
@@ -143,12 +143,10 @@ export function SearchMap({ properties }: SearchMapProps) {
         >
           <Link href={`/properties/${active.slug}`}>
             <Box position="relative" h="170px">
-              <Image
+              <CoverImage
                 src={active.picture}
                 alt={active.name}
-                fill
                 sizes="300px"
-                style={{ objectFit: 'cover' }}
               />
             </Box>
             <Box p="14px 16px">

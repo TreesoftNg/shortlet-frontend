@@ -31,7 +31,7 @@ describe('neighborhoods api', () => {
       name: 'Lekki',
       slug: 'lekki',
       city: 'Lekki',
-      image: '/backend/media/lekki.webp',
+      image: 'https://api-staging.sunmadeapartments.com/media/lekki.webp',
       property_count: 1,
     });
   });
@@ -56,13 +56,13 @@ describe('neighborhoods api', () => {
     const list = await getNeighborhoods();
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/public/neighbourhoods',
+      'https://api-staging.sunmadeapartments.com/api/v1/public/neighbourhoods',
       expect.objectContaining({ method: 'GET' }),
     );
     expect(list).toHaveLength(1);
     expect(list[0]?.name).toBe('Ikeja');
     expect(list[0]?.property_count).toBe(4);
-    expect(list[0]?.image).toBe('/backend/media/ikeja.webp');
+    expect(list[0]?.image).toBe('https://api-staging.sunmadeapartments.com/media/ikeja.webp');
   });
 
   it('finds a neighbourhood by slug', async () => {

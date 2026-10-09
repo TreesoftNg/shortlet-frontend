@@ -1,9 +1,9 @@
 'use client';
 
 import type { Booking } from '@/data/types';
+import { CoverImage } from '@/shared/components/CoverImage';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { MapPin, MessageCircle, PlaneLanding } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 type UpcomingTripCardProps = {
@@ -23,12 +23,10 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
       boxShadow="md"
     >
       <Box position="relative" minH={{ base: '220px', md: '360px' }}>
-        <Image
+        <CoverImage
           src={booking.property_image}
           alt={booking.property_name}
-          fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          style={{ objectFit: 'cover' }}
           priority
         />
       </Box>
@@ -140,8 +138,24 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
               px="10px"
               py="4px"
               borderRadius="full"
-              bg={booking.status === 'confirmed' ? '#E6F6EC' : 'bg.soft'}
-              color={booking.status === 'confirmed' ? 'ok' : 'ink.2'}
+              bg={
+                booking.status === 'confirmed' || booking.status === 'checked_in'
+                  ? '#E6F6EC'
+                  : booking.status === 'pending'
+                    ? '#FFF4E5'
+                    : booking.status === 'expired'
+                      ? '#FDECEC'
+                      : 'bg.soft'
+              }
+              color={
+                booking.status === 'confirmed' || booking.status === 'checked_in'
+                  ? 'ok'
+                  : booking.status === 'pending'
+                    ? 'warn'
+                    : booking.status === 'expired'
+                      ? 'danger'
+                      : 'ink.2'
+              }
               fontSize="12px"
               fontWeight="700"
             >
@@ -149,7 +163,11 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
                 ? 'Confirmed · Paid'
                 : booking.status === 'pending'
                   ? 'Awaiting payment'
-                  : booking.status}
+                  : booking.status === 'expired'
+                    ? 'Payment expired'
+                    : booking.status === 'checked_in'
+                      ? 'Checked in'
+                      : booking.status}
             </Flex>
           </Box>
         </Grid>
@@ -168,9 +186,7 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="white"
             fontWeight="700"
             _hover={{ bg: 'brand.600' }}
-            onClick={() =>
-              router.push(`/properties/${booking.property_slug}`)
-            }
+            onClick={() => router.push(`/bookings/${booking.id}`)}
           >
             Manage booking
           </Button>
@@ -182,6 +198,7 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="ink"
             fontWeight="700"
             gap="8px"
+            onClick={() => router.push('/contact')}
           >
             <MessageCircle size={18} strokeWidth={1.9} />
             Message
@@ -194,6 +211,14 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="ink"
             fontWeight="700"
             gap="8px"
+            onClick={() => {
+              const query = encodeURIComponent(booking.location_label);
+              window.open(
+                `https://www.google.com/maps/search/?api=1&query=${query}`,
+                '_blank',
+                'noopener,noreferrer',
+              );
+            }}
           >
             <MapPin size={18} strokeWidth={1.9} />
             Directions

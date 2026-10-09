@@ -2,10 +2,10 @@
 
 import { LeaveReviewDialog } from '@/features/trips/components/LeaveReviewDialog';
 import { AppButton, EmptyState, SectionHeader, StatusBadge, Surface } from '@/shared/components';
+import { CoverImage } from '@/shared/components/CoverImage';
 import type { Booking } from '@/data/types';
 import { Box, Flex, Grid, Text } from '@chakra-ui/react';
 import { CalendarDays, Star } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -78,14 +78,12 @@ export function PastTripsGrid({
       >
         {bookings.map((booking) => (
           <Surface key={booking.id} radius="lg" asChild>
-            <Link href={`/properties/${booking.property_slug}`}>
+            <Link href={`/bookings/${booking.id}`}>
               <Box position="relative" h="180px">
-                <Image
+                <CoverImage
                   src={booking.property_image}
                   alt={booking.property_name}
-                  fill
                   sizes="(max-width: 640px) 100vw, 33vw"
-                  style={{ objectFit: 'cover' }}
                 />
               </Box>
               <Box p="16px 18px">

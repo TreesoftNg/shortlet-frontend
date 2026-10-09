@@ -9,10 +9,10 @@ import {
   shortArea,
 } from '@/shared/lib/format';
 import type { Property } from '@/data/types';
+import { CoverImage } from '@/shared/components/CoverImage';
 import { tokens } from '@/shared/theme/tokens';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { Heart, Star } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -69,12 +69,10 @@ export function PropertyCard({
             transition="transform 0.25s ease"
             transform={liftImage ? 'scale(1.04)' : 'scale(1)'}
           >
-            <Image
+            <CoverImage
               src={property.picture}
               alt={property.public_name}
-              fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-              style={{ objectFit: 'cover' }}
             />
           </Box>
           {badge ? (

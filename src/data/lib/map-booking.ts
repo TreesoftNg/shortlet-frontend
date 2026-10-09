@@ -75,32 +75,6 @@ export function normalizeCreateBookingResult(
   };
 }
 
-/**
- * Amount the guest should pay — always from the create-booking response,
- * never from a pre-create client-side quote alone.
- */
-export function resolvePayableAmount(
-  result: CreateBookingResult,
-): number | null {
-  const candidates = [
-    result.checkout?.amount,
-    result.checkout?.totalDueNow,
-    result.totalAmount,
-    result.totalDueNow,
-    result.expectedTotal,
-    result.stayTotal,
-    result.price?.total,
-    // amountPaid is 0 while pending — only use if already paid.
-    result.amountPaid,
-    result.totalPaid,
-  ];
-  for (const value of candidates) {
-    const amount = toMoneyNumber(value);
-    if (amount > 0) return amount;
-  }
-  return null;
-}
-
 function guestCount(booking: ApiBooking): number {
   if (typeof booking.guests === 'number') return booking.guests;
   if (booking.guests && typeof booking.guests === 'object') {
@@ -114,7 +88,13 @@ function guestCount(booking: ApiBooking): number {
 
 function mapStatus(status: string | null | undefined): BookingStatus {
   const value = (status ?? '').toLowerCase();
-  if (value === 'confirmed' || value === 'completed' || value === 'cancelled') {
+  if (
+    value === 'confirmed' ||
+    value === 'completed' ||
+    value === 'cancelled' ||
+    value === 'expired' ||
+    value === 'checked_in'
+  ) {
     return value;
   }
   if (
@@ -125,7 +105,8 @@ function mapStatus(status: string | null | undefined): BookingStatus {
   ) {
     return 'pending';
   }
-  return 'pending';
+  // Unknown API statuses must not look payable.
+  return 'cancelled';
 }
 
 /** Accept `YYYY-MM-DD` or full ISO datetimes from the API. */
@@ -168,9 +149,9 @@ function countdownLabel(checkIn: string, status: BookingStatus): string | null {
 }
 
 function tabForBooking(status: BookingStatus, checkOut: string): 'upcoming' | 'past' | 'cancelled' {
-  if (status === 'cancelled') return 'cancelled';
+  if (status === 'cancelled' || status === 'expired') return 'cancelled';
   if (status === 'completed') return 'past';
-  if (status === 'confirmed' && checkOut) {
+  if ((status === 'confirmed' || status === 'checked_in') && checkOut) {
     const end = parseISODate(checkOut);
     if (Number.isNaN(end.getTime())) return 'upcoming';
     const today = new Date();
@@ -224,6 +205,11 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
   const unitId = api.unitId || api.unit?.id || '';
   const unitOrPropertyId = api.property?.id || unitId || id;
 
+  const guest = api.guest;
+  const guestName = guest
+    ? [guest.firstName, guest.lastName].filter(Boolean).join(' ').trim()
+    : '';
+
   return {
     id,
     reference: api.reference || id.slice(0, 8).toUpperCase(),
@@ -251,5 +237,53 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
     your_rating: api.yourRating ?? null,
     review_pending: Boolean(api.reviewPending),
     countdown_label: countdownLabel(checkIn, status),
+    checkout_url:
+      (typeof api.latestPayment?.checkoutUrl === 'string' &&
+        api.latestPayment.checkoutUrl) ||
+      (typeof api.checkout?.checkoutUrl === 'string' &&
+        api.checkout.checkoutUrl) ||
+      null,
+    guest_name: guestName || null,
+    guest_email: guest?.email?.trim() || null,
+    guest_phone: guest?.phone?.trim() || null,
+    special_requests: api.specialRequests?.trim() || null,
+    hold_expires_at: api.holdExpiresAt ?? null,
+    cancellation_reason: api.cancellationReason?.trim() || null,
   };
+}
+
+/** Guests can cancel holds anytime, and confirmed stays before check-in day. */
+export function canCancelBooking(booking: Booking, now = new Date()): boolean {
+  if (
+    booking.status === 'cancelled' ||
+    booking.status === 'completed' ||
+    booking.status === 'expired' ||
+    booking.status === 'checked_in'
+  ) {
+    return false;
+  }
+  if (booking.status === 'pending') {
+    // Hold already ended — pay/cancel online is closed; book again instead.
+    if (booking.hold_expires_at) {
+      const ends = Date.parse(booking.hold_expires_at);
+      if (Number.isFinite(ends) && ends <= now.getTime()) return false;
+    }
+    return true;
+  }
+  if (booking.status !== 'confirmed' || !booking.check_in) return false;
+  const checkIn = parseISODate(booking.check_in);
+  if (!checkIn) return false;
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  return checkIn.getTime() > today.getTime();
+}
+
+/** True when the guest can still open a payment checkout for this hold. */
+export function canPayBooking(booking: Booking, now = new Date()): boolean {
+  if (booking.status !== 'pending') return false;
+  if (!booking.hold_expires_at) return Boolean(booking.checkout_url);
+  const ends = Date.parse(booking.hold_expires_at);
+  if (!Number.isFinite(ends)) return Boolean(booking.checkout_url);
+  // Match API: need at least ~1 minute left on the hold.
+  return ends - now.getTime() >= 60_000;
 }

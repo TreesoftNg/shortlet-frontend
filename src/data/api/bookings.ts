@@ -82,6 +82,23 @@ export async function getGuestBooking(
   }
 }
 
+/** POST /api/v1/bookings/:id/payments — reopen checkout while the hold is active. */
+export async function startBookingPayment(
+  bookingId: string,
+  returnUrl: string,
+  options: { accessToken?: string | null; bookingToken?: string | null } = {},
+): Promise<{ checkoutUrl: string | null }> {
+  const bookingToken =
+    options.bookingToken ?? getBookingAccessToken(bookingId);
+  const checkout = await http<{
+    checkoutUrl?: string | null;
+  }>(`/api/v1/bookings/${encodeURIComponent(bookingId)}/payments`, {
+    body: { returnUrl },
+    ...authOptions(options.accessToken, bookingToken),
+  });
+  return { checkoutUrl: checkout.checkoutUrl ?? null };
+}
+
 /** POST /api/v1/bookings/:id/payments/verify */
 export async function verifyBookingPayment(
   bookingId: string,
@@ -168,12 +185,16 @@ export async function getBookings(
 export async function getBookingById(
   id: string,
   accessToken?: string | null,
+  bookingToken?: string | null,
 ): Promise<Booking | null> {
   if (accessToken) {
     const mine = await getMyBookingById(id, accessToken);
     if (mine) return mine;
   }
-  return getGuestBooking(id, { accessToken });
+  return getGuestBooking(id, {
+    accessToken,
+    bookingToken: bookingToken ?? getBookingAccessToken(id),
+  });
 }
 
 export async function getBookingCounts(

@@ -2,8 +2,12 @@
 
 import { useNeighborhood, usePublicUnits } from '@/data/hooks';
 import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
-import type { PropertySort } from '@/data/api';
-import type { Property, PublicUnitsListMeta, PublicUnitsTab } from '@/data/types';
+import type {
+  Property,
+  PropertySort,
+  PublicUnitsListMeta,
+  PublicUnitsTab,
+} from '@/data/types';
 import { getDefaultStay } from '@/shared/lib/default-stay';
 import { nightsBetween } from '@/shared/lib/format';
 import { useMemo } from 'react';

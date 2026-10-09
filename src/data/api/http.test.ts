@@ -28,7 +28,7 @@ describe('http client', () => {
 
     expect(result.accessToken).toBe('tok');
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/login',
+      'https://api-staging.sunmadeapartments.com/api/v1/login',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({

@@ -1,6 +1,7 @@
 export { AccountMenuButton } from './AccountMenuButton';
 export { AppPage } from './AppPage';
 export { BookingListCard } from './BookingListCard';
+export { CoverImage } from './CoverImage';
 export { MobileTabBar } from './MobileTabBar';
 export { NeighborhoodTile } from './NeighborhoodTile';
 export { PropertyCard } from './PropertyCard';

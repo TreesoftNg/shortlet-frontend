@@ -2,7 +2,6 @@ import {
   asApiBookingList,
   mapApiBookingToBooking,
   normalizeCreateBookingResult,
-  resolvePayableAmount,
   toMoneyNumber,
 } from '@/data/lib/map-booking';
 import { createBooking, getMyBookings, getUnitQuote } from '@/data/api/bookings';
@@ -41,7 +40,7 @@ describe('mapApiBookingToBooking', () => {
     expect(booking.unit_id).toBe('unit-1');
     expect(booking.guests).toBe(2);
     expect(booking.amount_paid).toBe(577025);
-    expect(booking.property_image).toBe('/backend/media/photo.webp');
+    expect(booking.property_image).toBe('https://api-staging.sunmadeapartments.com/media/photo.webp');
     expect(booking.dates_range_label).toContain('Dec');
   });
 
@@ -84,28 +83,6 @@ describe('normalizeCreateBookingResult', () => {
     expect(result.checkout?.checkoutUrl).toBe('https://pay.example');
   });
 
-  it('resolves payable amount from the create-booking response only', () => {
-    expect(
-      resolvePayableAmount({
-        id: 'bk-1',
-        checkout: { amount: '125000.00' },
-      }),
-    ).toBe(125000);
-    expect(
-      resolvePayableAmount({
-        id: 'bk-2',
-        totalDueNow: '99000',
-      }),
-    ).toBe(99000);
-    expect(
-      resolvePayableAmount({
-        id: 'bk-3',
-        totalAmount: '445875.00',
-        amountPaid: '0.00',
-      }),
-    ).toBe(445875);
-    expect(resolvePayableAmount({ id: 'bk-4' })).toBeNull();
-  });
 });
 
 describe('bookings api', () => {
@@ -149,7 +126,7 @@ describe('bookings api', () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/units/u1/quote?checkIn=2026-12-23&checkOut=2026-12-27&adults=2',
+      'https://api-staging.sunmadeapartments.com/api/v1/units/u1/quote?checkIn=2026-12-23&checkOut=2026-12-27&adults=2',
       expect.objectContaining({ method: 'GET' }),
     );
     expect(quote.totalDueNow).toBe('577025.00');
@@ -194,7 +171,7 @@ describe('bookings api', () => {
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/bookings',
+      'https://api-staging.sunmadeapartments.com/api/v1/bookings',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({
@@ -230,7 +207,7 @@ describe('bookings api', () => {
     const list = await getMyBookings('customer-access', { limit: 100 });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/backend/api/v1/me/bookings?limit=100',
+      'https://api-staging.sunmadeapartments.com/api/v1/me/bookings?limit=100',
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: 'Bearer customer-access',

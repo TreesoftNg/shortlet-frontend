@@ -2,7 +2,9 @@ export type BookingStatus =
   | 'confirmed'
   | 'completed'
   | 'cancelled'
-  | 'pending';
+  | 'pending'
+  | 'expired'
+  | 'checked_in';
 
 export type TripTab = 'upcoming' | 'past' | 'cancelled';
 
@@ -31,4 +33,12 @@ export type Booking = {
   your_rating: number | null;
   review_pending: boolean;
   countdown_label: string | null;
+  /** Open Flutterwave checkout while the hold is still active. */
+  checkout_url: string | null;
+  guest_name: string | null;
+  guest_email: string | null;
+  guest_phone: string | null;
+  special_requests: string | null;
+  hold_expires_at: string | null;
+  cancellation_reason: string | null;
 };
