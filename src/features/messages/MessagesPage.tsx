@@ -104,7 +104,9 @@ export function MessagesPage() {
     return (
       <AppPage footer={false} mainPt={{ base: 6, md: '44px' }}>
         <PageHero title="Messages" size="app" mb={0} maxW="none" />
-        <SkeletonText noOfLines={4} mt={6} />
+        <Box mt={6}>
+          <SkeletonText lines={4} />
+        </Box>
       </AppPage>
     );
   }
