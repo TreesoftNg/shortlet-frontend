@@ -28,6 +28,17 @@ export type {
 
 export type { Booking, BookingStatus, TripTab } from './booking';
 export type {
+  ConversationDetail,
+  ConversationListItem,
+  ConversationMessage,
+  ConversationStatus,
+  CreateConversationInput,
+  MessagePage,
+  MessageSenderType,
+  SendMessageInput,
+  UnreadCount,
+} from './messaging';
+export type {
   ApiBooking,
   BookingGuestInput,
   BookingQuote,

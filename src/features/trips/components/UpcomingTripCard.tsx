@@ -1,8 +1,13 @@
 'use client';
 
+import { createConversation } from '@/data/api/conversations';
+import { ApiError } from '@/data/api/http';
+import { queryKeys } from '@/data/query-keys';
 import type { Booking } from '@/data/types';
+import { useAuthStore } from '@/features/auth/store/auth-store';
 import { CoverImage } from '@/shared/components/CoverImage';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { MapPin, MessageCircle, PlaneLanding } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -13,7 +18,10 @@ type UpcomingTripCardProps = {
 
 export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [comingSoon, setComingSoon] = useState<string | null>(null);
+  const [messaging, setMessaging] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!comingSoon) return;
@@ -23,6 +31,40 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
 
   function showComingSoon(feature: string) {
     setComingSoon(`${feature} is coming soon`);
+  }
+
+  async function openTripChat() {
+    setMessageError(null);
+    const token = useAuthStore.getState().getValidAccessToken();
+    if (!token) {
+      router.push('/auth');
+      return;
+    }
+    setMessaging(true);
+    try {
+      const created = await createConversation(
+        {
+          bookingId: booking.id,
+          propertyId: booking.property_id || undefined,
+          unitId: booking.unit_id || undefined,
+        },
+        token,
+      );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.messages.conversations(),
+      });
+      router.push(`/messages/${created.id}`);
+    } catch (err) {
+      setMessageError(
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Could not open chat.',
+      );
+    } finally {
+      setMessaging(false);
+    }
   }
 
   return (
@@ -210,10 +252,11 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="ink"
             fontWeight="700"
             gap="8px"
-            onClick={() => showComingSoon('Messaging')}
+            disabled={messaging}
+            onClick={() => void openTripChat()}
           >
             <MessageCircle size={18} strokeWidth={1.9} />
-            Message
+            {messaging ? 'Opening…' : 'Message'}
           </Button>
           <Button
             h="48px"
@@ -233,6 +276,11 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
         {comingSoon ? (
           <Text color="ink.2" fontSize="13px" fontWeight="600" mt="10px">
             {comingSoon}
+          </Text>
+        ) : null}
+        {messageError ? (
+          <Text color="red.500" fontSize="13px" fontWeight="600" mt="10px">
+            {messageError}
           </Text>
         ) : null}
       </Flex>

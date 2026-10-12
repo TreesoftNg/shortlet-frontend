@@ -11,6 +11,7 @@ import { PropertyTitle } from '@/features/property/components/PropertyTitle';
 import { UnitPicker } from '@/features/property/components/UnitPicker';
 import { usePublicUnitDetail } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
+import { MessageUsButton } from '@/features/messages/components/MessageUsButton';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
 import {
   ErrorState,
@@ -128,6 +129,15 @@ export function PropertyPage({ slug }: PropertyPageProps) {
                   {capacity.max} guests · {capacity.bedrooms} bedrooms ·{' '}
                   {capacity.beds} beds · {capacity.bathrooms} baths
                 </Text>
+                <Box mt={3}>
+                  <MessageUsButton
+                    propertyId={
+                      selectedUnit?.property_id ??
+                      property.units[0]?.property_id
+                    }
+                    unitId={selectedUnit?.id ?? property.id}
+                  />
+                </Box>
               </Box>
               <Flex
                 w="52px"
