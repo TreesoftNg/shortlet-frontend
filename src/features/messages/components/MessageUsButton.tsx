@@ -46,7 +46,10 @@ export function MessageUsButton({
 
     setLoading(true);
     try {
-      const token = useAuthStore.getState().getValidAccessToken();
+      const { ensureAccessToken } = await import(
+        '@/features/auth/lib/refresh-session'
+      );
+      const token = await ensureAccessToken();
       if (!token) {
         router.push('/auth');
         return;

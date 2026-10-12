@@ -16,26 +16,14 @@ import type {
   ConversationListItem,
   UnreadCount,
 } from '@/data/types/messaging';
-import { isAccessTokenExpired } from '@/features/auth/lib/access-token';
-import {
-  useAuthStore,
-  useIsAuthenticated,
-} from '@/features/auth/store/auth-store';
+import { useValidAccessToken } from '@/features/auth/hooks/useValidAccessToken';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
+import { useIsAuthenticated } from '@/features/auth/store/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const readOptions = {
   staleTime: 30_000,
 } as const;
-
-function useValidAccessToken() {
-  return useAuthStore((s) => {
-    if (!s.accessToken) return null;
-    if (isAccessTokenExpired(s.accessToken, s.accessTokenExpiresAt)) {
-      return null;
-    }
-    return s.accessToken;
-  });
-}
 
 export function useConversations() {
   const accessToken = useValidAccessToken();
@@ -89,8 +77,8 @@ export function useConversationMessages(conversationId: string | null) {
 export function useMarkConversationRead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (conversationId: string) => {
-      const token = useAuthStore.getState().getValidAccessToken();
+    mutationFn: async (conversationId: string) => {
+      const token = await ensureAccessToken();
       if (!token) throw new Error('Sign in required');
       return markConversationRead(conversationId, token);
     },

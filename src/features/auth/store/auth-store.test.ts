@@ -65,7 +65,7 @@ describe('useAuthStore', () => {
     expect(localStorage.getItem('sunmade-auth')).toBeNull();
   });
 
-  it('treats an expired JWT as logged out and clears it', () => {
+  it('keeps the session when the access token is expired but a refresh token remains', () => {
     const expired = jwtWithExp(Math.floor(Date.now() / 1000) - 120);
     act(() => {
       useAuthStore.getState().setSession({
@@ -76,18 +76,19 @@ describe('useAuthStore', () => {
     });
 
     expect(useAuthStore.getState().getValidAccessToken()).toBeNull();
-    expect(useAuthStore.getState().accessToken).toBeNull();
+    expect(useAuthStore.getState().accessToken).toBe(expired);
 
     const { result } = renderHook(() => useIsAuthenticated());
-    expect(result.current).toBe(false);
+    expect(result.current).toBe(true);
   });
 
-  it('purgeExpiredAuthSession drops a dead persisted token', () => {
+  it('purgeExpiredAuthSession drops a session with no refresh token', () => {
     const expired = jwtWithExp(Math.floor(Date.now() / 1000) - 120);
     act(() => {
       useAuthStore.getState().setSession({
         ...session,
         accessToken: expired,
+        refreshToken: null,
         accessTokenExpiresAt: null,
       });
       purgeExpiredAuthSession();

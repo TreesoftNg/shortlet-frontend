@@ -1,13 +1,13 @@
 'use client';
 
 import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
 import { MessagingSessionBridge } from '@/features/messages/components/MessagingSessionBridge';
-import { purgeExpiredAuthSession } from '@/features/auth/store/auth-store';
 import { useEffect } from 'react';
 
 /**
- * After Zustand rehydrates from localStorage, drop expired sessions so the UI
- * never keeps showing a signed-in user without a usable token.
+ * After Zustand rehydrates from localStorage, renew an expired access token
+ * (or clear the session when refresh is impossible).
  */
 export function AuthSessionProvider({
   children,
@@ -18,7 +18,9 @@ export function AuthSessionProvider({
 
   useEffect(() => {
     if (!hydrated) return;
-    purgeExpiredAuthSession();
+    void ensureAccessToken().catch(() => {
+      // Offline — keep the persisted session for a later retry.
+    });
   }, [hydrated]);
 
   return (

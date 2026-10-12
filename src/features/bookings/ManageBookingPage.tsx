@@ -31,8 +31,9 @@ import {
   MessageCircle,
   Users,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useMemo, useState, type ReactNode } from 'react';
+import { restoreBookingSessionFromParams } from '@/data/lib/booking-session';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type ManageBookingPageProps = {
   bookingId: string;
@@ -75,10 +76,38 @@ function statusStyles(status: string): { bg: string; color: string } {
 
 export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const hydrated = useAuthHydrated();
   const isAuthenticated = useIsAuthenticated();
+  const emailToken = searchParams.get('token');
+  const [tokenReady, setTokenReady] = useState(() => !emailToken);
+
+  useEffect(() => {
+    if (!emailToken) {
+      setTokenReady(true);
+      return;
+    }
+    restoreBookingSessionFromParams({
+      bookingId,
+      bookingToken: emailToken,
+    });
+    // Drop token from the address bar after restoring session.
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('token')) {
+        url.searchParams.delete('token');
+        window.history.replaceState(
+          {},
+          '',
+          `${url.pathname}${url.search}${url.hash}`,
+        );
+      }
+    }
+    setTokenReady(true);
+  }, [bookingId, emailToken]);
+
   const { data: booking, isPending, isError, error, refetch } =
-    useBooking(bookingId);
+    useBooking(tokenReady ? bookingId : undefined);
   const cancelBooking = useCancelBooking();
   const startPayment = useStartBookingPayment();
   const [reason, setReason] = useState('');
@@ -94,7 +123,7 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
     [booking],
   );
 
-  if (!hydrated || isPending) {
+  if (!hydrated || !tokenReady || isPending) {
     return (
       <AppPage footer={false} mainPt={{ base: 6, md: '44px' }}>
         <Skeleton h="36px" w="240px" mb={6} borderRadius="full" />

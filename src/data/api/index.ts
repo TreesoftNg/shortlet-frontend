@@ -3,15 +3,19 @@ export { getPublicContactDetails, submitContactMessage } from './contact';
 export type { PublicContactDetails, SubmitContactInput } from './contact';
 export {
   createCustomerAccount,
+  forgotCustomerPassword,
   loginCustomer,
   resendCustomerOtp,
+  resetCustomerPassword,
   verifyCustomerOtp,
 } from './customers';
 export type {
   CreateCustomerAccountInput,
   CustomerLoginInput,
   CustomerLoginResult,
+  ForgotPasswordInput,
   ResendEmailOtpInput,
+  ResetPasswordInput,
   VerifyEmailOtpInput,
 } from './customers';
 
