@@ -33,12 +33,13 @@ import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
 import { queryKeys } from '@/data/query-keys';
 import type { BookingQuote as ApiBookingQuote } from '@/data/types';
 import type { Property, TripTab, Unit } from '@/data/types';
-import { isAccessTokenExpired } from '@/features/auth/lib/access-token';
+import { useValidAccessToken } from '@/features/auth/hooks/useValidAccessToken';
 import {
   invalidateAuthSession,
   isAuthApiError,
   useAuthStore,
 } from '@/features/auth/store/auth-store';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
 import { getDefaultStay } from '@/shared/lib/default-stay';
 import {
   formatDatesRangeLabel,
@@ -157,8 +158,8 @@ export function useCreateReview() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateReviewInput) => {
-      const accessToken = useAuthStore.getState().getValidAccessToken();
+    mutationFn: async (input: CreateReviewInput) => {
+      const accessToken = await ensureAccessToken();
       if (!accessToken) {
         throw new Error('Sign in to leave a review.');
       }
@@ -179,16 +180,6 @@ export function useCreateReview() {
 }
 
 // ── Bookings ──────────────────────────────────────────────────────────────
-
-function useValidAccessToken() {
-  return useAuthStore((s) => {
-    if (!s.accessToken) return null;
-    if (isAccessTokenExpired(s.accessToken, s.accessTokenExpiresAt)) {
-      return null;
-    }
-    return s.accessToken;
-  });
-}
 
 function useAllBookingsQuery() {
   const accessToken = useValidAccessToken();
@@ -232,7 +223,7 @@ export function useBookingCounts() {
 export function useCreateBooking() {
   return useMutation({
     mutationFn: async (input: CreateBookingInput) => {
-      const token = useAuthStore.getState().getValidAccessToken();
+      const token = await ensureAccessToken();
       if (!token) {
         return createBooking(input, null);
       }
@@ -250,12 +241,12 @@ export function useCreateBooking() {
 
 export function useVerifyBookingPayment() {
   return useMutation({
-    mutationFn: (args: {
+    mutationFn: async (args: {
       bookingId: string;
       transactionId?: string;
       bookingToken?: string | null;
     }) => {
-      const accessToken = useAuthStore.getState().getValidAccessToken();
+      const accessToken = await ensureAccessToken();
       return verifyBookingPayment(
         args.bookingId,
         { transactionId: args.transactionId },
@@ -278,12 +269,12 @@ export function useBooking(bookingId: string | undefined) {
 export function useCancelBooking() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (args: {
+    mutationFn: async (args: {
       bookingId: string;
       reason?: string;
       bookingToken?: string | null;
     }) => {
-      const accessToken = useAuthStore.getState().getValidAccessToken();
+      const accessToken = await ensureAccessToken();
       const input: CancelBookingInput = { reason: args.reason };
       return cancelBooking(args.bookingId, input, {
         accessToken,
@@ -302,8 +293,8 @@ export function useCancelBooking() {
 
 export function useStartBookingPayment() {
   return useMutation({
-    mutationFn: (args: { bookingId: string; returnUrl: string }) => {
-      const accessToken = useAuthStore.getState().getValidAccessToken();
+    mutationFn: async (args: { bookingId: string; returnUrl: string }) => {
+      const accessToken = await ensureAccessToken();
       return startBookingPayment(args.bookingId, args.returnUrl, {
         accessToken,
         bookingToken: getBookingAccessToken(args.bookingId),

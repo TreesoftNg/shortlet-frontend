@@ -76,8 +76,8 @@ export const useAuthStore = create<AuthState>()(
       getValidAccessToken: () => {
         const { accessToken, accessTokenExpiresAt } = get();
         if (!accessToken) return null;
+        // Expired tokens are refreshed by ensureAccessToken — do not log out here.
         if (isAccessTokenExpired(accessToken, accessTokenExpiresAt)) {
-          get().logout();
           return null;
         }
         return accessToken;
@@ -91,37 +91,40 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         accessTokenExpiresAt: state.accessTokenExpiresAt,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (!state?.accessToken) return;
-        if (
-          isAccessTokenExpired(state.accessToken, state.accessTokenExpiresAt)
-        ) {
-          // Defer so rehydrate finishes before we wipe storage.
-          queueMicrotask(() => {
-            useAuthStore.getState().logout();
-          });
-        }
+      onRehydrateStorage: () => {
+        // Refresh is handled by AuthSessionProvider after hydrate.
       },
     },
   ),
 );
 
-/** Clears a dead session left in localStorage after API/token expiry. */
+/**
+ * @deprecated Prefer ensureAccessToken() — kept for callers that only need a sync purge
+ * when there is no refresh token left.
+ */
 export function purgeExpiredAuthSession() {
   const state = useAuthStore.getState();
-  if (!state.accessToken) {
+  if (!state.accessToken && !state.refreshToken) {
     if (state.user) state.logout();
     return;
   }
-  if (isAccessTokenExpired(state.accessToken, state.accessTokenExpiresAt)) {
+  if (
+    state.accessToken &&
+    isAccessTokenExpired(state.accessToken, state.accessTokenExpiresAt) &&
+    !state.refreshToken
+  ) {
     state.logout();
   }
 }
 
 export function useIsAuthenticated() {
   return useAuthStore((s) => {
-    if (s.user == null || !s.accessToken) return false;
-    return !isAccessTokenExpired(s.accessToken, s.accessTokenExpiresAt);
+    if (s.user == null) return false;
+    if (s.accessToken && !isAccessTokenExpired(s.accessToken, s.accessTokenExpiresAt)) {
+      return true;
+    }
+    // Keep signed-in UI while a refresh token can renew the access token.
+    return Boolean(s.refreshToken);
   });
 }
 

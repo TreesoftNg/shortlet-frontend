@@ -112,7 +112,10 @@ export function useMessagingSocket(options: {
             // Fall through to REST.
           }
         }
-        const token = useAuthStore.getState().getValidAccessToken();
+        const { ensureAccessToken } = await import(
+          '@/features/auth/lib/refresh-session'
+        );
+        const token = await ensureAccessToken();
         if (!token) return;
         await markConversationRead(id, token);
         clearLocalUnread(id);
@@ -366,7 +369,10 @@ export function useMessagingSocket(options: {
         // Fall through to REST.
       }
 
-      const token = useAuthStore.getState().getValidAccessToken();
+      const { ensureAccessToken } = await import(
+        '@/features/auth/lib/refresh-session'
+      );
+      const token = await ensureAccessToken();
       if (!token) throw new Error('Sign in to send messages');
       const saved = await sendConversationMessage(
         conversationId,

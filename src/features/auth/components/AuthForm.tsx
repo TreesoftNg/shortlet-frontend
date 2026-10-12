@@ -2,8 +2,10 @@
 
 import {
   createCustomerAccount,
+  forgotCustomerPassword,
   loginCustomer,
   resendCustomerOtp,
+  resetCustomerPassword,
   verifyCustomerOtp,
 } from '@/data/api/customers';
 import { ApiError } from '@/data/api/http';
@@ -52,7 +54,6 @@ export function AuthForm() {
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [otp, setOtp] = useState('');
@@ -63,10 +64,21 @@ export function AuthForm() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const isSignIn = mode === 'signin';
+  const isForgot = mode === 'forgot';
+  const isSignUp = mode === 'signup';
 
   const resetAlerts = () => {
     setError(null);
     setNotice(null);
+  };
+
+  const goToSignIn = (message?: string) => {
+    setMode('signin');
+    setStep('credentials');
+    setOtp('');
+    setPassword('');
+    resetAlerts();
+    if (message) setNotice(message);
   };
 
   const completeLogin = async () => {
@@ -94,12 +106,55 @@ export function AuthForm() {
     resetAlerts();
     const trimmedEmail = email.trim();
 
+    if (isForgot && step === 'credentials') {
+      if (!trimmedEmail) {
+        setError('Enter your email address.');
+        return;
+      }
+      setSubmitting(true);
+      try {
+        await forgotCustomerPassword({ email: trimmedEmail });
+        setStep('otp');
+        setNotice('If an account exists for that email, we sent a reset code.');
+      } catch (submitError) {
+        setError(errorMessage(submitError));
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    if (isForgot && step === 'otp') {
+      if (otp.trim().length < 4) {
+        setError('Enter the reset code from your email.');
+        return;
+      }
+      if (!isValidGuestPassword(password)) {
+        setError(GUEST_PASSWORD_HINT);
+        return;
+      }
+      setSubmitting(true);
+      try {
+        await resetCustomerPassword({
+          email: trimmedEmail,
+          otp: otp.trim(),
+          newPassword: password,
+        });
+        goToSignIn('Password updated. Sign in with your new password.');
+      } catch (submitError) {
+        setError(errorMessage(submitError));
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     if (!trimmedEmail || !password) {
       setError('Enter your email and password.');
       return;
     }
 
-    if (!isSignIn && step === 'credentials') {
+    if (isSignUp && step === 'credentials') {
       if (!firstName.trim() || !lastName.trim()) {
         setError('Enter your first and last name.');
         return;
@@ -108,13 +163,9 @@ export function AuthForm() {
         setError(GUEST_PASSWORD_HINT);
         return;
       }
-      if (password !== confirmPassword) {
-        setError('Passwords do not match.');
-        return;
-      }
     }
 
-    if (!isSignIn && step === 'otp' && otp.trim().length < 4) {
+    if (isSignUp && step === 'otp' && otp.trim().length < 4) {
       setError('Enter the verification code from your email.');
       return;
     }
@@ -142,9 +193,7 @@ export function AuthForm() {
       try {
         await completeLogin();
       } catch (loginError) {
-        setMode('signin');
-        setStep('credentials');
-        setNotice('Email verified. Sign in to continue.');
+        goToSignIn('Email verified. Sign in to continue.');
         setError(errorMessage(loginError));
       }
     } catch (submitError) {
@@ -158,14 +207,39 @@ export function AuthForm() {
     resetAlerts();
     setSubmitting(true);
     try {
-      await resendCustomerOtp({ email: email.trim() });
-      setNotice('A new code is on its way.');
+      if (isForgot) {
+        await forgotCustomerPassword({ email: email.trim() });
+        setNotice('If an account exists for that email, we sent a reset code.');
+      } else {
+        await resendCustomerOtp({ email: email.trim() });
+        setNotice('A new code is on its way.');
+      }
     } catch (resendError) {
       setError(errorMessage(resendError));
     } finally {
       setSubmitting(false);
     }
   };
+
+  const heading =
+    isForgot && step === 'credentials'
+      ? 'Reset your password'
+      : step === 'otp'
+        ? 'Check your email'
+        : isSignIn
+          ? 'Welcome back'
+          : 'Create your account';
+
+  const subtitle =
+    isForgot && step === 'credentials'
+      ? 'Enter your email and we will send a reset code if an account exists.'
+      : step === 'otp'
+        ? isForgot
+          ? `Enter the code we sent to ${email.trim()}, then choose a new password.`
+          : `Enter the code we sent to ${email.trim()}.`
+        : isSignIn
+          ? 'Sign in to manage your bookings and check out faster.'
+          : 'Join Sunmade to book verified shortlets across Lagos & Abuja.';
 
   return (
     <Box w="full" maxW="420px" px={{ base: 5, md: 0 }} py={{ base: 8, md: 0 }}>
@@ -175,21 +249,13 @@ export function AuthForm() {
         fontWeight="800"
         letterSpacing="-0.02em"
       >
-        {step === 'otp'
-          ? 'Check your email'
-          : isSignIn
-            ? 'Welcome back'
-            : 'Create your account'}
+        {heading}
       </Heading>
       <Text color="ink.2" fontSize="14px" mt="6px">
-        {step === 'otp'
-          ? `Enter the code we sent to ${email.trim()}.`
-          : isSignIn
-            ? 'Sign in to manage your bookings and check out faster.'
-            : 'Join Sunmade to book verified shortlets across Lagos & Abuja.'}
+        {subtitle}
       </Text>
 
-      {step === 'credentials' ? (
+      {!isForgot && step === 'credentials' ? (
         <Grid
           templateColumns="1fr 1fr"
           bg="bg.soft"
@@ -221,6 +287,7 @@ export function AuthForm() {
                 cursor="pointer"
                 onClick={() => {
                   setMode(item.id);
+                  setStep('credentials');
                   resetAlerts();
                 }}
               >
@@ -234,12 +301,7 @@ export function AuthForm() {
       )}
 
       {error ? (
-        <Text
-          color="danger"
-          fontSize="14px"
-          mb="14px"
-          role="alert"
-        >
+        <Text color="danger" fontSize="14px" mb="14px" role="alert">
           {error}
         </Text>
       ) : null}
@@ -249,7 +311,7 @@ export function AuthForm() {
         </Text>
       ) : null}
 
-      {step === 'otp' ? (
+      {step === 'otp' && isSignUp ? (
         <>
           <LabeledField label="Verification code" mb="12px">
             <Input
@@ -302,9 +364,72 @@ export function AuthForm() {
             </Text>
           </Flex>
         </>
-      ) : (
+      ) : null}
+
+      {step === 'otp' && isForgot ? (
         <>
-          {!isSignIn ? (
+          <LabeledField label="Reset code" mb="12px">
+            <Input
+              {...fieldInputProps}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="6-digit code"
+              autoComplete="one-time-code"
+              inputMode="numeric"
+            />
+          </LabeledField>
+          <PasswordField
+            value={password}
+            onChange={setPassword}
+            placeholder="New password"
+            autoComplete="new-password"
+            mb="8px"
+          />
+          <Text color="ink.3" fontSize="12px" mb="16px">
+            {GUEST_PASSWORD_HINT}
+          </Text>
+          <AppButton
+            size="lg"
+            fullWidth
+            disabled={submitting}
+            onClick={() => {
+              void handleSubmit();
+            }}
+          >
+            {submitting ? 'Updating…' : 'Update password'}
+          </AppButton>
+          <Flex justify="space-between" mt="16px" fontSize="14px">
+            <Box
+              as="button"
+              fontWeight="700"
+              bg="transparent"
+              border="none"
+              cursor={submitting ? 'not-allowed' : 'pointer'}
+              opacity={submitting ? 0.6 : 1}
+              onClick={() => {
+                if (submitting) return;
+                void handleResend();
+              }}
+            >
+              Resend code
+            </Box>
+            <Text
+              as="button"
+              color="ink.3"
+              bg="transparent"
+              border="none"
+              cursor="pointer"
+              onClick={() => goToSignIn()}
+            >
+              Back to sign in
+            </Text>
+          </Flex>
+        </>
+      ) : null}
+
+      {step === 'credentials' ? (
+        <>
+          {isSignUp ? (
             <Flex gap="12px" mb="12px" direction={{ base: 'column', sm: 'row' }}>
               <LabeledField label="First name" flex="1">
                 <Input
@@ -340,27 +465,19 @@ export function AuthForm() {
             />
           </LabeledField>
 
-          <PasswordField
-            value={password}
-            onChange={setPassword}
-            placeholder={isSignIn ? 'Password' : 'Create a password'}
-            autoComplete={isSignIn ? 'current-password' : 'new-password'}
-            mb={!isSignIn ? '8px' : '12px'}
-          />
-          {!isSignIn ? (
-            <>
-              <Text color="ink.3" fontSize="12px" mb="12px">
-                {GUEST_PASSWORD_HINT}
-              </Text>
-              <PasswordField
-                label="Confirm password"
-                value={confirmPassword}
-                onChange={setConfirmPassword}
-                placeholder="Confirm password"
-                aria-label="Confirm password"
-                autoComplete="new-password"
-              />
-            </>
+          {!isForgot ? (
+            <PasswordField
+              value={password}
+              onChange={setPassword}
+              placeholder={isSignIn ? 'Password' : 'Create a password'}
+              autoComplete={isSignIn ? 'current-password' : 'new-password'}
+              mb={!isSignIn ? '8px' : '12px'}
+            />
+          ) : null}
+          {isSignUp ? (
+            <Text color="ink.3" fontSize="12px" mb="12px">
+              {GUEST_PASSWORD_HINT}
+            </Text>
           ) : null}
 
           {isSignIn ? (
@@ -401,18 +518,37 @@ export function AuthForm() {
                 Remember me
               </Flex>
               <Box
+                as="button"
                 textAlign={{ base: 'center', sm: 'right' }}
                 lineHeight="1.35"
+                fontWeight="700"
+                fontSize="14px"
+                bg="transparent"
+                border="none"
+                cursor="pointer"
+                onClick={() => {
+                  setMode('forgot');
+                  setStep('credentials');
+                  setPassword('');
+                  setOtp('');
+                  resetAlerts();
+                }}
               >
-                <Text fontWeight="700" fontSize="14px">
-                  Forgot password?
-                </Text>
-                <Box color="ink.3" fontSize="13px">
-                  <a href="mailto:hello@sunmadeapartments.com">
-                    hello@sunmadeapartments.com
-                  </a>
-                </Box>
+                Forgot password?
               </Box>
+            </Flex>
+          ) : isForgot ? (
+            <Flex justify="flex-end" mb="22px" fontSize="14px">
+              <Text
+                as="button"
+                color="ink.3"
+                bg="transparent"
+                border="none"
+                cursor="pointer"
+                onClick={() => goToSignIn()}
+              >
+                Back to sign in
+              </Text>
             </Flex>
           ) : (
             <Box h="10px" />
@@ -427,13 +563,17 @@ export function AuthForm() {
             }}
           >
             {submitting
-              ? isSignIn
-                ? 'Signing in…'
-                : 'Creating account…'
-              : 'Continue'}
+              ? isForgot
+                ? 'Sending…'
+                : isSignIn
+                  ? 'Signing in…'
+                  : 'Creating account…'
+              : isForgot
+                ? 'Send reset code'
+                : 'Continue'}
           </AppButton>
         </>
-      )}
+      ) : null}
 
       <Text color="ink.3" fontSize="13px" textAlign="center" mt="20px">
         By continuing you agree to our{' '}

@@ -4,6 +4,7 @@ import { createConversation } from '@/data/api/conversations';
 import { ApiError } from '@/data/api/http';
 import { queryKeys } from '@/data/query-keys';
 import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
 import {
   isAuthApiError,
   useAuthStore,
@@ -50,9 +51,20 @@ export function MessagesPage() {
 
   useEffect(() => {
     if (!error || !isAuthApiError(error)) return;
-    logout();
-    router.replace('/auth');
-  }, [error, logout, router]);
+    void ensureAccessToken()
+      .then((token) => {
+        if (token) {
+          void refetch();
+          return;
+        }
+        logout();
+        router.replace('/auth');
+      })
+      .catch(() => {
+        logout();
+        router.replace('/auth');
+      });
+  }, [error, logout, refetch, router]);
 
   async function handleStartChat() {
     setStartError(null);
@@ -77,7 +89,7 @@ export function MessagesPage() {
 
     setStarting(true);
     try {
-      const token = useAuthStore.getState().getValidAccessToken();
+      const token = await ensureAccessToken();
       if (!token) {
         router.replace('/auth');
         return;
