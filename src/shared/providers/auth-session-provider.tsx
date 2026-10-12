@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
+import { MessagingSessionBridge } from '@/features/messages/components/MessagingSessionBridge';
 import { purgeExpiredAuthSession } from '@/features/auth/store/auth-store';
 import { useEffect } from 'react';
 
@@ -20,5 +21,10 @@ export function AuthSessionProvider({
     purgeExpiredAuthSession();
   }, [hydrated]);
 
-  return children;
+  return (
+    <>
+      <MessagingSessionBridge />
+      {children}
+    </>
+  );
 }

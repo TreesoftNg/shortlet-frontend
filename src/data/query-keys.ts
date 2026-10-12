@@ -71,4 +71,15 @@ export const queryKeys = {
     detail: (id: string) =>
       [...queryKeys.bookings.all, 'detail', id] as const,
   },
+
+  messages: {
+    all: ['messages'] as const,
+    conversations: () =>
+      [...queryKeys.messages.all, 'conversations'] as const,
+    detail: (id: string) =>
+      [...queryKeys.messages.all, 'detail', id] as const,
+    thread: (id: string) =>
+      [...queryKeys.messages.all, 'thread', id] as const,
+    unread: () => [...queryKeys.messages.all, 'unread'] as const,
+  },
 } as const;

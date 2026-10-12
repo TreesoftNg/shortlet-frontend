@@ -51,3 +51,23 @@ export type {
 } from './bookings';
 export type { CancelBookingInput } from '@/data/types/booking-api';
 export type { PropertySort } from '@/data/types';
+
+export {
+  createConversation,
+  getConversation,
+  getUnreadCount,
+  listConversations,
+  listMessages,
+  markConversationRead,
+  reopenConversation,
+  sendConversationMessage,
+} from './conversations';
+export type {
+  ConversationDetail,
+  ConversationListItem,
+  ConversationMessage,
+  CreateConversationInput,
+  MessagePage,
+  SendMessageInput,
+  UnreadCount,
+} from '@/data/types/messaging';

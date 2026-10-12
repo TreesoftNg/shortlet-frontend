@@ -11,18 +11,30 @@ function base64UrlDecode(value: string): string {
   return Buffer.from(withPad, 'base64').toString('utf8');
 }
 
-/** Returns JWT `exp` as epoch milliseconds, or null if missing/unreadable. */
-export function getJwtExpiryMs(token: string): number | null {
+function readJwtPayload(token: string): Record<string, unknown> | null {
   const parts = token.split('.');
   if (parts.length < 2 || !parts[1]) return null;
   try {
-    const payload = JSON.parse(base64UrlDecode(parts[1])) as {
-      exp?: unknown;
-    };
-    return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+    const payload = JSON.parse(base64UrlDecode(parts[1])) as unknown;
+    if (typeof payload !== 'object' || payload === null) return null;
+    return payload as Record<string, unknown>;
   } catch {
     return null;
   }
+}
+
+/** Returns JWT `exp` as epoch milliseconds, or null if missing/unreadable. */
+export function getJwtExpiryMs(token: string): number | null {
+  const payload = readJwtPayload(token);
+  return typeof payload?.exp === 'number' ? payload.exp * 1000 : null;
+}
+
+/** Returns JWT `sub` (user id) when present. */
+export function getJwtSubject(token: string): string | null {
+  const payload = readJwtPayload(token);
+  return typeof payload?.sub === 'string' && payload.sub.trim()
+    ? payload.sub.trim()
+    : null;
 }
 
 export function isAccessTokenExpired(
