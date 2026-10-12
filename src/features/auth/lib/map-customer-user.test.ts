@@ -24,13 +24,29 @@ describe('mapCustomerUser', () => {
     expect(user.username).toBe('ada');
   });
 
-  it('falls back to the form email when the API omits a profile', () => {
+  it('falls back to the form email when the API omits a profile and JWT', () => {
     const user = mapCustomerUser(
       { accessToken: 'tok' },
       { email: 'guest@example.com', firstName: 'Temi' },
     );
     expect(user.id).toBe('guest@example.com');
     expect(user.firstName).toBe('Temi');
+  });
+
+  it('uses JWT sub as the user id when login returns tokens only', () => {
+    const header = Buffer.from(
+      JSON.stringify({ alg: 'none', typ: 'JWT' }),
+    ).toString('base64url');
+    const payload = Buffer.from(
+      JSON.stringify({ sub: 'user-uuid-1', tid: 'tenant-1', sid: 'session-1' }),
+    ).toString('base64url');
+    const accessToken = `${header}.${payload}.sig`;
+
+    const user = mapCustomerUser(
+      { accessToken },
+      { email: 'guest@example.com', firstName: 'Temi' },
+    );
+    expect(user.id).toBe('user-uuid-1');
   });
 });
 

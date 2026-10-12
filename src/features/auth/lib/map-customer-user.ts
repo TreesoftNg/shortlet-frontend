@@ -1,4 +1,5 @@
 import type { CustomerLoginResult, CustomerUserDto } from '@/data/api/customers';
+import { getJwtSubject } from '@/features/auth/lib/access-token';
 import type { AuthUser } from '@/features/auth/types';
 
 function isUserDto(value: unknown): value is CustomerUserDto {
@@ -39,9 +40,13 @@ export function mapCustomerUser(
   const firstName = user?.firstName || fallback.firstName || '';
   const lastName = user?.lastName || fallback.lastName || '';
   const email = user?.email || fallback.email;
+  // Guest login returns tokens only — prefer JWT `sub` over falling back to email.
+  const idFromToken = result?.accessToken
+    ? getJwtSubject(result.accessToken)
+    : null;
 
   return {
-    id: user?.id || email,
+    id: user?.id || idFromToken || email,
     email,
     firstName: firstName || email.split('@')[0] || 'Guest',
     lastName,

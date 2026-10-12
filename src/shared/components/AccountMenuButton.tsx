@@ -11,12 +11,14 @@ import {
   useIsAuthenticated,
 } from '@/features/auth/store/auth-store';
 import { Box, Flex, Menu, Portal, Text } from '@chakra-ui/react';
+import { UnreadBadge } from '@/features/messages/components/UnreadBadge';
 import {
   CircleHelp,
   LogIn,
   LogOut,
   MapPin,
   Menu as MenuIcon,
+  MessageCircle,
   User,
   UserRound,
 } from 'lucide-react';
@@ -28,6 +30,7 @@ type MenuLink = {
   href: string;
   label: string;
   icon: typeof User;
+  showUnread?: boolean;
 };
 
 const guestLinks: MenuLink[] = [
@@ -38,6 +41,13 @@ const guestLinks: MenuLink[] = [
 
 const memberLinks: MenuLink[] = [
   { value: 'account', href: '/account', label: 'Account', icon: UserRound },
+  {
+    value: 'messages',
+    href: '/messages',
+    label: 'Messages',
+    icon: MessageCircle,
+    showUnread: true,
+  },
   { value: 'contact', href: '/contact', label: 'Help', icon: CircleHelp },
 ];
 
@@ -161,7 +171,10 @@ export function AccountMenuButton() {
                     >
                       <Link href={item.href}>
                         <Flex align="center" gap="10px" w="full">
-                          <Icon size={16} strokeWidth={1.9} />
+                          <Box position="relative" display="inline-flex">
+                            <Icon size={16} strokeWidth={1.9} />
+                            {item.showUnread ? <UnreadBadge /> : null}
+                          </Box>
                           {item.label}
                         </Flex>
                       </Link>
