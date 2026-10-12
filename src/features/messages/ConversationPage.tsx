@@ -90,7 +90,7 @@ export function ConversationPage({ conversationId }: ConversationPageProps) {
   if (!hydrated || !isAuthenticated) {
     return (
       <AppPage footer={false} mainPt={{ base: 4, md: '32px' }}>
-        <SkeletonText noOfLines={6} />
+        <SkeletonText lines={6} />
       </AppPage>
     );
   }
@@ -134,9 +134,11 @@ export function ConversationPage({ conversationId }: ConversationPageProps) {
 
         {isPending ? (
           <Box flex="1" py={4}>
-            <Skeleton h="48px" mb={3} maxW="60%" />
-            <Skeleton h="48px" mb={3} maxW="50%" ml="auto" />
-            <Skeleton h="48px" maxW="55%" />
+            <Skeleton h="48px" mb={3} w="60%" />
+            <Flex justify="flex-end" mb={3}>
+              <Skeleton h="48px" w="50%" />
+            </Flex>
+            <Skeleton h="48px" w="55%" />
           </Box>
         ) : null}
 
