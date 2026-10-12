@@ -58,7 +58,7 @@ function currentGuestToken(): string | null {
 /**
  * Singleton customer messaging socket.
  * Auth is resolved on every connect/reconnect so a stale access token is not reused.
- * (Guest REST refresh is not wired yet — expired sessions still require re-login.)
+ * Callers should pass a freshly ensured token when possible (see ensureAccessToken).
  */
 export function getMessagingSocket(accessToken?: string): Socket | null {
   const token = accessToken ?? currentGuestToken();

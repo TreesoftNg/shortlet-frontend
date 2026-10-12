@@ -4,7 +4,7 @@ import { createConversation } from '@/data/api/conversations';
 import { ApiError } from '@/data/api/http';
 import { queryKeys } from '@/data/query-keys';
 import type { Booking } from '@/data/types';
-import { useAuthStore } from '@/features/auth/store/auth-store';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
 import { CoverImage } from '@/shared/components/CoverImage';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -35,7 +35,7 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
 
   async function openTripChat() {
     setMessageError(null);
-    const token = useAuthStore.getState().getValidAccessToken();
+    const token = await ensureAccessToken();
     if (!token) {
       router.push('/auth');
       return;

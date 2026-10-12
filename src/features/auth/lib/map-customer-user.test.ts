@@ -55,7 +55,12 @@ describe('isValidGuestPassword', () => {
     expect(isValidGuestPassword('Sunmade-guest-1')).toBe(true);
   });
 
+  it('accepts an 8-character password with uppercase and special', () => {
+    expect(isValidGuestPassword('Abcdef!1')).toBe(true);
+  });
+
   it('rejects short or missing special/uppercase', () => {
+    expect(isValidGuestPassword('Abcd!12')).toBe(false);
     expect(isValidGuestPassword('short')).toBe(false);
     expect(isValidGuestPassword('noupperorspecial1')).toBe(false);
   });

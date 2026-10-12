@@ -8,6 +8,7 @@ import {
   useBookings,
 } from '@/features/trips/hooks/useTripsData';
 import { ApiError } from '@/data/api/http';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
 import {
   isAuthApiError,
   useAuthStore,
@@ -43,9 +44,21 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
   useEffect(() => {
     const err = countsErr ?? listErr;
     if (!err || !isAuthApiError(err)) return;
-    logout();
-    router.replace('/auth');
-  }, [countsErr, listErr, logout, router]);
+    void ensureAccessToken()
+      .then((token) => {
+        if (token) {
+          void refetchCounts();
+          void refetchList();
+          return;
+        }
+        logout();
+        router.replace('/auth');
+      })
+      .catch(() => {
+        logout();
+        router.replace('/auth');
+      });
+  }, [countsErr, listErr, logout, refetchCounts, refetchList, router]);
 
   if (!isAuthenticated && !embedded) {
     return (
