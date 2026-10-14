@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import { Star } from 'lucide-react';
 
 type RatingStarsProps = {
