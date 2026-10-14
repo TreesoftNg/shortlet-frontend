@@ -107,9 +107,9 @@ describe('messaging-cache', () => {
     const next = applyMessageToConversationList(list, incoming, {
       incrementUnread: true,
     });
-    expect(next[0]?.id).toBe('conv-1');
-    expect(next[0]?.unreadCount).toBe(2);
-    expect(next[0]?.lastMessagePreview).toBe('New reply');
+    expect(next?.[0]?.id).toBe('conv-1');
+    expect(next?.[0]?.unreadCount).toBe(2);
+    expect(next?.[0]?.lastMessagePreview).toBe('New reply');
   });
 
   it('clears unread for one conversation', () => {
@@ -137,7 +137,7 @@ describe('messaging-cache', () => {
       message({ senderType: 'staff', content: 'On it' }),
       { incrementUnread: false, clearUnread: true },
     );
-    expect(next[0]?.unreadCount).toBe(0);
+    expect(next?.[0]?.unreadCount).toBe(0);
   });
 
   it('subtracts a conversation from badge totals', () => {
