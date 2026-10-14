@@ -2,8 +2,10 @@ import {
   createCustomerAccount,
   forgotCustomerPassword,
   loginCustomer,
+  resendCustomerOtp,
   resetCustomerPassword,
 } from '@/data/api/customers';
+import { ApiError } from '@/data/api/http';
 import { AuthForm } from '@/features/auth/components/AuthForm';
 import { useAuthStore } from '@/features/auth/store/auth-store';
 import { renderWithProviders } from '@/test/render';
@@ -46,6 +48,7 @@ describe('AuthForm', () => {
     });
     vi.mocked(forgotCustomerPassword).mockResolvedValue({});
     vi.mocked(resetCustomerPassword).mockResolvedValue({});
+    vi.mocked(resendCustomerOtp).mockResolvedValue({});
   });
 
   it(
@@ -93,6 +96,40 @@ describe('AuthForm', () => {
       expect(
         await screen.findByText(/enter the code we sent/i),
       ).toBeInTheDocument();
+    },
+    15_000,
+  );
+
+  it(
+    'sends unverified sign-in to the email verification step',
+    async () => {
+      vi.mocked(loginCustomer).mockRejectedValue(
+        new ApiError({
+          status: 403,
+          code: 'FORBIDDEN',
+          message: 'Verify your email before signing in',
+        }),
+      );
+      const user = userEvent.setup();
+      renderWithProviders(<AuthForm />);
+
+      await user.type(
+        screen.getByPlaceholderText('Email address'),
+        'ada@sunmadeapartments.com',
+      );
+      await user.type(screen.getByLabelText('Password'), 'Sunmade-guest-1');
+      await user.click(screen.getByRole('button', { name: /^continue$/i }));
+
+      expect(resendCustomerOtp).toHaveBeenCalledWith({
+        email: 'ada@sunmadeapartments.com',
+      });
+      expect(
+        await screen.findByText(/verify your email to continue/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('6-digit code'),
+      ).toBeInTheDocument();
+      expect(push).not.toHaveBeenCalled();
     },
     15_000,
   );
