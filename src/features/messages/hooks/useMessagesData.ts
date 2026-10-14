@@ -34,6 +34,9 @@ export function useConversations() {
     queryFn: () => listConversations(accessToken!, { limit: 50 }),
     enabled: isAuthenticated && Boolean(accessToken),
     ...readOptions,
+    // Always reload when opening the inbox so a prior mark-read / socket
+    // patch cannot leave a stale empty list after booking → chat → back.
+    refetchOnMount: 'always',
   });
 }
 
@@ -93,10 +96,12 @@ export function useMarkConversationRead() {
         queryKeys.messages.conversations(),
       );
       const prior = list?.find((c) => c.id === conversationId)?.unreadCount ?? 0;
-      queryClient.setQueryData<ConversationListItem[]>(
-        queryKeys.messages.conversations(),
-        (prev) => clearConversationUnread(prev, conversationId),
-      );
+      if (list) {
+        queryClient.setQueryData<ConversationListItem[]>(
+          queryKeys.messages.conversations(),
+          (prev) => clearConversationUnread(prev, conversationId),
+        );
+      }
       if (prior > 0) {
         queryClient.setQueryData<UnreadCount>(
           queryKeys.messages.unread(),
@@ -107,12 +112,14 @@ export function useMarkConversationRead() {
     onSuccess: (detail, conversationId) => {
       queryClient.setQueryData<ConversationListItem[]>(
         queryKeys.messages.conversations(),
-        (prev) =>
-          (prev ?? []).map((c) =>
+        (prev) => {
+          if (!prev) return prev;
+          return prev.map((c) =>
             c.id === conversationId
               ? { ...c, unreadCount: detail.unreadCount }
               : c,
-          ),
+          );
+        },
       );
       queryClient.setQueryData(
         queryKeys.messages.detail(conversationId),

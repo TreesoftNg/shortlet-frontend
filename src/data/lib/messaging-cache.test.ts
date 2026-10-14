@@ -117,8 +117,17 @@ describe('messaging-cache', () => {
       conversation({ id: 'conv-1', unreadCount: 4 }),
       conversation({ id: 'conv-2', unreadCount: 1 }),
     ];
-    expect(clearConversationUnread(list, 'conv-1')[0]?.unreadCount).toBe(0);
-    expect(clearConversationUnread(list, 'conv-1')[1]?.unreadCount).toBe(1);
+    expect(clearConversationUnread(list, 'conv-1')?.[0]?.unreadCount).toBe(0);
+    expect(clearConversationUnread(list, 'conv-1')?.[1]?.unreadCount).toBe(1);
+  });
+
+  it('does not invent an empty inbox when the list was never loaded', () => {
+    expect(clearConversationUnread(undefined, 'conv-1')).toBeUndefined();
+    expect(
+      applyMessageToConversationList(undefined, message(), {
+        incrementUnread: true,
+      }),
+    ).toBeUndefined();
   });
 
   it('clears unread when the open thread gets a staff reply', () => {

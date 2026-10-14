@@ -82,10 +82,12 @@ export function useMessagingSocket(options: {
         queryKeys.messages.conversations(),
       );
       const prior = list?.find((c) => c.id === id)?.unreadCount ?? 0;
-      queryClient.setQueryData<ConversationListItem[]>(
-        queryKeys.messages.conversations(),
-        (prev) => clearConversationUnread(prev, id),
-      );
+      if (list) {
+        queryClient.setQueryData<ConversationListItem[]>(
+          queryKeys.messages.conversations(),
+          (prev) => clearConversationUnread(prev, id),
+        );
+      }
       if (prior > 0) {
         queryClient.setQueryData<UnreadCount>(
           queryKeys.messages.unread(),
@@ -153,14 +155,19 @@ export function useMessagingSocket(options: {
           };
         },
       );
-      queryClient.setQueryData<ConversationListItem[]>(
-        queryKeys.messages.conversations(),
-        (prev) =>
+      const listKey = queryKeys.messages.conversations();
+      const cachedList =
+        queryClient.getQueryData<ConversationListItem[]>(listKey);
+      if (cachedList === undefined) {
+        void queryClient.invalidateQueries({ queryKey: listKey });
+      } else {
+        queryClient.setQueryData<ConversationListItem[]>(listKey, (prev) =>
           applyMessageToConversationList(prev, message, {
             incrementUnread: !isOwn && !isActive,
             clearUnread: isActive && !isOwn,
           }),
-      );
+        );
+      }
 
       if (!isOwn && isActive) {
         void persistMarkRead(message.conversationId);
@@ -222,12 +229,14 @@ export function useMessagingSocket(options: {
       );
       queryClient.setQueryData<ConversationListItem[]>(
         queryKeys.messages.conversations(),
-        (prev) =>
-          (prev ?? []).map((c) =>
+        (prev) => {
+          if (!prev) return prev;
+          return prev.map((c) =>
             c.id === payload.conversationId
               ? { ...c, unreadCount: payload.customerUnreadCount }
               : c,
-          ),
+          );
+        },
       );
     };
 

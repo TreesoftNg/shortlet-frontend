@@ -130,6 +130,16 @@ export function ConversationPage({ conversationId }: ConversationPageProps) {
               {closed ? 'Conversation closed' : 'Usually replies within a few hours'}
             </Text>
           </Box>
+          <Text
+            asChild
+            fontSize="13px"
+            color="ink.3"
+            fontWeight="600"
+            flexShrink={0}
+            _hover={{ color: 'ink' }}
+          >
+            <Link href="/trips">Trips</Link>
+          </Text>
         </Flex>
 
         {isPending ? (
