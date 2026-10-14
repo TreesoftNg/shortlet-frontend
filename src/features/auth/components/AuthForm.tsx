@@ -36,6 +36,14 @@ function errorMessage(error: unknown): string {
   return 'Something went wrong. Please try again.';
 }
 
+function isEmailUnverifiedError(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return false;
+  return (
+    error.status === 403 &&
+    /verify your email/i.test(error.message)
+  );
+}
+
 const fieldInputProps = {
   unstyled: true,
   fontSize: '15px',
@@ -173,7 +181,31 @@ export function AuthForm() {
     setSubmitting(true);
     try {
       if (isSignIn) {
-        await completeLogin();
+        try {
+          await completeLogin();
+        } catch (loginError) {
+          if (isEmailUnverifiedError(loginError)) {
+            resetAlerts();
+            try {
+              await resendCustomerOtp({ email: trimmedEmail });
+              setNotice(
+                'Verify your email to continue. We sent a new code to your inbox.',
+              );
+            } catch {
+              setNotice(
+                'Verify your email to continue. Enter the code we sent to your inbox.',
+              );
+            }
+            // Clear submitting before the OTP step mounts so the button
+            // does not flash "Verifying…" from this sign-in attempt.
+            setSubmitting(false);
+            setMode('signup');
+            setStep('otp');
+            setOtp('');
+            return;
+          }
+          throw loginError;
+        }
         return;
       }
 
