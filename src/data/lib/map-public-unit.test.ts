@@ -27,6 +27,7 @@ const sample: PublicUnitCard = {
     neighbourhood: 'Phase 1',
     display: null,
   },
+  reviews: { averageRating: 4.8, totalCount: 3 },
 };
 
 describe('toPublicUnitsTab', () => {
@@ -76,5 +77,15 @@ describe('mapPublicUnitToProperty', () => {
       'https://api-staging.sunmadeapartments.com/media/tenants/t1/units/unit-1/photos/p1/medium.webp',
     );
     expect(property.images[0]?.url).toBe(property.picture);
+    expect(property.review_summary).toMatchObject({
+      rating: 4.8,
+      count: 3,
+    });
+  });
+
+  it('defaults review summary when the API omits reviews', () => {
+    const { reviews: _reviews, ...withoutReviews } = sample;
+    const property = mapPublicUnitToProperty(withoutReviews);
+    expect(property.review_summary).toMatchObject({ rating: 0, count: 0 });
   });
 });

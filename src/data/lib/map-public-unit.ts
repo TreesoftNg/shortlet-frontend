@@ -5,6 +5,7 @@ import type {
   PublicUnitDetail,
   PublicUnitLocation,
   PublicUnitReviews,
+  PublicUnitReviewSummary,
 } from '@/data/types/public-unit';
 
 export type PublicUnitDetailMapped = {
@@ -59,6 +60,19 @@ function emptyReviewSummary() {
       location: 0,
       value: 0,
     },
+  };
+}
+
+function mapCardReviewSummary(
+  reviews: PublicUnitReviewSummary | null | undefined,
+) {
+  const count = reviews?.totalCount ?? 0;
+  const rating =
+    reviews?.averageRating != null ? toNumber(reviews.averageRating) : 0;
+  return {
+    ...emptyReviewSummary(),
+    rating,
+    count,
   };
 }
 
@@ -131,7 +145,7 @@ export function mapPublicUnitToProperty(unit: PublicUnitCard): Property {
       service_fee: 0,
       caution_deposit: 0,
     },
-    review_summary: emptyReviewSummary(),
+    review_summary: mapCardReviewSummary(unit.reviews),
     highlights: [],
     amenity_labels: [],
   };
