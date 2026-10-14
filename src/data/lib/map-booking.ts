@@ -203,7 +203,10 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
     api.nights ??
     (checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 1);
   const unitId = api.unitId || api.unit?.id || '';
-  const unitOrPropertyId = api.property?.id || unitId || id;
+  // Guest booking views expose property as unit.propertyId (not a nested property).
+  // Never fall back to unitId — that breaks create-conversation property lookups.
+  const propertyId =
+    api.unit?.propertyId || api.propertyId || api.property?.id || '';
 
   const guest = api.guest;
   const guestName = guest
@@ -213,10 +216,11 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
   return {
     id,
     reference: api.reference || id.slice(0, 8).toUpperCase(),
-    property_id: unitOrPropertyId,
+    property_id: propertyId,
     unit_id: unitId,
-    property_slug: unitId || api.property?.slug || id,
-    property_name: api.unit?.name || api.property?.name || 'Stay',
+    property_slug: api.property?.slug || unitId || id,
+    property_name:
+      api.unit?.propertyName || api.unit?.name || api.property?.name || 'Stay',
     property_image: image,
     unit_label: unitName,
     location_label: location,

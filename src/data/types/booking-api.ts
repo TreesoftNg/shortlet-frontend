@@ -98,10 +98,14 @@ export type ApiBooking = {
   price?: BookingQuotePrice | null;
   deposit?: BookingQuoteDeposit | null;
   unitId?: string | null;
+  /** Present on some payloads; guest booking views usually nest this under unit. */
+  propertyId?: string | null;
   unit?: {
     id?: string;
     name?: string | null;
     pictureUrl?: string | null;
+    propertyId?: string | null;
+    propertyName?: string | null;
     location?: {
       city?: string | null;
       display?: string | null;

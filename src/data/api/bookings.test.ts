@@ -30,6 +30,8 @@ describe('mapApiBookingToBooking', () => {
       unit: {
         id: 'unit-1',
         name: 'Charming 1bedroom',
+        propertyId: 'prop-1',
+        propertyName: 'Azure Lekki',
         pictureUrl: 'http://localhost:4000/media/photo.webp',
         location: { city: 'Lagos', display: 'Lagos, NG' },
       },
@@ -38,6 +40,8 @@ describe('mapApiBookingToBooking', () => {
     expect(booking.reference).toBe('SMD-123');
     expect(booking.status).toBe('confirmed');
     expect(booking.unit_id).toBe('unit-1');
+    expect(booking.property_id).toBe('prop-1');
+    expect(booking.property_id).not.toBe(booking.unit_id);
     expect(booking.guests).toBe(2);
     expect(booking.amount_paid).toBe(577025);
     expect(booking.property_image).toBe('https://api-staging.sunmadeapartments.com/media/photo.webp');

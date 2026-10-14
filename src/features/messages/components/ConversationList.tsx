@@ -20,6 +20,7 @@ function formatPreviewTime(iso: string | null): string {
 }
 
 function conversationContextLabel(conversation: ConversationListItem): string {
+  if (conversation.contextLabel) return conversation.contextLabel;
   if (conversation.bookingId) return 'About your stay';
   if (conversation.propertyId || conversation.unitId) return 'Property inquiry';
   return 'General chat';
