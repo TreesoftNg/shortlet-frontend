@@ -270,7 +270,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           fontWeight="700"
           fontSize="15px"
           _hover={{ bg: 'brand.600' }}
-          isDisabled={Boolean(datesUnavailable)}
+          disabled={Boolean(datesUnavailable)}
           onClick={() =>
             router.push(
               `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${clampedGuests}`,

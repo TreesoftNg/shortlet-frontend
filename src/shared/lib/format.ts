@@ -97,6 +97,6 @@ export function formatDatesRangeLabel(checkIn: string, checkOut: string): string
   return `${start.toLocaleDateString(DATE_DISPLAY_LOCALE, withMonth)} – ${end.toLocaleDateString(DATE_DISPLAY_LOCALE, withMonth)}`;
 }
 
-export function guestsLabel(guests: number): string {
-  return guests === 1 ? '1 guest' : `${guests} guests`;
+export function guestsLabel(guests: number | null): string {
+  return guests === 1 ? '1 guest' : `${guests ?? 0} guests`;
 }
