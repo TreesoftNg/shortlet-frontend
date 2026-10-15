@@ -47,7 +47,9 @@ function ShowAllPhotosButton({
       }}
     >
       <Grid3x3 size={16} strokeWidth={1.9} />
-      <Text as="span">Show all {total} photos</Text>
+      <Text as="span">
+        {total === 1 ? 'Show photo' : `Show all ${total} photos`}
+      </Text>
     </Flex>
   );
 }

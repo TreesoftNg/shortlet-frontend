@@ -8,28 +8,35 @@ import { Skeleton } from '@/shared/components';
 import { minBookableDate } from '@/shared/lib/default-stay';
 import {
   formatNaira,
+  formatShortDate,
   guestsLabel,
   nightsBetween,
   parseISODate,
   toISODate,
 } from '@/shared/lib/format';
 import type { Property, Unit } from '@/data/types';
-import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 type BookingCardProps = {
   property: Property;
   selectedUnit: Unit | null;
 };
 
-function shortDateLabel(iso: string) {
-  return parseISODate(iso).toLocaleDateString('en-US', {
-    month: 'numeric',
-    day: 'numeric',
-    year: 'numeric',
-  });
+function isDatesUnavailableError(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return false;
+  return (
+    error.code === 'BOOKING_UNAVAILABLE' ||
+    error.status === 409
+  );
 }
 
 export function BookingCard({ property, selectedUnit }: BookingCardProps) {
@@ -51,6 +58,10 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
     selectedUnit?.capacity.max ?? property.capacity.max ?? 16,
   );
   const unitId = selectedUnit?.id ?? property.id;
+
+  useEffect(() => {
+    if (guests > maxGuests) setGuests(maxGuests);
+  }, [guests, maxGuests, setGuests]);
 
   const {
     data: apiQuote,
@@ -77,6 +88,8 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
   const total = toMoneyNumber(apiQuote?.totalDueNow);
   const showQuote = Boolean(apiQuote);
   const quoteBusy = quotePending && !apiQuote;
+  const datesUnavailable =
+    quoteError && !apiQuote && isDatesUnavailableError(quoteErr);
 
   const lines = useMemo(
     () => [
@@ -102,6 +115,8 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
     }
     setDates(start, end);
   };
+
+  const clampedGuests = Math.min(guests, maxGuests);
 
   return (
     <Box>
@@ -135,7 +150,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
             <DateCell
               label="Check-in"
               value={checkIn}
-              display={shortDateLabel(checkIn)}
+              display={formatShortDate(checkIn)}
               min={minBookableDate()}
               editing={editingDate === 'checkIn'}
               borderRight
@@ -152,7 +167,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
             <DateCell
               label="Checkout"
               value={checkOut}
-              display={shortDateLabel(checkOut)}
+              display={formatShortDate(checkOut)}
               min={checkIn}
               editing={editingDate === 'checkOut'}
               onOpen={() => {
@@ -194,7 +209,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
                 Guests
               </Text>
               <Text fontSize="15px" color="ink.2">
-                {guestsLabel(guests)}
+                {guestsLabel(clampedGuests)}
               </Text>
             </Box>
             {guestsOpen ? (
@@ -225,18 +240,18 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
               <Flex align="center" gap="12px">
                 <StepButton
                   ariaLabel="Fewer guests"
-                  disabled={guests <= 1}
-                  onClick={() => setGuests(guests - 1)}
+                  disabled={clampedGuests <= 1}
+                  onClick={() => setGuests(clampedGuests - 1)}
                 >
                   <Minus size={16} strokeWidth={2} />
                 </StepButton>
                 <Text minW="24px" textAlign="center" fontWeight="700">
-                  {guests}
+                  {clampedGuests}
                 </Text>
                 <StepButton
                   ariaLabel="More guests"
-                  disabled={guests >= maxGuests}
-                  onClick={() => setGuests(guests + 1)}
+                  disabled={clampedGuests >= maxGuests}
+                  onClick={() => setGuests(clampedGuests + 1)}
                 >
                   <Plus size={16} strokeWidth={2} />
                 </StepButton>
@@ -255,9 +270,10 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           fontWeight="700"
           fontSize="15px"
           _hover={{ bg: 'brand.600' }}
+          disabled={Boolean(datesUnavailable)}
           onClick={() =>
             router.push(
-              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`,
+              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${clampedGuests}`,
             )
           }
         >
@@ -273,6 +289,12 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
             <Skeleton h="18px" mb="14px" borderRadius="full" />
             <Skeleton h="18px" mb="14px" w="70%" borderRadius="full" />
             <Skeleton h="22px" mt="8px" borderRadius="full" />
+          </Box>
+        ) : datesUnavailable ? (
+          <Box mt="16px">
+            <Text color="ink.2" fontSize="14px">
+              These dates are already booked. Please pick different dates.
+            </Text>
           </Box>
         ) : quoteError && !apiQuote ? (
           <Box mt="16px">
@@ -347,6 +369,22 @@ function DateCell({
   onClose: () => void;
   onChange: (value: string) => void;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Keep a stable native input mounted; open its picker explicitly.
+  // Closing on blur was killing the Chrome calendar before a date could be chosen.
+  const openPicker = () => {
+    onOpen();
+    const el = inputRef.current;
+    if (!el) return;
+    try {
+      el.showPicker();
+    } catch {
+      // Older browsers: focus is enough for the native control.
+      el.focus();
+    }
+  };
+
   return (
     <Box
       flex="1"
@@ -355,9 +393,7 @@ function DateCell({
       bg={editing ? 'bg.soft' : 'transparent'}
       position="relative"
       cursor="pointer"
-      onClick={() => {
-        if (!editing) onOpen();
-      }}
+      onClick={openPicker}
       _hover={{ bg: 'bg.soft' }}
     >
       <Text
@@ -368,29 +404,34 @@ function DateCell({
       >
         {label}
       </Text>
-      {editing ? (
-        <Input
-          type="date"
-          value={value}
-          min={min}
-          autoFocus
-          mt="4px"
-          h="32px"
-          px="8px"
-          fontSize="14px"
-          fontWeight="600"
-          borderColor="line"
-          borderRadius="8px"
-          bg="white"
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onClose}
-        />
-      ) : (
-        <Text fontSize="15px" color="ink.2">
-          {display}
-        </Text>
-      )}
+      <Text fontSize="15px" color="ink.2" mt="4px" pointerEvents="none">
+        {display}
+      </Text>
+      <input
+        ref={inputRef}
+        type="date"
+        value={value}
+        min={min}
+        aria-label={label}
+        onClick={(e) => {
+          e.stopPropagation();
+          openPicker();
+        }}
+        onChange={(e) => {
+          onChange(e.target.value);
+          onClose();
+        }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0,
+          cursor: 'pointer',
+          width: '100%',
+          height: '100%',
+          border: 'none',
+          background: 'transparent',
+        }}
+      />
     </Box>
   );
 }

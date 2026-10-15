@@ -32,7 +32,8 @@ export const usePropertyBookingStore = create<PropertyBookingUiState>(
   (set) => ({
     ...defaults,
     setSelectedUnitId: (id) => set({ selectedUnitId: id }),
-    setGuests: (guests) => set({ guests: Math.min(16, Math.max(1, guests)) }),
+    // Upper bound is enforced by the listing UI (unit/property capacity).
+    setGuests: (guests) => set({ guests: Math.max(1, Math.floor(guests) || 1) }),
     setDates: (checkIn, checkOut) => set({ checkIn, checkOut }),
     reset: () => set({ ...buildDefaults() }),
   }),

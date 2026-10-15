@@ -20,6 +20,8 @@ import { useEffect, useRef, useState } from 'react';
 type PropertyHeaderBarProps = {
   locationLabel: string;
   searchHref?: string;
+  /** Listing capacity — steppers must not exceed this. */
+  maxGuests?: number;
 };
 
 type EditField = 'dates' | 'guests';
@@ -34,6 +36,7 @@ const DATE_PRESETS = [
 export function PropertyHeaderBar({
   locationLabel,
   searchHref = '/search',
+  maxGuests = 16,
 }: PropertyHeaderBarProps) {
   const router = useRouter();
   const [open, setOpen] = useState<EditField | null>(null);
@@ -44,9 +47,11 @@ export function PropertyHeaderBar({
   const checkOut = usePropertyBookingStore((s) => s.checkOut);
   const setGuests = usePropertyBookingStore((s) => s.setGuests);
   const setDates = usePropertyBookingStore((s) => s.setDates);
+  const guestCap = Math.max(1, maxGuests);
+  const clampedGuests = Math.min(guests, guestCap);
 
   const datesLabel = formatDatesRangeLabel(checkIn, checkOut);
-  const guestsText = guestsLabel(guests);
+  const guestsText = guestsLabel(clampedGuests);
 
   useEffect(() => {
     if (!open) return;
@@ -324,19 +329,19 @@ export function PropertyHeaderBar({
                     borderColor="line"
                     align="center"
                     justify="center"
-                    cursor={guests <= 1 ? 'not-allowed' : 'pointer'}
-                    opacity={guests <= 1 ? 0.4 : 1}
-                    aria-disabled={guests <= 1}
+                    cursor={clampedGuests <= 1 ? 'not-allowed' : 'pointer'}
+                    opacity={clampedGuests <= 1 ? 0.4 : 1}
+                    aria-disabled={clampedGuests <= 1}
                     aria-label="Fewer guests"
                     onClick={() => {
-                      if (guests <= 1) return;
-                      setGuests(guests - 1);
+                      if (clampedGuests <= 1) return;
+                      setGuests(clampedGuests - 1);
                     }}
                   >
                     <Minus size={16} strokeWidth={2} />
                   </Flex>
                   <Text minW="28px" textAlign="center" fontWeight="700">
-                    {guests}
+                    {clampedGuests}
                   </Text>
                   <Flex
                     as="button"
@@ -347,13 +352,13 @@ export function PropertyHeaderBar({
                     borderColor="line"
                     align="center"
                     justify="center"
-                    cursor={guests >= 16 ? 'not-allowed' : 'pointer'}
-                    opacity={guests >= 16 ? 0.4 : 1}
-                    aria-disabled={guests >= 16}
+                    cursor={clampedGuests >= guestCap ? 'not-allowed' : 'pointer'}
+                    opacity={clampedGuests >= guestCap ? 0.4 : 1}
+                    aria-disabled={clampedGuests >= guestCap}
                     aria-label="More guests"
                     onClick={() => {
-                      if (guests >= 16) return;
-                      setGuests(guests + 1);
+                      if (clampedGuests >= guestCap) return;
+                      setGuests(clampedGuests + 1);
                     }}
                   >
                     <Plus size={16} strokeWidth={2} />

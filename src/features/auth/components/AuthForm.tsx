@@ -3,6 +3,7 @@
 import {
   createCustomerAccount,
   forgotCustomerPassword,
+  getCustomerMe,
   loginCustomer,
   resendCustomerOtp,
   resetCustomerPassword,
@@ -97,8 +98,17 @@ export function AuthForm() {
     if (!result?.accessToken) {
       throw new Error('Sign-in did not return an access token.');
     }
+
+    let profileUser = result;
+    try {
+      const profile = await getCustomerMe(result.accessToken);
+      profileUser = { ...result, user: profile };
+    } catch {
+      // Fall back to form names (signup) or email local-part if /me fails.
+    }
+
     setSession({
-      user: mapCustomerUser(result, {
+      user: mapCustomerUser(profileUser, {
         email: email.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),

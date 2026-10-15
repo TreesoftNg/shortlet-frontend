@@ -18,7 +18,14 @@ import {
   Skeleton,
   SkeletonText,
 } from '@/shared/components';
-import { formatNaira, shortArea } from '@/shared/lib/format';
+import {
+  bathsLabel,
+  bedroomsLabel,
+  bedsOnlyLabel,
+  formatNaira,
+  guestsLabel,
+  shortArea,
+} from '@/shared/lib/format';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { Building2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -82,6 +89,9 @@ export function PropertyPage({ slug }: PropertyPageProps) {
       <PropertyHeaderBar
         locationLabel={locationLabel}
         searchHref={searchHref}
+        maxGuests={
+          selectedUnit?.capacity.max ?? property.capacity.max ?? 16
+        }
       />
 
       <Box as="main" px={{ base: 4, md: 8, lg: '120px' }}>
@@ -126,8 +136,9 @@ export function PropertyPage({ slug }: PropertyPageProps) {
                   {property.summary}
                 </Heading>
                 <Text color="ink.2" fontSize="14px" mt={1}>
-                  {capacity.max} guests · {capacity.bedrooms} bedrooms ·{' '}
-                  {capacity.beds} beds · {capacity.bathrooms} baths
+                  {guestsLabel(capacity.max)} · {bedroomsLabel(capacity.bedrooms)}{' '}
+                  · {bedsOnlyLabel(capacity.beds)} ·{' '}
+                  {bathsLabel(capacity.bathrooms)}
                 </Text>
                 <Box mt={3}>
                   <MessageUsButton
