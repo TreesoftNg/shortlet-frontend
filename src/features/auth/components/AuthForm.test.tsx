@@ -1,6 +1,7 @@
 import {
   createCustomerAccount,
   forgotCustomerPassword,
+  getCustomerMe,
   loginCustomer,
   resendCustomerOtp,
   resetCustomerPassword,
@@ -22,6 +23,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/data/api/customers', () => ({
   createCustomerAccount: vi.fn(),
   forgotCustomerPassword: vi.fn(),
+  getCustomerMe: vi.fn(),
   loginCustomer: vi.fn(),
   resendCustomerOtp: vi.fn(),
   resetCustomerPassword: vi.fn(),
@@ -37,14 +39,13 @@ describe('AuthForm', () => {
     vi.mocked(loginCustomer).mockResolvedValue({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
-      profile: {
-        user: {
-          id: 'usr_1',
-          email: 'ada@sunmadeapartments.com',
-          firstName: 'Ada',
-          lastName: 'Okafor',
-        },
-      },
+    });
+    vi.mocked(getCustomerMe).mockResolvedValue({
+      id: 'usr_1',
+      email: 'ada@sunmadeapartments.com',
+      firstName: 'Ada',
+      lastName: 'Okafor',
+      customerId: 'cus_1',
     });
     vi.mocked(forgotCustomerPassword).mockResolvedValue({});
     vi.mocked(resetCustomerPassword).mockResolvedValue({});
@@ -68,6 +69,7 @@ describe('AuthForm', () => {
         email: 'ada@sunmadeapartments.com',
         password: 'Sunmade-guest-1',
       });
+      expect(getCustomerMe).toHaveBeenCalledWith('access-token');
       expect(useAuthStore.getState().accessToken).toBe('access-token');
       expect(useAuthStore.getState().user?.firstName).toBe('Ada');
       expect(push).toHaveBeenCalledWith('/account');

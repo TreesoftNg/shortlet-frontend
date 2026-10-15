@@ -4,6 +4,7 @@ import { useNeighborhoods } from '@/data/hooks';
 import { pagePx } from '@/shared/layout';
 import { getDefaultStay, minBookableDate } from '@/shared/lib/default-stay';
 import {
+  DATE_DISPLAY_LOCALE,
   guestsLabel,
   parseISODate,
   toISODate,
@@ -31,9 +32,9 @@ type StayDraft = {
 };
 
 function shortDateLabel(iso: string) {
-  return parseISODate(iso).toLocaleDateString('en-US', {
-    month: 'short',
+  return parseISODate(iso).toLocaleDateString(DATE_DISPLAY_LOCALE, {
     day: 'numeric',
+    month: 'short',
   });
 }
 

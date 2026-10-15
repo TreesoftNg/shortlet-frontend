@@ -46,6 +46,26 @@ export function bedsOnlyLabel(beds: number | null): string {
   return beds === 1 ? '1 bed' : `${beds ?? 0} beds`;
 }
 
+export function bedroomsLabel(bedrooms: number | null): string {
+  return bedrooms === 1 ? '1 bedroom' : `${bedrooms ?? 0} bedrooms`;
+}
+
+export function bathsLabel(baths: number | null): string {
+  return baths === 1 ? '1 bath' : `${baths ?? 0} baths`;
+}
+
+/** Site-wide display locale for calendar dates (DD/MM/YYYY). */
+export const DATE_DISPLAY_LOCALE = 'en-GB';
+
+/** e.g. 18/10/2026 — consistent whether the field is focused or not. */
+export function formatShortDate(iso: string): string {
+  return parseISODate(iso).toLocaleDateString(DATE_DISPLAY_LOCALE, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
 export function parseISODate(iso: string): Date {
   const [year, month, day] = iso.split('-').map(Number);
   return new Date(year, (month ?? 1) - 1, day ?? 1);
@@ -64,17 +84,17 @@ export function nightsBetween(checkIn: string, checkOut: string): number {
   return Math.max(1, Math.round((end - start) / 86_400_000));
 }
 
-/** e.g. Oct 12 – 16 or Oct 28 – Nov 2 */
+/** e.g. 12–16 Oct or 28 Oct – 2 Nov */
 export function formatDatesRangeLabel(checkIn: string, checkOut: string): string {
   const start = parseISODate(checkIn);
   const end = parseISODate(checkOut);
   const sameMonth = start.getMonth() === end.getMonth();
-  const withMonth = { month: 'short' as const, day: 'numeric' as const };
+  const withMonth = { day: 'numeric' as const, month: 'short' as const };
   const dayOnly = { day: 'numeric' as const };
   if (sameMonth) {
-    return `${start.toLocaleDateString('en-US', withMonth)} – ${end.toLocaleDateString('en-US', dayOnly)}`;
+    return `${start.toLocaleDateString(DATE_DISPLAY_LOCALE, dayOnly)}–${end.toLocaleDateString(DATE_DISPLAY_LOCALE, withMonth)}`;
   }
-  return `${start.toLocaleDateString('en-US', withMonth)} – ${end.toLocaleDateString('en-US', withMonth)}`;
+  return `${start.toLocaleDateString(DATE_DISPLAY_LOCALE, withMonth)} – ${end.toLocaleDateString(DATE_DISPLAY_LOCALE, withMonth)}`;
 }
 
 export function guestsLabel(guests: number): string {

@@ -26,4 +26,9 @@ describe('usePropertyBookingStore', () => {
     expect(usePropertyBookingStore.getState().checkIn).toBe('2026-11-01');
     expect(usePropertyBookingStore.getState().checkOut).toBe('2026-11-05');
   });
+
+  it('allows guest counts above 16 when the listing capacity is higher', () => {
+    usePropertyBookingStore.getState().setGuests(20);
+    expect(usePropertyBookingStore.getState().guests).toBe(20);
+  });
 });

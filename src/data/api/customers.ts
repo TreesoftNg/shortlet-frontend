@@ -70,6 +70,15 @@ export function loginCustomer(input: CustomerLoginInput) {
   return http<CustomerLoginResult>('/api/v1/login', { body: input });
 }
 
+export type CustomerProfileDto = CustomerUserDto & {
+  customerId?: string;
+};
+
+/** GET /api/v1/me — signed-in guest profile (name and email). */
+export function getCustomerMe(accessToken: string) {
+  return http<CustomerProfileDto>('/api/v1/me', { token: accessToken });
+}
+
 export type RefreshSessionInput = {
   refreshToken: string;
 };

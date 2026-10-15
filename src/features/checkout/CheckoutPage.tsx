@@ -44,7 +44,7 @@ export function CheckoutPage() {
   const checkOut = searchParams.get('checkOut') ?? stayDefaults.checkOut;
   const guestsParam = Number(searchParams.get('guests'));
   const guests =
-    guestsParam > 0 ? Math.min(16, guestsParam) : stayDefaults.guests;
+    guestsParam > 0 ? Math.max(1, guestsParam) : stayDefaults.guests;
 
   const { data: property, isPending, isError } = useCheckoutProperty(propertySlug);
   const stay = useMemo(
