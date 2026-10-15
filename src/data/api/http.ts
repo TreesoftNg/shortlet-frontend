@@ -74,6 +74,27 @@ export function unwrapApiData<T>(payload: unknown): T {
   return payload as T;
 }
 
+/**
+ * Field-level messages from a validation error envelope
+ * (`error.details.fields`, e.g. `{ checkOut: ['…'] }`). Empty when absent.
+ */
+export function apiFieldErrors(error: unknown): Record<string, string[]> {
+  if (!(error instanceof ApiError)) return {};
+  const details = error.details;
+  if (!isRecord(details) || !isRecord(details.fields)) return {};
+
+  const fields: Record<string, string[]> = {};
+  for (const [field, messages] of Object.entries(details.fields)) {
+    if (!Array.isArray(messages)) continue;
+    const texts = messages.filter(
+      (message): message is string =>
+        typeof message === 'string' && message.trim() !== '',
+    );
+    if (texts.length) fields[field] = texts;
+  }
+  return fields;
+}
+
 function toApiError(status: number, payload: unknown): ApiError {
   if (isRecord(payload) && isRecord(payload.error)) {
     const error = payload.error;

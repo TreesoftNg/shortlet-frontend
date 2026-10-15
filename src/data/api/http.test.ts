@@ -1,4 +1,10 @@
-import { ApiError, http, httpWithMeta, unwrapApiData } from '@/data/api/http';
+import {
+  ApiError,
+  apiFieldErrors,
+  http,
+  httpWithMeta,
+  unwrapApiData,
+} from '@/data/api/http';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 function jsonResponse(body: unknown, status = 200) {
@@ -99,5 +105,63 @@ describe('http client', () => {
     });
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(ApiError);
+  });
+});
+
+describe('apiFieldErrors', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('keeps the field messages from a validation error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            success: false,
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'The request contains invalid data',
+              details: {
+                fields: {
+                  checkOut: ['This unit needs a stay of at least 3 nights'],
+                  adults: ['', 42],
+                },
+              },
+            },
+          },
+          400,
+        ),
+      ),
+    );
+
+    const error = await http('/api/v1/units/u1/quote').catch(
+      (caught: unknown) => caught,
+    );
+
+    expect(apiFieldErrors(error)).toEqual({
+      checkOut: ['This unit needs a stay of at least 3 nights'],
+    });
+  });
+
+  it('is empty when the error carries no field details', () => {
+    expect(
+      apiFieldErrors(
+        new ApiError({ status: 409, code: 'CONFLICT', message: 'Taken' }),
+      ),
+    ).toEqual({});
+    expect(
+      apiFieldErrors(
+        new ApiError({
+          status: 400,
+          code: 'VALIDATION_ERROR',
+          message: 'bad',
+          details: { fields: 'checkOut' },
+        }),
+      ),
+    ).toEqual({});
+    expect(apiFieldErrors(new Error('network'))).toEqual({});
+    expect(apiFieldErrors(null)).toEqual({});
   });
 });

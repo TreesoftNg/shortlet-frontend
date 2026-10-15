@@ -116,7 +116,9 @@ export type PublicUnitDetail = PublicUnitCard & {
   cleaningFee: string | number | null;
   weeklyDiscountPercent: string | number | null;
   monthlyDiscountPercent: string | number | null;
-  minNights: number | null;
+  /** Effective minimum stay (unit override or business default), at least 1. */
+  minNights: number;
+  /** Effective maximum stay; null means no upper limit. */
   maxNights: number | null;
   checkInTime: string | null;
   checkOutTime: string | null;

@@ -2,6 +2,7 @@
 
 import { ApiError } from '@/data/api/http';
 import { toMoneyNumber } from '@/data/lib/map-booking';
+import { quoteErrorMessage } from '@/data/lib/quote-error';
 import { useUnitQuote } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
 import { Skeleton } from '@/shared/components';
@@ -11,9 +12,15 @@ import {
   formatShortDate,
   guestsLabel,
   nightsBetween,
-  parseISODate,
-  toISODate,
 } from '@/shared/lib/format';
+import {
+  DEFAULT_STAY_LIMITS,
+  earliestCheckOut,
+  fitCheckOutToLimits,
+  latestCheckOut,
+  stayLengthProblem,
+  stayLimitsHint,
+} from '@/shared/lib/stay-length';
 import type { Property, Unit } from '@/data/types';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react';
@@ -58,22 +65,28 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
     selectedUnit?.capacity.max ?? property.capacity.max ?? 16,
   );
   const unitId = selectedUnit?.id ?? property.id;
+  const stayLimits = selectedUnit?.stay_limits ?? DEFAULT_STAY_LIMITS;
+  const stayProblem = stayLengthProblem(checkIn, checkOut, stayLimits);
+  const limitsHint = stayLimitsHint(stayLimits);
 
   useEffect(() => {
     if (guests > maxGuests) setGuests(maxGuests);
   }, [guests, maxGuests, setGuests]);
 
   const {
-    data: apiQuote,
+    data: quoteData,
     isPending: quotePending,
     isError: quoteError,
     error: quoteErr,
     refetch: refetchQuote,
   } = useUnitQuote(
-    unitId && checkIn && checkOut && guests > 0
+    // The API rejects stays outside the unit's limits; don't ask for them.
+    unitId && checkIn && checkOut && guests > 0 && !stayProblem
       ? { unitId, checkIn, checkOut, adults: guests }
       : null,
   );
+  // keepPreviousData would otherwise keep showing the last valid stay's price.
+  const apiQuote = stayProblem ? undefined : quoteData;
 
   const listingNightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;
@@ -106,13 +119,8 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
   );
 
   const applyDates = (nextIn: string, nextOut: string) => {
-    let start = nextIn || checkIn;
-    let end = nextOut || checkOut;
-    if (parseISODate(end) <= parseISODate(start)) {
-      const bumped = parseISODate(start);
-      bumped.setDate(bumped.getDate() + 1);
-      end = toISODate(bumped);
-    }
+    const start = nextIn || checkIn;
+    const end = fitCheckOutToLimits(start, nextOut || checkOut, stayLimits);
     setDates(start, end);
   };
 
@@ -168,7 +176,8 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
               label="Checkout"
               value={checkOut}
               display={formatShortDate(checkOut)}
-              min={checkIn}
+              min={earliestCheckOut(checkIn, stayLimits)}
+              max={latestCheckOut(checkIn, stayLimits) ?? undefined}
               editing={editingDate === 'checkOut'}
               onOpen={() => {
                 setEditingDate('checkOut');
@@ -260,6 +269,12 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           ) : null}
         </Box>
 
+        {limitsHint ? (
+          <Text fontSize="13px" color="ink.3" mt="-8px" mb="16px">
+            {limitsHint}
+          </Text>
+        ) : null}
+
         <Button
           type="button"
           w="full"
@@ -270,7 +285,7 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           fontWeight="700"
           fontSize="15px"
           _hover={{ bg: 'brand.600' }}
-          disabled={Boolean(datesUnavailable)}
+          disabled={Boolean(datesUnavailable || stayProblem)}
           onClick={() =>
             router.push(
               `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${clampedGuests}`,
@@ -283,7 +298,13 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
           You won&apos;t be charged yet
         </Text>
 
-        {quoteBusy ? (
+        {stayProblem ? (
+          <Box mt="16px">
+            <Text color="ink.2" fontSize="14px">
+              {stayProblem}. Please pick different dates.
+            </Text>
+          </Box>
+        ) : quoteBusy ? (
           <Box mt="12px" aria-busy="true">
             <Skeleton h="18px" mb="14px" borderRadius="full" />
             <Skeleton h="18px" mb="14px" borderRadius="full" />
@@ -299,9 +320,10 @@ export function BookingCard({ property, selectedUnit }: BookingCardProps) {
         ) : quoteError && !apiQuote ? (
           <Box mt="16px">
             <Text color="ink.2" fontSize="14px" mb="10px">
-              {quoteErr instanceof ApiError
-                ? quoteErr.message
-                : 'Couldn’t load the live price for these dates.'}
+              {quoteErrorMessage(
+                quoteErr,
+                'Couldn’t load the live price for these dates.',
+              )}
             </Text>
             <Button
               type="button"
@@ -353,6 +375,7 @@ function DateCell({
   value,
   display,
   min,
+  max,
   editing,
   borderRight,
   onOpen,
@@ -363,6 +386,7 @@ function DateCell({
   value: string;
   display: string;
   min?: string;
+  max?: string;
   editing: boolean;
   borderRight?: boolean;
   onOpen: () => void;
@@ -412,6 +436,7 @@ function DateCell({
         type="date"
         value={value}
         min={min}
+        max={max}
         aria-label={label}
         onClick={(e) => {
           e.stopPropagation();

@@ -1,5 +1,11 @@
 import { toAppMediaUrl } from '@/data/lib/app-media-url';
-import type { Property, PropertyImage, Review, Unit } from '@/data/types';
+import type {
+  Property,
+  PropertyImage,
+  Review,
+  StayLimits,
+  Unit,
+} from '@/data/types';
 import type {
   PublicUnitCard,
   PublicUnitDetail,
@@ -187,6 +193,23 @@ function mapDetailImages(unit: PublicUnitDetail): PropertyImage[] {
     : [];
 }
 
+/** Whole night count of at least 1, or null when missing or not positive. */
+function toNightCount(value: number | null | undefined): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  const nights = Math.floor(value);
+  return nights >= 1 ? nights : null;
+}
+
+function mapStayLimits(unit: PublicUnitDetail): StayLimits {
+  const minNights = toNightCount(unit.minNights) ?? 1;
+  const maxNights = toNightCount(unit.maxNights);
+  return {
+    min_nights: minNights,
+    // Never let the upper bound fall below the lower one (unbookable picker).
+    max_nights: maxNights === null ? null : Math.max(maxNights, minNights),
+  };
+}
+
 function mapDetailUnit(unit: PublicUnitDetail, nightly: number): Unit {
   const bathrooms = toNumber(unit.bathrooms);
   return {
@@ -205,6 +228,7 @@ function mapDetailUnit(unit: PublicUnitDetail, nightly: number): Unit {
     nightly_rate: nightly,
     currency: unit.currency || 'NGN',
     status: 'available',
+    stay_limits: mapStayLimits(unit),
   };
 }
 

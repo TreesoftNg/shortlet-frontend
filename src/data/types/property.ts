@@ -10,6 +10,14 @@ export type PropertySort =
 /** Bookable inventory under a property (PRD Unit). */
 export type UnitStatus = 'available' | 'unavailable' | 'maintenance';
 
+/** Effective stay-length rules for a unit (unit override or business default). */
+export type StayLimits = {
+  /** Fewest nights a guest can book (always at least 1). */
+  min_nights: number;
+  /** Most nights a guest can book; null means no upper limit. */
+  max_nights: number | null;
+};
+
 export type Unit = {
   id: string;
   property_id: string;
@@ -27,6 +35,7 @@ export type Unit = {
   nightly_rate: number;
   currency: string;
   status: UnitStatus;
+  stay_limits: StayLimits;
 };
 
 export type PropertyImage = {

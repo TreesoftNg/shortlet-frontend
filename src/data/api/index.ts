@@ -1,4 +1,4 @@
-export { http, ApiError } from './http';
+export { http, ApiError, apiFieldErrors } from './http';
 export { getPublicContactDetails, submitContactMessage } from './contact';
 export type { PublicContactDetails, SubmitContactInput } from './contact';
 export {

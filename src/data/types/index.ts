@@ -21,6 +21,7 @@ export type {
   Review,
   ReviewCategoryScores,
   ReviewSummary,
+  StayLimits,
   Unit,
   UnitStatus,
   WebsiteContent,

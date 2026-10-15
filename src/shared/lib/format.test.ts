@@ -11,6 +11,7 @@ import {
   formatShortDate,
   guestsLabel,
   nightsBetween,
+  nightsLabel,
   shortArea,
 } from '@/shared/lib/format';
 import { describe, expect, it } from 'vitest';
@@ -90,6 +91,11 @@ describe('date helpers', () => {
   it('formats guest counts', () => {
     expect(guestsLabel(1)).toBe('1 guest');
     expect(guestsLabel(2)).toBe('2 guests');
+  });
+
+  it('formats night counts', () => {
+    expect(nightsLabel(1)).toBe('1 night');
+    expect(nightsLabel(3)).toBe('3 nights');
   });
 });
 

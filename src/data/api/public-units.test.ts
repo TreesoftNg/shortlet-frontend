@@ -214,6 +214,10 @@ describe('public units api', () => {
     expect(detail?.property.amenity_labels).toEqual(['Wi-Fi', 'Pool']);
     expect(detail?.property.images[0]?.url).toBe('https://api-staging.sunmadeapartments.com/media/large.webp');
     expect(detail?.property.units).toHaveLength(1);
+    expect(detail?.property.units[0]?.stay_limits).toEqual({
+      min_nights: 1,
+      max_nights: null,
+    });
     expect(detail?.property.review_summary).toEqual(
       expect.objectContaining({ rating: 5, count: 1 }),
     );

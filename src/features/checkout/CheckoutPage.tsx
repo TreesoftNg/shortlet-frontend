@@ -10,6 +10,7 @@ import {
 } from '@/features/checkout/hooks/useCheckoutData';
 import { ApiError } from '@/data/api/http';
 import { saveBookingSession } from '@/data/lib/booking-session';
+import { quoteErrorMessage } from '@/data/lib/quote-error';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import { getDefaultStay } from '@/shared/lib/default-stay';
 import { formatNaira } from '@/shared/lib/format';
@@ -121,9 +122,10 @@ export function CheckoutPage() {
             description={
               unavailable
                 ? 'Those dates are no longer free. Pick different dates and try again.'
-                : quoteErr instanceof Error
-                  ? quoteErr.message
-                  : 'This checkout link is invalid or the stay is no longer available.'
+                : quoteErrorMessage(
+                    quoteErr,
+                    'This checkout link is invalid or the stay is no longer available.',
+                  )
             }
             actionLabel="Back to search"
             actionHref="/search"
