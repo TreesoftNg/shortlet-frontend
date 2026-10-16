@@ -92,13 +92,14 @@ export function SearchPage() {
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
     }
-    return 'Anywhere';
+    // No area filter — don’t show “Anywhere” for a single-stay catalogue.
+    return '';
   }, [filters.neighborhood, neighborhood]);
 
   const miniLocation =
     neighborhood?.city && neighborhood.name !== neighborhood.city
       ? `${neighborhood.name}, ${neighborhood.city}`
-      : locationLabel;
+      : locationLabel || 'All stays';
 
   const datesLabel = formatDatesRangeLabel(filters.checkIn, filters.checkOut);
 
