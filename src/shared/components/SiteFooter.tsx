@@ -9,9 +9,9 @@ const columns = [
   {
     title: 'Explore',
     links: [
-      { label: 'All stays', href: '/search' },
-      { label: 'Neighbourhoods', href: '/locations' },
-      { label: 'Long stays', href: '/search' },
+      { label: 'All stays', href: '/search?tab=all' },
+      // { label: 'Neighbourhoods', href: '/locations' }, // temporarily disabled
+      { label: 'Long stays', href: '/search?tab=all' },
     ],
   },
   {

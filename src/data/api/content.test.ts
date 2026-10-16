@@ -36,12 +36,13 @@ describe('brand defaults', () => {
     );
   });
 
-  it('builds website content from live areas', () => {
+  it('builds website content with singular stay copy', () => {
     const content = buildWebsiteContent({
       areaNames: ['Ikeja', 'Lekki'],
       heroImage: 'https://api-staging.sunmadeapartments.com/media/unit.webp',
     });
-    expect(content.hero.subheadline).toContain('Ikeja & Lekki');
+    expect(content.hero.subheadline).toContain('verified, fully furnished shortlet');
+    expect(content.hero.subheadline).not.toContain('Ikeja');
     expect(content.hero.image).toBe('https://api-staging.sunmadeapartments.com/media/unit.webp');
     expect(content.categories.length).toBeGreaterThan(0);
   });
@@ -52,10 +53,11 @@ describe('content api', () => {
     vi.clearAllMocks();
   });
 
-  it('keeps the brand hero image and uses live neighbourhood names', async () => {
+  it('keeps the brand hero image and singular stay copy', async () => {
     const content = await getWebsiteContent();
     expect(content.brand_name).toContain('Sunmade');
-    expect(content.hero.subheadline).toContain('Ikeja');
+    expect(content.hero.subheadline).toContain('instantly bookable');
+    expect(content.hero.subheadline).not.toMatch(/Ikeja|Lekki/);
     expect(content.hero.image).toBe(BRAND_DEFAULTS.hero.fallbackImage);
   });
 });

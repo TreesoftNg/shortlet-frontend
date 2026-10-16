@@ -63,14 +63,16 @@ export function buildWebsiteContent(input: {
   areaNames: string[];
   heroImage?: string | null;
 }): WebsiteContent {
-  const areas = formatAreaList(input.areaNames);
+  // areaNames kept for callers / future use — hero copy stays singular (one stay).
+  void input.areaNames;
   return {
     brand_name: BRAND_DEFAULTS.brand_name,
     currency: BRAND_DEFAULTS.currency,
     currency_symbol: BRAND_DEFAULTS.currency_symbol,
     hero: {
       headline: BRAND_DEFAULTS.hero.headline,
-      subheadline: `Serviced shortlet apartments across ${areas} — verified, fully furnished, instantly bookable.`,
+      subheadline:
+        'A verified, fully furnished shortlet — clean, comfortable, and instantly bookable.',
       image: input.heroImage || BRAND_DEFAULTS.hero.fallbackImage,
     },
     trust: {
