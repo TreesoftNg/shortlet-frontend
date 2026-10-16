@@ -118,7 +118,7 @@ export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {
   };
 
   const summaryLine = [
-    locationLabel ?? 'Anywhere',
+    locationLabel ?? 'All stays',
     datesTouched
       ? `${shortDateLabel(draft.checkIn)} – ${shortDateLabel(draft.checkOut)}`
       : 'Any week',
@@ -158,7 +158,7 @@ export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {
           <Search size={18} strokeWidth={1.9} color={tokens.colors.brand[500]} />
           <Box minW={0}>
             <Text fontSize="14px" fontWeight="700" color="ink">
-              {locationLabel ?? 'Where to?'}
+              {locationLabel ?? 'All stays'}
             </Text>
             <Text fontSize="12px" color="ink.3" lineClamp={1}>
               {summaryLine}
@@ -259,7 +259,7 @@ export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {
           >
             <FieldButton
               label="Where"
-              value={locationLabel ?? 'Lekki, Victoria Island, Ikoyi…'}
+              value={locationLabel ?? 'All stays'}
               placeholder={!locationLabel}
               active={open === 'where'}
               onClick={() =>
@@ -477,8 +477,8 @@ function SearchPanel({
           </Text>
           <Flex direction="column" gap="6px">
             <PlaceOption
-              title="Anywhere"
-              subtitle="Browse all Sunmade stays"
+              title="All stays"
+              subtitle="Browse our available apartment"
               active={!draft.neighborhood}
               onClick={() => {
                 setDraft((prev) => ({ ...prev, neighborhood: undefined }));
