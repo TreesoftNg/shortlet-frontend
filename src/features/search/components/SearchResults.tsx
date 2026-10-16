@@ -64,8 +64,8 @@ export function SearchResults({
           {isPending
             ? 'Searching stays'
             : locationLabel
-              ? `${total} unit${total === 1 ? '' : 's'} in ${locationLabel}`
-              : `${total} unit${total === 1 ? '' : 's'}`}
+              ? `${total} apartment${total === 1 ? '' : 's'} in ${locationLabel}`
+              : `${total} apartment${total === 1 ? '' : 's'}`}
         </Heading>
         <Text color="ink.2" fontSize="14px" mt={1}>
           {datesLabel} · {nights} night{nights === 1 ? '' : 's'} · {guests}{' '}
