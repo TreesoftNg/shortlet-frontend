@@ -235,8 +235,8 @@ export function SearchMiniBar({
                 </Text>
                 <Flex direction="column" gap="6px">
                   <PlaceOption
-                    title="Anywhere in Lagos"
-                    subtitle="Browse all Lagos stays"
+                    title="All stays"
+                    subtitle="Browse our available apartment"
                     active={!filters.neighborhood}
                     onClick={() => setNeighborhood(undefined)}
                   />
