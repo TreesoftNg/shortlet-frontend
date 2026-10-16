@@ -35,7 +35,7 @@ type MenuLink = {
 
 const guestLinks: MenuLink[] = [
   { value: 'auth', href: '/auth', label: 'Sign in', icon: LogIn },
-  { value: 'search', href: '/search', label: 'Explore stays', icon: MapPin },
+  { value: 'search', href: '/search?tab=all', label: 'Explore stays', icon: MapPin },
   { value: 'contact', href: '/contact', label: 'Help', icon: CircleHelp },
 ];
 

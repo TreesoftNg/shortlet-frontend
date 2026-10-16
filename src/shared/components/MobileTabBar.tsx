@@ -8,10 +8,11 @@ import { UnreadBadge } from '@/features/messages/components/UnreadBadge';
 import { useIsAuthenticated } from '@/features/auth/store/auth-store';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import {
+  Building2,
   CircleUser,
+  Home,
   Luggage,
   MessageCircle,
-  Search,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -32,9 +33,15 @@ export function MobileTabBar() {
   const tabs: Tab[] = [
     {
       href: '/',
-      label: 'Explore',
-      icon: Search,
+      label: 'Home',
+      icon: Home,
       match: (path) => path === '/',
+    },
+    {
+      href: '/search?tab=all',
+      label: 'Stays',
+      icon: Building2,
+      match: (path) => path.startsWith('/search'),
     },
     {
       href: '/trips',

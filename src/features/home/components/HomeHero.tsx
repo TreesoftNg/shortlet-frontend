@@ -485,6 +485,7 @@ function SearchPanel({
                 setOpen(null);
               }}
             />
+            {/* Neighbourhood place options temporarily disabled
             {neighborhoods.map((nb) => (
               <PlaceOption
                 key={nb.id}
@@ -497,6 +498,7 @@ function SearchPanel({
                 }}
               />
             ))}
+            */}
           </Flex>
         </Box>
       ) : null}

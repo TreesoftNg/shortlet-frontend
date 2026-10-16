@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: '%s · Sunmade Apartments & Suites',
   },
   description:
-    'Serviced shortlet apartments across Lagos & Abuja — verified, fully furnished, instantly bookable.',
+    'A verified, fully furnished shortlet — clean, comfortable, and instantly bookable.',
 };
 
 export const viewport: Viewport = {

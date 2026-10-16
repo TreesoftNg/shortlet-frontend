@@ -1,6 +1,6 @@
 'use client';
 
-import { useNeighborhoods } from '@/data/hooks';
+// import { useNeighborhoods } from '@/data/hooks';
 import type { SearchFilters } from '@/features/search/hooks/useSearchData';
 import { AccountMenuButton } from '@/shared/components/AccountMenuButton';
 import { SunmadeLogo } from '@/shared/components/brand';
@@ -35,7 +35,7 @@ export function SearchMiniBar({
 }: SearchMiniBarProps) {
   const [open, setOpen] = useState<SearchField | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const { data: neighborhoods = [] } = useNeighborhoods();
+  // const { data: neighborhoods = [] } = useNeighborhoods();
   const datePresets = useMemo(() => getStayDatePresets(), []);
   const earliestDate = minBookableDate();
 
@@ -240,6 +240,7 @@ export function SearchMiniBar({
                     active={!filters.neighborhood}
                     onClick={() => setNeighborhood(undefined)}
                   />
+                  {/* Neighbourhood place options temporarily disabled
                   {neighborhoods.map((nb) => (
                     <PlaceOption
                       key={nb.id}
@@ -249,6 +250,7 @@ export function SearchMiniBar({
                       onClick={() => setNeighborhood(nb.slug)}
                     />
                   ))}
+                  */}
                 </Flex>
               </Box>
             ) : null}

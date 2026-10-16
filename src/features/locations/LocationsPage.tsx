@@ -1,71 +1,52 @@
 'use client';
 
-import { useNeighborhoods } from '@/data/hooks';
+// Neighbourhoods / locations UI temporarily disabled
+// import { useNeighborhoods } from '@/data/hooks';
 import {
   AppButton,
   AppPage,
   EmptyState,
-  ErrorState,
-  NeighborhoodTile,
-  NeighborhoodTileSkeleton,
+  // ErrorState,
+  // NeighborhoodTile,
+  // NeighborhoodTileSkeleton,
   PageHero,
 } from '@/shared/components';
-import { Box, Flex, Grid, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import { MapPin } from 'lucide-react';
 
 export function LocationsPage() {
-  const {
-    data: neighborhoods = [],
-    isPending,
-    isError,
-    refetch,
-  } = useNeighborhoods();
+  // const {
+  //   data: neighborhoods = [],
+  //   isPending,
+  //   isError,
+  //   refetch,
+  // } = useNeighborhoods();
 
   return (
     <AppPage mainPt={{ base: 8, md: 12 }}>
       <PageHero
         eyebrow="Destinations"
         title="Locations"
-        description="Browse Sunmade neighbourhoods from the live catalogue, then jump into available apartments in each area."
+        description="Neighbourhood browsing is coming soon."
       />
 
+      {/* Neighbourhood tiles temporarily disabled
       {isPending ? (
         <LocationsSkeleton />
       ) : isError ? (
-        <ErrorState
-          title="Couldn’t load locations"
-          description="Neighbourhoods are temporarily unavailable."
-          onRetry={() => {
-            void refetch();
-          }}
-          mt={6}
-        />
-      ) : neighborhoods.length === 0 ? (
-        <EmptyState
-          title="No locations yet"
-          description="We’re adding Sunmade neighbourhoods soon."
-          actionLabel="Open search"
-          actionHref="/search"
-          icon={<MapPin size={22} strokeWidth={1.9} />}
-        />
+        <ErrorState ... />
       ) : (
-        <Grid
-          templateColumns={{
-            base: '1fr',
-            sm: 'repeat(2, 1fr)',
-            lg: 'repeat(3, 1fr)',
-          }}
-          gap={{ base: 3, md: 4 }}
-        >
-          {neighborhoods.map((area) => (
-            <NeighborhoodTile
-              key={area.id}
-              neighborhood={area}
-              height={{ base: '200px', md: '240px' }}
-            />
-          ))}
-        </Grid>
+        <Grid>...</Grid>
       )}
+      */}
+
+      <EmptyState
+        title="Neighbourhoods coming soon"
+        description="Browse all verified stays for now — area guides will be back shortly."
+        actionLabel="Open search"
+        actionHref="/search"
+        icon={<MapPin size={22} strokeWidth={1.9} />}
+      />
 
       <Flex
         mt={{ base: 10, md: 12 }}
@@ -91,23 +72,12 @@ export function LocationsPage() {
   );
 }
 
-function LocationsSkeleton() {
-  return (
-    <Grid
-      aria-busy="true"
-      templateColumns={{
-        base: '1fr',
-        sm: 'repeat(2, 1fr)',
-        lg: 'repeat(3, 1fr)',
-      }}
-      gap={{ base: 3, md: 4 }}
-    >
-      {Array.from({ length: 3 }).map((_, i) => (
-        <NeighborhoodTileSkeleton
-          key={i}
-          height={{ base: '200px', md: '240px' }}
-        />
-      ))}
-    </Grid>
-  );
-}
+// function LocationsSkeleton() {
+//   return (
+//     <Grid ...>
+//       {Array.from({ length: 3 }).map((_, i) => (
+//         <NeighborhoodTileSkeleton key={i} ... />
+//       ))}
+//     </Grid>
+//   );
+// }
