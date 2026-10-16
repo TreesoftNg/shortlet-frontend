@@ -8,6 +8,7 @@ type PageHeroProps = {
   title: ReactNode;
   description?: ReactNode;
   maxW?: string;
+  mx?: string | number;
   size?: 'marketing' | 'app';
   mb?: { base: number; md: number } | number;
 };
@@ -17,13 +18,14 @@ export function PageHero({
   title,
   description,
   maxW = '720px',
+  mx,
   size = 'marketing',
   mb = { base: 8, md: 10 },
 }: PageHeroProps) {
   const isApp = size === 'app';
 
   return (
-    <Box maxW={maxW} mb={mb}>
+    <Box maxW={maxW} mx={mx} mb={mb} w={mx != null ? 'full' : undefined}>
       {eyebrow ? (
         <Text
           fontSize="13px"

@@ -52,9 +52,22 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: apiHostname,
+        hostname: 'api-staging.sunmadeapartments.com',
         pathname: '/media/**',
       },
+      // Whatever NEXT_PUBLIC_API_BASE_URL points at (local or another env).
+      ...(apiHostname !== 'api-staging.sunmadeapartments.com' &&
+      apiHostname !== 'localhost'
+        ? [
+            {
+              protocol: (apiOrigin.startsWith('http:')
+                ? 'http'
+                : 'https') as 'http' | 'https',
+              hostname: apiHostname,
+              pathname: '/media/**',
+            },
+          ]
+        : []),
     ],
   },
   experimental: {

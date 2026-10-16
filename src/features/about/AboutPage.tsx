@@ -1,25 +1,24 @@
 'use client';
 
 import { TrustSection } from '@/features/home/components/TrustSection';
-import { useNeighborhoods, useWebsiteContent } from '@/features/home/hooks/useHomeData';
+import {
+  // useNeighborhoods,
+  useWebsiteContent,
+} from '@/features/home/hooks/useHomeData';
 import {
   AppButton,
   AppPage,
-  EmptyState,
   ErrorState,
-  NeighborhoodTile,
-  NeighborhoodTileSkeleton,
   PageHero,
   Skeleton,
   SkeletonText,
 } from '@/shared/components';
 import { pagePx } from '@/shared/layout';
 import { Box, Flex, Grid, Heading, Text } from '@chakra-ui/react';
-import { MapPin } from 'lucide-react';
 import Image from 'next/image';
 
 const story = [
-  'Sunmade Apartments & Suites is a shortlet brand built for guests who want verified, fully furnished apartments — without the guesswork of unverified listings.',
+  'Sunmade Apartments & Suites is a shortlet brand built for guests who want a verified, fully furnished stay — without the guesswork of unverified listings.',
   'Every stay is inspected, professionally cleaned, and supported round the clock. Book in minutes, check in with confidence, and settle into a space that feels like home.',
 ];
 
@@ -30,128 +29,77 @@ export function AboutPage() {
     isError: contentError,
     refetch: refetchContent,
   } = useWebsiteContent();
-  const {
-    data: neighborhoods = [],
-    isPending: neighborhoodsPending,
-    isError: neighborhoodsError,
-    refetch: refetchNeighborhoods,
-  } = useNeighborhoods();
-
-  const locationsPending = neighborhoodsPending;
-  const locationsError = neighborhoodsError;
 
   return (
     <AppPage wrapMain={false}>
       <Box as="main" pb={{ base: '40px', md: 0 }}>
-        <Box px={pagePx} pt={{ base: 8, md: 12 }}>
+        <Box px={pagePx} pt={{ base: 8, md: 12 }} mb={{ base: 8, md: 10 }}>
           <PageHero
             eyebrow="Our story"
             title="Shortlets that feel like home"
             description={content?.hero.subheadline}
-            maxW="780px"
+            maxW="640px"
             mb={0}
           />
         </Box>
 
-        <Box
-          position="relative"
-          mx={pagePx}
-          mt={{ base: 8, md: 10 }}
-          h={{ base: '220px', md: '360px' }}
-          borderRadius={{ base: '20px', md: '28px' }}
-          overflow="hidden"
-          bg="bg.soft"
+        <Grid
+          px={pagePx}
+          templateColumns={{ base: '1fr', lg: '1.15fr 1fr' }}
+          gap={{ base: 6, md: 8, lg: '48px' }}
+          alignItems="center"
+          maxW="1440px"
+          mx="auto"
         >
-          {contentPending ? (
-            <Box position="absolute" inset={0}>
-              <Skeleton h="100%" borderRadius="inherit" />
-            </Box>
-          ) : content?.hero.image ? (
-            <Image
-              src={content.hero.image}
-              alt="Sunmade apartment interior"
-              fill
-              sizes="100vw"
-              style={{ objectFit: 'cover' }}
-              priority
-            />
-          ) : null}
-        </Box>
-
-        <Box px={pagePx} mt={{ base: 8, md: 10 }} maxW="780px">
-          {story.map((paragraph) => (
-            <Text
-              key={paragraph.slice(0, 24)}
-              color="ink.2"
-              fontSize={{ base: '15px', md: '16px' }}
-              mb="16px"
-              lineHeight="1.7"
-            >
-              {paragraph}
-            </Text>
-          ))}
-        </Box>
-
-        <Box px={pagePx} mt={{ base: 8, md: 10 }}>
-          <Heading
-            as="h2"
-            fontSize={{ base: '22px', md: '26px' }}
-            fontWeight="700"
-            letterSpacing="-0.01em"
-            mb="18px"
+          <Box
+            position="relative"
+            h={{ base: '240px', md: '380px', lg: '440px' }}
+            borderRadius={{ base: '20px', md: '28px' }}
+            overflow="hidden"
+            bg="bg.soft"
           >
-            Where we operate
-          </Heading>
+            {contentPending ? (
+              <Box position="absolute" inset={0}>
+                <Skeleton h="100%" borderRadius="inherit" />
+              </Box>
+            ) : content?.hero.image ? (
+              <Image
+                src={content.hero.image}
+                alt="Sunmade apartment interior"
+                fill
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                style={{ objectFit: 'cover' }}
+                priority
+              />
+            ) : null}
+          </Box>
 
-          {locationsPending ? (
-            <Grid
-              templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
-              gap={{ base: 4, md: 5 }}
-              aria-busy="true"
+          <Box>
+            <Heading
+              as="h2"
+              fontSize={{ base: '20px', md: '24px' }}
+              fontWeight="700"
+              letterSpacing="-0.01em"
+              mb="18px"
             >
-              {Array.from({ length: 3 }).map((_, i) => (
-                <NeighborhoodTileSkeleton
-                  key={i}
-                  height={{ base: '180px', md: '200px' }}
-                />
-              ))}
-            </Grid>
-          ) : locationsError ? (
-            <ErrorState
-              title="Couldn’t load locations"
-              description="Neighbourhoods are temporarily unavailable."
-              onRetry={() => {
-                void refetchNeighborhoods();
-              }}
-              compact
-            />
-          ) : neighborhoods.length === 0 ? (
-            <EmptyState
-              title="No locations yet"
-              description="We’re adding Sunmade neighbourhoods soon."
-              actionLabel="Open search"
-              actionHref="/search"
-              icon={<MapPin size={22} strokeWidth={1.9} />}
-            />
-          ) : (
-            <Grid
-              templateColumns={{
-                base: '1fr',
-                md: 'repeat(2, 1fr)',
-                lg: 'repeat(3, 1fr)',
-              }}
-              gap={{ base: 4, md: 5 }}
-            >
-              {neighborhoods.map((area) => (
-                <NeighborhoodTile
-                  key={area.id}
-                  neighborhood={area}
-                  height={{ base: '180px', md: '200px' }}
-                />
-              ))}
-            </Grid>
-          )}
-        </Box>
+              Built for confident stays
+            </Heading>
+            {story.map((paragraph) => (
+              <Text
+                key={paragraph.slice(0, 24)}
+                color="ink.2"
+                fontSize={{ base: '15px', md: '16px' }}
+                mb="14px"
+                lineHeight="1.7"
+                _last={{ mb: 0 }}
+              >
+                {paragraph}
+              </Text>
+            ))}
+          </Box>
+        </Grid>
+
+        {/* Where we operate (neighbourhoods) temporarily disabled */}
 
         {contentPending ? (
           <Box px={pagePx} py={10} aria-busy="true">
@@ -202,10 +150,10 @@ export function AboutPage() {
               Ready to book your next stay?
             </Text>
             <Text color="ink.2" fontSize="14px" mt="4px">
-              Browse verified apartments in our live neighbourhoods.
+              Browse our verified, fully furnished apartment.
             </Text>
           </Box>
-          <AppButton href="/search">Explore stays</AppButton>
+          <AppButton href="/search?tab=all">Explore stays</AppButton>
         </Flex>
       </Box>
     </AppPage>

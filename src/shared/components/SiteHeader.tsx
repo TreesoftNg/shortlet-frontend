@@ -15,11 +15,16 @@ export type NavLink = {
 
 /** Single primary nav for the customer site (discover / brand). */
 const navLinks: NavLink[] = [
-  { href: '/', label: 'Stays' },
-  { href: '/locations', label: 'Locations' },
+  { href: '/', label: 'Home' },
+  { href: '/search?tab=all', label: 'Stays' },
+  // { href: '/locations', label: 'Locations' }, // neighbourhoods temporarily disabled
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
+
+function navPath(href: string) {
+  return href.split('?')[0] || href;
+}
 
 type SiteHeaderProps = {
   /**
@@ -68,10 +73,11 @@ export function SiteHeader({
         display={{ base: 'none', md: 'flex' }}
       >
         {navLinks.map((link) => {
+          const path = navPath(link.href);
           const active =
-            link.href === '/'
+            path === '/'
               ? pathname === '/'
-              : pathname.startsWith(link.href);
+              : pathname.startsWith(path);
 
           return (
             <Box
