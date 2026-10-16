@@ -117,7 +117,7 @@ export function SiteFooter() {
         direction={{ base: 'column', sm: 'row' }}
         gap={4}
       >
-        <Text>© 2026 Sunmade Apartments & Suites</Text>
+        <Text>© 2026 Sunmade Luxury Shortlets & Suites</Text>
         <Text
         mt="14px"
         fontSize="12px"

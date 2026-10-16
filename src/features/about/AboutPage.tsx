@@ -18,7 +18,7 @@ import { Box, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import Image from 'next/image';
 
 const story = [
-  'Sunmade Apartments & Suites is a shortlet brand built for guests who want a verified, fully furnished stay — without the guesswork of unverified listings.',
+  'Sunmade Luxury Shortlets & Suites is a shortlet brand built for guests who want a verified, fully furnished stay — without the guesswork of unverified listings.',
   'Every stay is inspected, professionally cleaned, and supported round the clock. Book in minutes, check in with confidence, and settle into a space that feels like home.',
 ];
 
