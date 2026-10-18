@@ -167,6 +167,15 @@ export function bookingTab(booking: Booking): 'upcoming' | 'past' | 'cancelled' 
   return tabForBooking(booking.status, booking.check_out);
 }
 
+/** The area of a street address: "5 Admiralty Way, Lekki, Lagos" → "Lekki". */
+function areaOfAddress(address: string): string {
+  const parts = address
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  return parts.length >= 2 ? parts[parts.length - 2] : (parts[0] ?? '');
+}
+
 function bookingId(api: ApiBooking): string {
   const raw = api.id ?? api.reference;
   return raw != null && String(raw).length > 0 ? String(raw) : 'unknown';
@@ -179,11 +188,14 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
   const checkOut = toDateOnly(api.checkOut);
   const status = mapStatus(api.status);
   const unitName = api.unit?.name ?? null;
+  const address = api.unit?.address?.trim() || null;
   const city =
     api.unit?.location?.city ||
     shortArea(api.unit?.location?.display ?? '') ||
+    (address ? areaOfAddress(address) : '') ||
     'Nigeria';
   const location =
+    address ||
     api.unit?.location?.display ||
     api.unit?.location?.neighbourhood ||
     city;
@@ -225,6 +237,7 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
     unit_label: unitName,
     location_label: location,
     city_label: city,
+    address,
     check_in: checkIn,
     check_out: checkOut,
     check_in_label: dateTimeLabel(checkIn),

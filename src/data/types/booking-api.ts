@@ -106,6 +106,8 @@ export type ApiBooking = {
     pictureUrl?: string | null;
     propertyId?: string | null;
     propertyName?: string | null;
+    /** Street address of the unit (or its property), e.g. "5 Admiralty Way, Lekki, Lagos". */
+    address?: string | null;
     location?: {
       city?: string | null;
       display?: string | null;

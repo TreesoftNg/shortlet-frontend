@@ -24,6 +24,7 @@ import {
 } from '@/shared/components';
 import { CoverImage } from '@/shared/components/CoverImage';
 import { formatNaira } from '@/shared/lib/format';
+import { directionsUrl } from '@/shared/lib/maps';
 import { Box, Flex, Grid, Heading, Text, Textarea } from '@chakra-ui/react';
 import {
   ArrowLeft,
@@ -181,9 +182,7 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
   }
 
   const styles = statusStyles(booking.status);
-  const mapsUrl = booking.location_label
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.location_label)}`
-    : null;
+  const mapsUrl = directionsUrl(booking);
 
   const handlePay = async () => {
     setActionError(null);
@@ -414,10 +413,9 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
         {mapsUrl ? (
           <AppButton
             variant="outlineMuted"
+            href={mapsUrl}
+            external
             leftIcon={<MapPin size={16} strokeWidth={1.9} />}
-            onClick={() =>
-              window.open(mapsUrl, '_blank', 'noopener,noreferrer')
-            }
           >
             Directions
           </AppButton>
