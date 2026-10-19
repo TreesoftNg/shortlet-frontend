@@ -244,12 +244,16 @@ export function useVerifyBookingPayment() {
     mutationFn: async (args: {
       bookingId: string;
       transactionId?: string;
+      reference?: string;
       bookingToken?: string | null;
     }) => {
       const accessToken = await ensureAccessToken();
       return verifyBookingPayment(
         args.bookingId,
-        { transactionId: args.transactionId },
+        {
+          ...(args.transactionId ? { transactionId: args.transactionId } : {}),
+          ...(args.reference ? { reference: args.reference } : {}),
+        },
         { accessToken, bookingToken: args.bookingToken },
       );
     },

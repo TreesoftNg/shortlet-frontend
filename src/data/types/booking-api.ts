@@ -140,6 +140,8 @@ export type CreateBookingResult = ApiBooking & {
 
 export type VerifyBookingPaymentInput = {
   transactionId?: string;
+  /** Our payment reference (Paystack return URL `reference` / `trxref`). */
+  reference?: string;
 };
 
 export type CancelBookingInput = {
