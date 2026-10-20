@@ -4,6 +4,7 @@ export type { PublicContactDetails, SubmitContactInput } from './contact';
 export {
   createCustomerAccount,
   forgotCustomerPassword,
+  getCustomerMe,
   loginCustomer,
   resendCustomerOtp,
   resetCustomerPassword,
@@ -37,6 +38,7 @@ export type { CreateReviewInput, CustomerReview } from './reviews';
 
 export {
   cancelBooking,
+  claimGuestBookingAccount,
   createBooking,
   getBookingById,
   getBookingCounts,

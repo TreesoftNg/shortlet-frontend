@@ -221,6 +221,7 @@ export function CheckoutPage() {
         as="main"
         px={{ base: 4, md: 10, lg: '160px' }}
         pb={{ base: 10, md: '80px' }}
+        overflowX="hidden"
       >
         <Flex align="center" gap="16px" my={{ base: 6, md: '44px' }}>
           <Flex
@@ -320,7 +321,12 @@ export function CheckoutPage() {
               </Flex>
             </Box>
 
-            <Box py="26px" borderBottom="1px solid" borderColor="line">
+            <Box
+              py="26px"
+              borderBottom="1px solid"
+              borderColor="line"
+              overflowX="hidden"
+            >
               <Flex
                 justify="space-between"
                 align={{ base: 'start', sm: 'center' }}
@@ -376,6 +382,8 @@ export function CheckoutPage() {
                     borderRadius="12px"
                     px="16px"
                     py="12px"
+                    minW={0}
+                    maxW="100%"
                   >
                     <Text
                       fontSize="11px"
@@ -389,9 +397,10 @@ export function CheckoutPage() {
                       unstyled
                       value={value}
                       onChange={(e) => setter(e.target.value)}
-                      fontSize="15px"
+                      fontSize={{ base: '16px', md: '15px' }}
                       mt={1}
                       w="full"
+                      minW={0}
                       outline="none"
                     />
                   </Box>
@@ -405,6 +414,8 @@ export function CheckoutPage() {
                 borderRadius="12px"
                 px="16px"
                 py="12px"
+                minW={0}
+                maxW="100%"
               >
                 <Text
                   fontSize="11px"
@@ -420,12 +431,13 @@ export function CheckoutPage() {
                   placeholder="e.g. Business trip, family visit…"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
-                  fontSize="15px"
+                  fontSize={{ base: '16px', md: '15px' }}
                   color="ink"
                   _placeholder={{ color: 'ink.3' }}
                   rows={2}
                   resize="none"
                   w="full"
+                  minW={0}
                   outline="none"
                 />
               </Box>

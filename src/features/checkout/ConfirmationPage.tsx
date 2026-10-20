@@ -12,7 +12,11 @@ import {
 } from '@/data/lib/booking-session';
 import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
 import { isAccessTokenExpired } from '@/features/auth/lib/access-token';
-import { useAuthStore } from '@/features/auth/store/auth-store';
+import {
+  useAuthStore,
+  useIsAuthenticated,
+} from '@/features/auth/store/auth-store';
+import { SecureGuestAccountCard } from '@/features/trips/components/SecureGuestAccountCard';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import { formatNaira } from '@/shared/lib/format';
 import { SunmadeLogo } from '@/shared/components/brand';
@@ -24,6 +28,7 @@ import Link from 'next/link';
 import { paymentVerifyFromReturnParams } from '@/features/checkout/lib/payment-return-params';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { hasGuestBookingSession } from '@/data/lib/booking-session';
 
 export function ConfirmationPage() {
   const router = useRouter();
@@ -34,6 +39,7 @@ export function ConfirmationPage() {
   const verifyParams = paymentVerifyFromReturnParams(searchParams);
   const slug = searchParams.get('property');
   const [bookingId, setBookingId] = useState(bookingIdParam);
+  const isAuthenticated = useIsAuthenticated();
   const accessToken = useAuthStore((s) => {
     if (!s.accessToken) return null;
     if (isAccessTokenExpired(s.accessToken, s.accessTokenExpiresAt)) {
@@ -46,6 +52,7 @@ export function ConfirmationPage() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [guestSession, setGuestSession] = useState(false);
 
   const {
     data: property,
@@ -57,6 +64,7 @@ export function ConfirmationPage() {
       bookingId: bookingIdParam,
       bookingToken: bookingTokenParam,
     });
+    setGuestSession(hasGuestBookingSession());
 
     // Drop token from the address bar after restoring session (Referer hygiene).
     if (bookingTokenParam && typeof window !== 'undefined') {
@@ -292,6 +300,14 @@ export function ConfirmationPage() {
             </Grid>
           </Box>
         </Box>
+
+        {!isAuthenticated && guestSession ? (
+          <SecureGuestAccountCard
+            onSecured={() => {
+              setGuestSession(false);
+            }}
+          />
+        ) : null}
       </Box>
     </Box>
   );
