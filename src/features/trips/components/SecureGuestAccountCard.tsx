@@ -1,6 +1,11 @@
 'use client';
 
-import { claimGuestBookingAccount, getCustomerMe } from '@/data/api';
+import {
+  claimGuestBookingAccount,
+  confirmClaimGuestBookingAccount,
+  getCustomerMe,
+  resendCustomerOtp,
+} from '@/data/api';
 import { ApiError } from '@/data/api/http';
 import {
   clearBookingSession,
@@ -14,8 +19,8 @@ import {
   isValidGuestPassword,
 } from '@/features/auth/lib/password';
 import { useAuthStore } from '@/features/auth/store/auth-store';
-import { AppButton } from '@/shared/components';
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { AppButton, LabeledField } from '@/shared/components';
+import { Box, Flex, Input, Text } from '@chakra-ui/react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -33,16 +38,67 @@ export function SecureGuestAccountCard({
   onSecured,
 }: SecureGuestAccountCardProps) {
   const setSession = useAuthStore((s) => s.setSession);
+  const [step, setStep] = useState<'password' | 'otp'>('password');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [claimEmail, setClaimEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [alreadyHasAccount, setAlreadyHasAccount] = useState(false);
 
-  const handleSubmit = async () => {
-    setError(null);
-    setAlreadyHasAccount(false);
+  const bookingSession = () => {
     const bookingId = getPendingBookingId();
     const bookingToken = getBookingAccessToken(bookingId);
+    return { bookingId, bookingToken };
+  };
+
+  const finishSession = async (tokens: {
+    accessToken: string;
+    accessTokenExpiresAt?: string;
+    refreshToken?: string;
+  }) => {
+    if (!tokens?.accessToken) {
+      throw new Error('Could not start your session.');
+    }
+
+    let profileUser:
+      | { id: string; email: string; firstName: string; lastName: string }
+      | undefined;
+    try {
+      const profile = await getCustomerMe(tokens.accessToken);
+      profileUser = {
+        id: profile.id,
+        email: profile.email,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+      };
+    } catch {
+      // Session still works; names come from JWT / fallbacks.
+    }
+
+    setSession({
+      user: mapCustomerUser(
+        { ...tokens, user: profileUser },
+        {
+          email: profileUser?.email || claimEmail || 'guest',
+          firstName: profileUser?.firstName,
+          lastName: profileUser?.lastName,
+        },
+      ),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken ?? null,
+      accessTokenExpiresAt: tokens.accessTokenExpiresAt ?? null,
+    });
+    clearBookingSession();
+    onSecured?.();
+  };
+
+  const handleStart = async () => {
+    setError(null);
+    setNotice(null);
+    setAlreadyHasAccount(false);
+    const { bookingId, bookingToken } = bookingSession();
     if (!bookingId || !bookingToken) {
       setError('This trip session expired. Open the link from your email.');
       return;
@@ -54,55 +110,63 @@ export function SecureGuestAccountCard({
 
     setSubmitting(true);
     try {
-      const tokens = await claimGuestBookingAccount(
+      const result = await claimGuestBookingAccount(
         bookingId,
         password,
         bookingToken,
       );
-      if (!tokens?.accessToken) {
-        throw new Error('Could not start your session.');
-      }
-
-      let profileUser:
-        | { id: string; email: string; firstName: string; lastName: string }
-        | undefined;
-      try {
-        const profile = await getCustomerMe(tokens.accessToken);
-        profileUser = {
-          id: profile.id,
-          email: profile.email,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-        };
-      } catch {
-        // Session still works; names come from JWT / fallbacks.
-      }
-
-      setSession({
-        user: mapCustomerUser(
-          { ...tokens, user: profileUser },
-          {
-            email: profileUser?.email || 'guest',
-            firstName: profileUser?.firstName,
-            lastName: profileUser?.lastName,
-          },
-        ),
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken ?? null,
-        accessTokenExpiresAt: tokens.accessTokenExpiresAt ?? null,
-      });
-      clearBookingSession();
-      onSecured?.();
+      setClaimEmail(result.email);
+      setStep('otp');
+      setNotice('We sent a verification code to your booking email.');
     } catch (submitError) {
-      if (
-        submitError instanceof ApiError &&
-        submitError.status === 409
-      ) {
+      if (submitError instanceof ApiError && submitError.status === 409) {
         setAlreadyHasAccount(true);
         setError(submitError.message);
       } else {
         setError(errorMessage(submitError));
       }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleConfirm = async () => {
+    setError(null);
+    setNotice(null);
+    const { bookingId, bookingToken } = bookingSession();
+    if (!bookingId || !bookingToken) {
+      setError('This trip session expired. Open the link from your email.');
+      return;
+    }
+    if (otp.trim().length < 4) {
+      setError('Enter the verification code from your email.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const tokens = await confirmClaimGuestBookingAccount(
+        bookingId,
+        otp.trim(),
+        bookingToken,
+      );
+      await finishSession(tokens);
+    } catch (submitError) {
+      setError(errorMessage(submitError));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!claimEmail) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await resendCustomerOtp({ email: claimEmail });
+      setNotice('We sent a new verification code.');
+    } catch (submitError) {
+      setError(errorMessage(submitError));
     } finally {
       setSubmitting(false);
     }
@@ -120,20 +184,46 @@ export function SecureGuestAccountCard({
       py={{ base: 4, md: 5 }}
     >
       <Text fontWeight="800" fontSize="16px">
-        Verify your email by creating a password to secure your account
+        {step === 'password'
+          ? 'Verify your email by creating a password to secure your account'
+          : 'Enter the code we emailed you'}
       </Text>
       <Text color="ink.2" fontSize="14px" mt={1} mb={4}>
-        {GUEST_PASSWORD_HINT}
+        {step === 'password'
+          ? GUEST_PASSWORD_HINT
+          : `Sent to ${claimEmail || 'your booking email'}.`}
       </Text>
 
-      <PasswordField
-        label="Password"
-        value={password}
-        onChange={setPassword}
-        placeholder="Create a password"
-        autoComplete="new-password"
-        mb="12px"
-      />
+      {step === 'password' ? (
+        <PasswordField
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          placeholder="Create a password"
+          autoComplete="new-password"
+          mb="12px"
+        />
+      ) : (
+        <LabeledField label="Verification code" mb="12px">
+          <Input
+            unstyled
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            fontSize={{ base: '16px', md: '15px' }}
+            w="full"
+            outline="none"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="6-digit code"
+          />
+        </LabeledField>
+      )}
+
+      {notice ? (
+        <Text color="ok" fontSize="13px" mb={3}>
+          {notice}
+        </Text>
+      ) : null}
 
       {error ? (
         <Text color="danger" fontSize="13px" mb={3}>
@@ -151,14 +241,30 @@ export function SecureGuestAccountCard({
 
       <Flex gap={3} align="center" flexWrap="wrap">
         <AppButton
-          onClick={() => void handleSubmit()}
+          onClick={() =>
+            void (step === 'password' ? handleStart() : handleConfirm())
+          }
           disabled={submitting}
         >
-          {submitting ? 'Securing…' : 'Secure my account'}
+          {submitting
+            ? step === 'password'
+              ? 'Sending…'
+              : 'Verifying…'
+            : step === 'password'
+              ? 'Send verification code'
+              : 'Verify and sign in'}
         </AppButton>
+        {step === 'otp' ? (
+          <AppButton
+            variant="outlineMuted"
+            onClick={() => void handleResend()}
+            disabled={submitting}
+          >
+            Resend code
+          </AppButton>
+        ) : null}
         <Text fontSize="13px" color="ink.3">
-          Already have an account?{' '}
-          <Link href="/auth">Sign in</Link>
+          Already have an account? <Link href="/auth">Sign in</Link>
         </Text>
       </Flex>
     </Box>

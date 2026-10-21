@@ -139,12 +139,27 @@ export async function cancelBooking(
 }
 
 /**
- * POST /api/v1/bookings/:id/claim-account — create a password to verify the
- * booking email and receive a customer session.
+ * POST /api/v1/bookings/:id/claim-account — create a password and email an OTP.
+ * Does not return a session; confirm with `confirmClaimGuestBookingAccount`.
  */
 export async function claimGuestBookingAccount(
   bookingId: string,
   password: string,
+  bookingToken?: string | null,
+): Promise<{ email: string }> {
+  const token = bookingToken ?? getBookingAccessToken(bookingId);
+  return http(`/api/v1/bookings/${encodeURIComponent(bookingId)}/claim-account`, {
+    body: { password },
+    ...authOptions(null, token),
+  });
+}
+
+/**
+ * POST /api/v1/bookings/:id/claim-account/confirm — verify OTP and sign in.
+ */
+export async function confirmClaimGuestBookingAccount(
+  bookingId: string,
+  otp: string,
   bookingToken?: string | null,
 ): Promise<{
   accessToken: string;
@@ -153,10 +168,13 @@ export async function claimGuestBookingAccount(
   refreshTokenExpiresAt?: string;
 }> {
   const token = bookingToken ?? getBookingAccessToken(bookingId);
-  return http(`/api/v1/bookings/${encodeURIComponent(bookingId)}/claim-account`, {
-    body: { password },
-    ...authOptions(null, token),
-  });
+  return http(
+    `/api/v1/bookings/${encodeURIComponent(bookingId)}/claim-account/confirm`,
+    {
+      body: { otp },
+      ...authOptions(null, token),
+    },
+  );
 }
 
 /** GET /api/v1/me/bookings — signed-in customer trips. */

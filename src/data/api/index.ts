@@ -39,6 +39,7 @@ export type { CreateReviewInput, CustomerReview } from './reviews';
 export {
   cancelBooking,
   claimGuestBookingAccount,
+  confirmClaimGuestBookingAccount,
   createBooking,
   getBookingById,
   getBookingCounts,
