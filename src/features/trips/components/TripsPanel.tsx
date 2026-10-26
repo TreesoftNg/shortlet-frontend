@@ -161,7 +161,7 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
           {list.length === 0 ? (
             <EmptyState
               title="No upcoming trips"
-              description="Ready for your next stay? Explore apartments across Lagos and Abuja."
+              description="Ready for your next stay? Explore apartments in Lagos."
               actionLabel="Explore stays"
               actionHref="/search"
               icon={<Plane size={22} strokeWidth={1.9} />}

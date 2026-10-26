@@ -68,7 +68,7 @@ export function ComingSoonPage() {
           <p className={styles.eyebrow}>Coming soon</p>
           <h1 className={styles.title}>Stay somewhere that feels like home.</h1>
           <p className={styles.lead}>
-            Serviced shortlet apartments in Lagos — verified, fully furnished, and ready for
+            Premium luxury apartments in Lagos — verified, fully furnished, and ready for
             guests. Our website is nearly there; we&apos;ll be live shortly.
           </p>
           <ul className={styles.facts}>
