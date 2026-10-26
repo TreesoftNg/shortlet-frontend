@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { HomePage } from '@/features/home';
 
 export const metadata: Metadata = {
-  title: 'Sunmade Luxury Shortlets & Suites',
+  title: 'Sunmade Apartments & Suites',
   description:
     'Serviced shortlet apartments across Lagos & Abuja — verified, fully furnished, instantly bookable.',
 };

@@ -10,8 +10,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Sunmade Luxury Shortlets & Suites',
-    template: '%s · Sunmade Luxury Shortlets & Suites',
+    default: 'Sunmade Apartments & Suites',
+    template: '%s · Sunmade Apartments & Suites',
   },
   description:
     'A verified, fully furnished shortlet — clean, comfortable, and instantly bookable.',

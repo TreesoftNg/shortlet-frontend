@@ -54,7 +54,7 @@ export function ComingSoonPage() {
     <div className={styles.shell}>
       <aside className={styles.panel}>
         <Watermark />
-        <a className={styles.logo} href="/" aria-label="Sunmade Luxury Shortlets & Suites">
+        <a className={styles.logo} href="/" aria-label="Sunmade Apartments & Suites">
           <SunmadeLogo size="26px" variant="onBrand" tagline />
         </a>
         <div className={styles.places}>
@@ -111,7 +111,7 @@ export function ComingSoonPage() {
             </>
           )}
 
-          <p className={styles.fine}>© 2026 Sunmade Luxury Shortlets &amp; Suites</p>
+          <p className={styles.fine}>© 2026 Sunmade Apartments &amp; Suites</p>
         </div>
       </main>
     </div>

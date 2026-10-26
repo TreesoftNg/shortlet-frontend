@@ -19,7 +19,7 @@ export const PUBLIC_UNIT_CATEGORIES = [
  * neighbourhood / units APIs (no CMS endpoint on staging yet).
  */
 export const BRAND_DEFAULTS = {
-  brand_name: 'Sunmade Luxury Shortlets & Suites',
+  brand_name: 'Sunmade Apartments & Suites',
   currency: 'NGN',
   currency_symbol: '₦',
   hero: {
