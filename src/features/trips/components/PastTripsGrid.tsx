@@ -1,17 +1,21 @@
 'use client';
 
-import { AppButton, SectionHeader, StatusBadge, Surface } from '@/shared/components';
+import { LeaveReviewDialog } from '@/features/trips/components/LeaveReviewDialog';
+import { AppButton, EmptyState, SectionHeader, StatusBadge, Surface } from '@/shared/components';
+import { CoverImage } from '@/shared/components/CoverImage';
 import type { Booking } from '@/data/types';
 import { Box, Flex, Grid, Text } from '@chakra-ui/react';
-import { Star } from 'lucide-react';
-import Image from 'next/image';
+import { CalendarDays, Star } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 type PastTripsGridProps = {
   bookings: Booking[];
   title?: string;
   showViewAll?: boolean;
   onViewAll?: () => void;
+  emptyTitle?: string;
+  emptyDescription?: string;
 };
 
 export function PastTripsGrid({
@@ -19,12 +23,20 @@ export function PastTripsGrid({
   title = "Where you've been",
   showViewAll = true,
   onViewAll,
+  emptyTitle = 'No trips in this list yet',
+  emptyDescription = 'When you have trips here, they will show up in this grid.',
 }: PastTripsGridProps) {
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+
   if (!bookings.length) {
     return (
-      <Text color="ink.2" mt={8}>
-        No trips in this list yet.
-      </Text>
+      <EmptyState
+        title={emptyTitle}
+        description={emptyDescription}
+        actionLabel="Explore stays"
+        actionHref="/search"
+        icon={<CalendarDays size={22} strokeWidth={1.9} />}
+      />
     );
   }
 
@@ -66,14 +78,12 @@ export function PastTripsGrid({
       >
         {bookings.map((booking) => (
           <Surface key={booking.id} radius="lg" asChild>
-            <Link href={`/properties/${booking.property_slug}`}>
+            <Link href={`/bookings/${booking.id}`}>
               <Box position="relative" h="180px">
-                <Image
+                <CoverImage
                   src={booking.property_image}
                   alt={booking.property_name}
-                  fill
                   sizes="(max-width: 640px) 100vw, 33vw"
-                  style={{ objectFit: 'cover' }}
                 />
               </Box>
               <Box p="16px 18px">
@@ -101,6 +111,7 @@ export function PastTripsGrid({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        setReviewBooking(booking);
                       }}
                     >
                       Leave a review
@@ -122,6 +133,14 @@ export function PastTripsGrid({
           </Surface>
         ))}
       </Grid>
+
+      <LeaveReviewDialog
+        booking={reviewBooking}
+        open={Boolean(reviewBooking)}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setReviewBooking(null);
+        }}
+      />
     </Box>
   );
 }

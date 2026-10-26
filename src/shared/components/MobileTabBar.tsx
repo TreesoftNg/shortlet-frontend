@@ -2,12 +2,19 @@
 
 /**
  * Mobile-only bottom nav. Desktop uses SiteHeader + account menu instead.
- * Only include routes that exist — no Saved/Inbox until those pages ship.
  */
 
+import { UnreadBadge } from '@/features/messages/components/UnreadBadge';
 import { useIsAuthenticated } from '@/features/auth/store/auth-store';
-import { Flex, Text } from '@chakra-ui/react';
-import { CircleUser, Luggage, Search, type LucideIcon } from 'lucide-react';
+import { Box, Flex, Text } from '@chakra-ui/react';
+import {
+  Building2,
+  CircleUser,
+  Home,
+  Luggage,
+  MessageCircle,
+  type LucideIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -16,6 +23,7 @@ type Tab = {
   label: string;
   icon: LucideIcon;
   match?: (pathname: string) => boolean;
+  showUnread?: boolean;
 };
 
 export function MobileTabBar() {
@@ -25,15 +33,28 @@ export function MobileTabBar() {
   const tabs: Tab[] = [
     {
       href: '/',
-      label: 'Explore',
-      icon: Search,
+      label: 'Home',
+      icon: Home,
       match: (path) => path === '/',
+    },
+    {
+      href: '/search?tab=all',
+      label: 'Stays',
+      icon: Building2,
+      match: (path) => path.startsWith('/search'),
     },
     {
       href: '/trips',
       label: 'Trips',
       icon: Luggage,
       match: (path) => path.startsWith('/trips'),
+    },
+    {
+      href: isAuthenticated ? '/messages' : '/auth',
+      label: 'Inbox',
+      icon: MessageCircle,
+      match: (path) => path.startsWith('/messages'),
+      showUnread: isAuthenticated,
     },
     {
       href: isAuthenticated ? '/account' : '/auth',
@@ -81,7 +102,10 @@ export function MobileTabBar() {
             minW="56px"
           >
             <Link href={tab.href}>
-              <Icon size={22} strokeWidth={1.9} />
+              <Box position="relative" display="inline-flex">
+                <Icon size={22} strokeWidth={1.9} />
+                {tab.showUnread ? <UnreadBadge /> : null}
+              </Box>
               <Text as="span">{tab.label}</Text>
             </Link>
           </Flex>

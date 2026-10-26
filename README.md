@@ -18,7 +18,17 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Learn More
+## Staging API
+
+The browser calls the [staging API](https://api-staging.sunmadeapartments.com/api/docs) directly via `NEXT_PUBLIC_API_BASE_URL` (CORS must allow your app Origin).
+
+Required env:
+
+```
+NEXT_PUBLIC_API_BASE_URL=https://api-staging.sunmadeapartments.com
+NEXT_PUBLIC_TENANT_SLUG=sunmade
+```
+
 
 To learn more about Next.js, take a look at the following resources:
 

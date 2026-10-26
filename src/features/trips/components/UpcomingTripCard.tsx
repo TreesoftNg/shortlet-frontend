@@ -1,10 +1,17 @@
 'use client';
 
+import { createConversation } from '@/data/api/conversations';
+import { ApiError } from '@/data/api/http';
+import { queryKeys } from '@/data/query-keys';
 import type { Booking } from '@/data/types';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
+import { CoverImage } from '@/shared/components/CoverImage';
+import { directionsUrl } from '@/shared/lib/maps';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { MapPin, MessageCircle, PlaneLanding } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 type UpcomingTripCardProps = {
   booking: Booking;
@@ -12,6 +19,44 @@ type UpcomingTripCardProps = {
 
 export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [messaging, setMessaging] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
+  const mapsUrl = directionsUrl(booking);
+
+  async function openTripChat() {
+    setMessageError(null);
+    const token = await ensureAccessToken();
+    if (!token) {
+      router.push('/auth');
+      return;
+    }
+    setMessaging(true);
+    try {
+      const created = await createConversation(
+        {
+          bookingId: booking.id,
+          propertyId: booking.property_id || undefined,
+          unitId: booking.unit_id || undefined,
+        },
+        token,
+      );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.messages.conversations(),
+      });
+      router.push(`/messages/${created.id}`);
+    } catch (err) {
+      setMessageError(
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Could not open chat.',
+      );
+    } finally {
+      setMessaging(false);
+    }
+  }
 
   return (
     <Grid
@@ -23,12 +68,10 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
       boxShadow="md"
     >
       <Box position="relative" minH={{ base: '220px', md: '360px' }}>
-        <Image
+        <CoverImage
           src={booking.property_image}
           alt={booking.property_name}
-          fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          style={{ objectFit: 'cover' }}
           priority
         />
       </Box>
@@ -140,12 +183,36 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
               px="10px"
               py="4px"
               borderRadius="full"
-              bg="#E6F6EC"
-              color="ok"
+              bg={
+                booking.status === 'confirmed' || booking.status === 'checked_in'
+                  ? '#E6F6EC'
+                  : booking.status === 'pending'
+                    ? '#FFF4E5'
+                    : booking.status === 'expired'
+                      ? '#FDECEC'
+                      : 'bg.soft'
+              }
+              color={
+                booking.status === 'confirmed' || booking.status === 'checked_in'
+                  ? 'ok'
+                  : booking.status === 'pending'
+                    ? 'warn'
+                    : booking.status === 'expired'
+                      ? 'danger'
+                      : 'ink.2'
+              }
               fontSize="12px"
               fontWeight="700"
             >
-              Confirmed · Paid
+              {booking.status === 'confirmed'
+                ? 'Confirmed · Paid'
+                : booking.status === 'pending'
+                  ? 'Awaiting payment'
+                  : booking.status === 'expired'
+                    ? 'Payment expired'
+                    : booking.status === 'checked_in'
+                      ? 'Checked in'
+                      : booking.status}
             </Flex>
           </Box>
         </Grid>
@@ -164,9 +231,7 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="white"
             fontWeight="700"
             _hover={{ bg: 'brand.600' }}
-            onClick={() =>
-              router.push(`/properties/${booking.property_slug}`)
-            }
+            onClick={() => router.push(`/bookings/${booking.id}`)}
           >
             Manage booking
           </Button>
@@ -178,23 +243,36 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             color="ink"
             fontWeight="700"
             gap="8px"
+            disabled={messaging}
+            onClick={() => void openTripChat()}
           >
             <MessageCircle size={18} strokeWidth={1.9} />
-            Message
+            {messaging ? 'Opening…' : 'Message'}
           </Button>
-          <Button
-            h="48px"
-            px="16px"
-            borderRadius="12px"
-            bg="bg.soft"
-            color="ink"
-            fontWeight="700"
-            gap="8px"
-          >
-            <MapPin size={18} strokeWidth={1.9} />
-            Directions
-          </Button>
+          {mapsUrl ? (
+            <Button
+              asChild
+              h="48px"
+              px="16px"
+              borderRadius="12px"
+              bg="bg.soft"
+              color="ink"
+              fontWeight="700"
+              gap="8px"
+            >
+              <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                <MapPin size={18} strokeWidth={1.9} />
+                Directions
+              </a>
+            </Button>
+          ) : null}
         </Flex>
+
+        {messageError ? (
+          <Text color="red.500" fontSize="13px" fontWeight="600" mt="10px">
+            {messageError}
+          </Text>
+        ) : null}
       </Flex>
     </Grid>
   );

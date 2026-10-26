@@ -1,4 +1,24 @@
-export { request, delay } from './client';
+export { http, ApiError, apiFieldErrors } from './http';
+export { getPublicContactDetails, submitContactMessage } from './contact';
+export type { PublicContactDetails, SubmitContactInput } from './contact';
+export {
+  createCustomerAccount,
+  forgotCustomerPassword,
+  getCustomerMe,
+  loginCustomer,
+  resendCustomerOtp,
+  resetCustomerPassword,
+  verifyCustomerOtp,
+} from './customers';
+export type {
+  CreateCustomerAccountInput,
+  CustomerLoginInput,
+  CustomerLoginResult,
+  ForgotPasswordInput,
+  ResendEmailOtpInput,
+  ResetPasswordInput,
+  VerifyEmailOtpInput,
+} from './customers';
 
 export { getWebsiteContent } from './content';
 
@@ -7,17 +27,54 @@ export {
   getNeighborhoods,
 } from './neighborhoods';
 
-export {
-  getProperties,
-  getPropertyById,
-  getPropertyBySlug,
-} from './properties';
-export type { PropertyListParams, PropertySort } from './properties';
-
-export { getReviewsByPropertyId } from './reviews';
+export { getPublicUnits, getPublicUnitById } from './public-units';
+export type { PublicUnitsParams, PublicUnitsPage } from './public-units';
 
 export {
+  createCustomerReview,
+  mapCustomerReview,
+} from './reviews';
+export type { CreateReviewInput, CustomerReview } from './reviews';
+
+export {
+  cancelBooking,
+  claimGuestBookingAccount,
+  confirmClaimGuestBookingAccount,
+  createBooking,
   getBookingById,
   getBookingCounts,
   getBookings,
+  getGuestBooking,
+  getMyBookingById,
+  getMyBookings,
+  getUnitQuote,
+  startBookingPayment,
+  verifyBookingPayment,
 } from './bookings';
+export type {
+  BookingQuote,
+  CreateBookingInput,
+  CreateBookingResult,
+} from './bookings';
+export type { CancelBookingInput } from '@/data/types/booking-api';
+export type { PropertySort } from '@/data/types';
+
+export {
+  createConversation,
+  getConversation,
+  getUnreadCount,
+  listConversations,
+  listMessages,
+  markConversationRead,
+  reopenConversation,
+  sendConversationMessage,
+} from './conversations';
+export type {
+  ConversationDetail,
+  ConversationListItem,
+  ConversationMessage,
+  CreateConversationInput,
+  MessagePage,
+  SendMessageInput,
+  UnreadCount,
+} from '@/data/types/messaging';

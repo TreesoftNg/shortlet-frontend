@@ -11,12 +11,14 @@ import {
   useIsAuthenticated,
 } from '@/features/auth/store/auth-store';
 import { Box, Flex, Menu, Portal, Text } from '@chakra-ui/react';
+import { UnreadBadge } from '@/features/messages/components/UnreadBadge';
 import {
   CircleHelp,
   LogIn,
   LogOut,
   MapPin,
   Menu as MenuIcon,
+  MessageCircle,
   User,
   UserRound,
 } from 'lucide-react';
@@ -28,16 +30,24 @@ type MenuLink = {
   href: string;
   label: string;
   icon: typeof User;
+  showUnread?: boolean;
 };
 
 const guestLinks: MenuLink[] = [
   { value: 'auth', href: '/auth', label: 'Sign in', icon: LogIn },
-  { value: 'search', href: '/search', label: 'Explore stays', icon: MapPin },
+  { value: 'search', href: '/search?tab=all', label: 'Explore stays', icon: MapPin },
   { value: 'contact', href: '/contact', label: 'Help', icon: CircleHelp },
 ];
 
 const memberLinks: MenuLink[] = [
   { value: 'account', href: '/account', label: 'Account', icon: UserRound },
+  {
+    value: 'messages',
+    href: '/messages',
+    label: 'Messages',
+    icon: MessageCircle,
+    showUnread: true,
+  },
   { value: 'contact', href: '/contact', label: 'Help', icon: CircleHelp },
 ];
 
@@ -83,7 +93,9 @@ export function AccountMenuButton() {
         aria-label={isAuthenticated ? 'Your account' : 'Sign in'}
       >
         <Link href={accountHref}>
-          <AvatarBadge initials={user?.avatarInitials} />
+          <AvatarBadge
+            initials={isAuthenticated ? user?.avatarInitials : undefined}
+          />
         </Link>
       </Flex>
 
@@ -109,7 +121,9 @@ export function AccountMenuButton() {
               _open={{ boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}
             >
               <MenuIcon size={18} strokeWidth={1.9} />
-              <AvatarBadge initials={user?.avatarInitials} />
+              <AvatarBadge
+                initials={isAuthenticated ? user?.avatarInitials : undefined}
+              />
             </Flex>
           </Menu.Trigger>
 
@@ -157,7 +171,10 @@ export function AccountMenuButton() {
                     >
                       <Link href={item.href}>
                         <Flex align="center" gap="10px" w="full">
-                          <Icon size={16} strokeWidth={1.9} />
+                          <Box position="relative" display="inline-flex">
+                            <Icon size={16} strokeWidth={1.9} />
+                            {item.showUnread ? <UnreadBadge /> : null}
+                          </Box>
                           {item.label}
                         </Flex>
                       </Link>

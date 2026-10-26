@@ -17,12 +17,48 @@ export type {
   PropertyBadge,
   PropertyHighlight,
   PropertyImage,
+  PropertySort,
   Review,
   ReviewCategoryScores,
   ReviewSummary,
+  StayLimits,
   Unit,
   UnitStatus,
   WebsiteContent,
 } from './property';
 
 export type { Booking, BookingStatus, TripTab } from './booking';
+export type {
+  ConversationDetail,
+  ConversationListItem,
+  ConversationMessage,
+  ConversationStatus,
+  CreateConversationInput,
+  MessagePage,
+  MessageSenderType,
+  SendMessageInput,
+  UnreadCount,
+} from './messaging';
+export type {
+  ApiBooking,
+  BookingGuestInput,
+  BookingQuote,
+  CreateBookingInput,
+  CreateBookingResult,
+} from './booking-api';
+
+export type {
+  PublicUnitAmenity,
+  PublicUnitCard,
+  PublicUnitDetail,
+  PublicUnitLocation,
+  PublicUnitMedia,
+  PublicUnitPropertyRef,
+  PublicUnitReviewItem,
+  PublicUnitReviews,
+  PublicUnitsListMeta,
+  PublicUnitsListResult,
+  PublicUnitsTab,
+} from './public-unit';
+
+export type { CreateReviewInput, CustomerReview } from './review-api';

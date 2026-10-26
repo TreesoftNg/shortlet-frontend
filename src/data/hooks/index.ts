@@ -7,20 +7,54 @@
  */
 
 import {
-  getBookingCounts,
+  cancelBooking,
+  createBooking,
+  createCustomerReview,
+  getBookingById,
   getBookings,
   getNeighborhoodBySlug,
   getNeighborhoods,
-  getProperties,
-  getPropertyBySlug,
-  getReviewsByPropertyId,
+  getPublicContactDetails,
+  getPublicUnitById,
+  getPublicUnits,
+  getUnitQuote,
   getWebsiteContent,
-  type PropertyListParams,
+  startBookingPayment,
+  verifyBookingPayment,
+  type CancelBookingInput,
+  type CreateBookingInput,
+  type CreateReviewInput,
+  type PublicUnitsParams,
 } from '@/data/api';
 import { DEMO_STAY } from '@/data/demo-stay';
+import {
+  getBookingAccessToken,
+  getPendingBookingId,
+  hasGuestBookingSession,
+} from '@/data/lib/booking-session';
+import { bookingTab, toMoneyNumber } from '@/data/lib/map-booking';
+import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
 import { queryKeys } from '@/data/query-keys';
+import type { BookingQuote as ApiBookingQuote } from '@/data/types';
 import type { Property, TripTab, Unit } from '@/data/types';
-import { useQuery } from '@tanstack/react-query';
+import { useValidAccessToken } from '@/features/auth/hooks/useValidAccessToken';
+import {
+  invalidateAuthSession,
+  isAuthApiError,
+  useAuthStore,
+} from '@/features/auth/store/auth-store';
+import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
+import { getDefaultStay } from '@/shared/lib/default-stay';
+import {
+  formatDatesRangeLabel,
+  parseISODate,
+} from '@/shared/lib/format';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 /** Shared query defaults for list/detail reads. */
@@ -48,6 +82,18 @@ export function useNeighborhoods() {
   });
 }
 
+export function usePublicContactDetails() {
+  return useQuery({
+    queryKey: queryKeys.contact.details(),
+    queryFn: getPublicContactDetails,
+    // Always re-read DB-backed Settings; never keep a stale sidebar.
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useNeighborhood(slug?: string) {
   return useQuery({
     queryKey: queryKeys.neighborhoods.detail(slug ?? ''),
@@ -58,28 +104,52 @@ export function useNeighborhood(slug?: string) {
   });
 }
 
+// ── Public units (live browse API) ────────────────────────────────────────
+
+export function usePublicUnits(params: PublicUnitsParams = {}) {
+  const normalised: PublicUnitsParams = {
+    ...params,
+    tab: toPublicUnitsTab(params.tab),
+  };
+  return useQuery({
+    queryKey: queryKeys.publicUnits.list(normalised),
+    queryFn: () => getPublicUnits(normalised),
+    placeholderData: keepPreviousData,
+    ...readOptions,
+  });
+}
+
 // ── Properties ────────────────────────────────────────────────────────────
 
-export function useFeaturedProperties() {
+/** Featured strip on home — powered by GET /api/v1/public/units?tab=… */
+export function useFeaturedProperties(categoryOrTab = 'all') {
+  const tab = toPublicUnitsTab(categoryOrTab);
   return useQuery({
-    queryKey: queryKeys.properties.featured(),
-    queryFn: () => getProperties({ featured: true }),
+    queryKey: queryKeys.properties.featured(tab),
+    queryFn: async () => {
+      const page = await getPublicUnits({ tab, limit: 4 });
+      return page.items;
+    },
     ...readOptions,
   });
 }
 
-export function useProperties(params: PropertyListParams = {}) {
+/** Full public unit detail (property + reviews) from one API response. */
+export function usePublicUnitDetail(id: string) {
   return useQuery({
-    queryKey: queryKeys.properties.list(params),
-    queryFn: () => getProperties(params),
+    queryKey: queryKeys.properties.detail(id),
+    queryFn: () => getPublicUnitById(id),
+    enabled: Boolean(id),
     ...readOptions,
   });
 }
 
+/** Property-only view of the public unit detail (shared cache with usePublicUnitDetail). */
 export function useProperty(slug: string) {
   return useQuery({
     queryKey: queryKeys.properties.detail(slug),
-    queryFn: () => getPropertyBySlug(slug),
+    queryFn: () => getPublicUnitById(slug),
+    select: (result) => result?.property ?? null,
     enabled: Boolean(slug),
     ...readOptions,
   });
@@ -87,38 +157,168 @@ export function useProperty(slug: string) {
 
 // ── Reviews ───────────────────────────────────────────────────────────────
 
-export function usePropertyReviews(propertyId: string | undefined) {
-  return useQuery({
-    queryKey: queryKeys.reviews.byProperty(propertyId ?? ''),
-    queryFn: () =>
-      propertyId
-        ? getReviewsByPropertyId(propertyId)
-        : Promise.resolve([]),
-    enabled: Boolean(propertyId),
-    ...readOptions,
+/** POST /api/v1/reviews — submit a customer review for a completed booking. */
+export function useCreateReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: CreateReviewInput) => {
+      const accessToken = await ensureAccessToken();
+      if (!accessToken) {
+        throw new Error('Sign in to leave a review.');
+      }
+      return createCustomerReview(input, accessToken);
+    },
+    onSuccess: (review) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
+      if (review.unitId) {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.reviews.byProperty(review.unitId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.properties.detail(review.unitId),
+        });
+      }
+    },
   });
 }
 
 // ── Bookings ──────────────────────────────────────────────────────────────
 
-export function useBookings(tab?: TripTab) {
-  const keyTab = tab ?? 'all';
+function useAllBookingsQuery() {
+  const accessToken = useValidAccessToken();
+  // sessionStorage guest token is not reactive; read at render for enable + key.
+  const guestBookingId = accessToken ? null : getPendingBookingId();
+  const guestSession =
+    !accessToken && hasGuestBookingSession() ? guestBookingId : null;
   return useQuery({
-    queryKey: queryKeys.bookings.list(keyTab),
-    queryFn: () => getBookings(tab),
+    queryKey: [
+      ...queryKeys.bookings.list('all'),
+      accessToken ?? (guestSession ? `guest:${guestSession}` : 'anon'),
+    ],
+    queryFn: () => getBookings(undefined, accessToken),
+    enabled: Boolean(accessToken || guestSession),
     ...readOptions,
   });
+}
+
+export function useBookings(tab?: TripTab) {
+  const query = useAllBookingsQuery();
+  const list = !tab
+    ? (query.data ?? [])
+    : (query.data ?? []).filter((booking) => bookingTab(booking) === tab);
+
+  return {
+    ...query,
+    data: list,
+  };
 }
 
 export function useBookingCounts() {
+  const query = useAllBookingsQuery();
+  const list = query.data ?? [];
+  const counts = {
+    upcoming: list.filter((booking) => bookingTab(booking) === 'upcoming')
+      .length,
+    past: list.filter((booking) => bookingTab(booking) === 'past').length,
+    cancelled: list.filter((booking) => bookingTab(booking) === 'cancelled')
+      .length,
+  };
+
+  return {
+    ...query,
+    data: counts,
+  };
+}
+
+export function useCreateBooking() {
+  return useMutation({
+    mutationFn: async (input: CreateBookingInput) => {
+      const token = await ensureAccessToken();
+      if (!token) {
+        return createBooking(input, null);
+      }
+      try {
+        return await createBooking(input, token);
+      } catch (error) {
+        if (!isAuthApiError(error)) throw error;
+        // Stale Bearer breaks guest checkout — drop session and retry unsigned.
+        invalidateAuthSession();
+        return createBooking(input, null);
+      }
+    },
+  });
+}
+
+export function useVerifyBookingPayment() {
+  return useMutation({
+    mutationFn: async (args: {
+      bookingId: string;
+      transactionId?: string;
+      reference?: string;
+      bookingToken?: string | null;
+    }) => {
+      const accessToken = await ensureAccessToken();
+      return verifyBookingPayment(
+        args.bookingId,
+        {
+          ...(args.transactionId ? { transactionId: args.transactionId } : {}),
+          ...(args.reference ? { reference: args.reference } : {}),
+        },
+        { accessToken, bookingToken: args.bookingToken },
+      );
+    },
+  });
+}
+
+export function useBooking(bookingId: string | undefined) {
+  const accessToken = useValidAccessToken();
   return useQuery({
-    queryKey: queryKeys.bookings.counts(),
-    queryFn: getBookingCounts,
+    queryKey: [...queryKeys.bookings.detail(bookingId ?? ''), accessToken ?? 'anon'],
+    queryFn: () => getBookingById(bookingId!, accessToken),
+    enabled: Boolean(bookingId),
     ...readOptions,
   });
 }
 
-// ── Checkout quote (derived client-side from property + demo stay) ────────
+export function useCancelBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: {
+      bookingId: string;
+      reason?: string;
+      bookingToken?: string | null;
+    }) => {
+      const accessToken = await ensureAccessToken();
+      const input: CancelBookingInput = { reason: args.reason };
+      return cancelBooking(args.bookingId, input, {
+        accessToken,
+        bookingToken: args.bookingToken ?? getBookingAccessToken(args.bookingId),
+      });
+    },
+    onSuccess: (booking) => {
+      queryClient.setQueryData(
+        [...queryKeys.bookings.detail(booking.id), useAuthStore.getState().getValidAccessToken() ?? 'anon'],
+        booking,
+      );
+      void queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
+    },
+  });
+}
+
+export function useStartBookingPayment() {
+  return useMutation({
+    mutationFn: async (args: { bookingId: string; returnUrl: string }) => {
+      const accessToken = await ensureAccessToken();
+      return startBookingPayment(args.bookingId, args.returnUrl, {
+        accessToken,
+        bookingToken: getBookingAccessToken(args.bookingId),
+      });
+    },
+  });
+}
+
+// ── Checkout quote (live API quote + property card) ───────────────────────
 
 export type PaymentMethod = 'card' | 'transfer' | 'ussd';
 
@@ -131,13 +331,64 @@ export type CheckoutQuote = {
   stay: number;
   cleaning: number;
   service: number;
+  tax: number;
   deposit: number;
   total: number;
   datesLabel: string;
+  checkIn: string;
+  checkOut: string;
   checkInShort: string;
   checkOutShort: string;
+  houseRules: string | null;
+  apiQuote: ApiBookingQuote | null;
 };
 
+function shortStayLabel(iso: string) {
+  return parseISODate(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+export function buildCheckoutQuoteFromApi(
+  property: Property,
+  unitId: string | null,
+  apiQuote: ApiBookingQuote,
+): CheckoutQuote {
+  const unit =
+    property.units.find((u) => u.id === unitId) ?? property.units[0] ?? null;
+  const stay = toMoneyNumber(apiQuote.price.nightsSubtotal);
+  const nights = apiQuote.nights || 1;
+  const cleaning = toMoneyNumber(apiQuote.price.cleaningFee);
+  const service = toMoneyNumber(apiQuote.price.serviceFee?.amount);
+  const tax = toMoneyNumber(apiQuote.price.tax?.amount);
+  const deposit = toMoneyNumber(apiQuote.deposit.amount);
+  const total = toMoneyNumber(apiQuote.totalDueNow);
+  const nightly = nights > 0 ? stay / nights : toMoneyNumber(unit?.nightly_rate);
+
+  return {
+    property,
+    unit,
+    nights,
+    guests: apiQuote.guests.adults + apiQuote.guests.children,
+    nightly,
+    stay,
+    cleaning,
+    service,
+    tax,
+    deposit,
+    total,
+    datesLabel: formatDatesRangeLabel(apiQuote.checkIn, apiQuote.checkOut),
+    checkIn: apiQuote.checkIn,
+    checkOut: apiQuote.checkOut,
+    checkInShort: shortStayLabel(apiQuote.checkIn),
+    checkOutShort: shortStayLabel(apiQuote.checkOut),
+    houseRules: apiQuote.houseRules ?? null,
+    apiQuote,
+  };
+}
+
+/** Offline/demo fallback used by unit tests. */
 export function buildCheckoutQuote(
   property: Property,
   unitId: string | null,
@@ -161,28 +412,75 @@ export function buildCheckoutQuote(
     stay,
     cleaning,
     service,
+    tax: 0,
     deposit,
     total: stay + cleaning + service + deposit,
     datesLabel: DEMO_STAY.datesLabel,
+    checkIn: DEMO_STAY.checkIn,
+    checkOut: DEMO_STAY.checkOut,
     checkInShort: DEMO_STAY.checkInShort,
     checkOutShort: DEMO_STAY.checkOutShort,
+    houseRules: null,
+    apiQuote: null,
   };
+}
+
+export type UnitQuoteParams = {
+  unitId: string;
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+};
+
+export function useUnitQuote(params: UnitQuoteParams | null) {
+  return useQuery({
+    queryKey: queryKeys.quotes.unit(
+      params ?? { unitId: '', checkIn: '', checkOut: '', adults: 0 },
+    ),
+    queryFn: () =>
+      getUnitQuote({
+        unitId: params!.unitId,
+        checkIn: params!.checkIn,
+        checkOut: params!.checkOut,
+        adults: params!.adults,
+      }),
+    enabled: Boolean(
+      params?.unitId && params.checkIn && params.checkOut && params.adults > 0,
+    ),
+    placeholderData: keepPreviousData,
+    ...readOptions,
+  });
 }
 
 export function useCheckoutQuote(
   property: Property | null | undefined,
   unitId: string | null,
+  stay?: { checkIn: string; checkOut: string; guests: number } | null,
 ) {
-  return useMemo(() => {
-    if (!property) return null;
-    return buildCheckoutQuote(property, unitId);
-  }, [property, unitId]);
-}
+  const resolvedUnitId =
+    unitId || property?.units[0]?.id || property?.id || '';
+  const defaults = getDefaultStay();
+  const checkIn = stay?.checkIn ?? defaults.checkIn;
+  const checkOut = stay?.checkOut ?? defaults.checkOut;
+  const adults = stay?.guests ?? defaults.guests;
 
-export const mockGuest = {
-  firstName: 'Temitope',
-  lastName: 'Aladesiun',
-  email: 'temi@example.com',
-  phone: '+234 801 234 5678',
-  username: 'aladesiun.t',
-};
+  const quoteQuery = useUnitQuote(
+    property && resolvedUnitId
+      ? { unitId: resolvedUnitId, checkIn, checkOut, adults }
+      : null,
+  );
+
+  return useMemo(() => {
+    if (!property) return { quote: null, ...quoteQuery };
+    if (quoteQuery.data) {
+      return {
+        quote: buildCheckoutQuoteFromApi(property, unitId, quoteQuery.data),
+        ...quoteQuery,
+      };
+    }
+    return {
+      quote: null,
+      ...quoteQuery,
+    };
+  }, [property, unitId, quoteQuery]);
+}

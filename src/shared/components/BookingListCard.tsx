@@ -1,10 +1,10 @@
 'use client';
 
 import type { Booking } from '@/data/types';
+import { CoverImage } from '@/shared/components/CoverImage';
 import { StatusBadge } from '@/shared/components/ui';
 import { formatNaira } from '@/shared/lib/format';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 type BookingListCardProps = {
@@ -36,12 +36,10 @@ export function BookingListCard({ booking }: BookingListCardProps) {
             minH={{ sm: '120px' }}
             flexShrink={0}
           >
-            <Image
+            <CoverImage
               src={booking.property_image}
               alt={booking.property_name}
-              fill
               sizes="(max-width: 640px) 100vw, 140px"
-              style={{ objectFit: 'cover' }}
             />
           </Box>
 

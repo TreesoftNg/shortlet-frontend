@@ -2,22 +2,36 @@
 
 import { BookingCard } from '@/features/property/components/BookingCard';
 import { PropertyAmenities } from '@/features/property/components/PropertyAmenities';
+import { PropertyDescription } from '@/features/property/components/PropertyDescription';
 import { PropertyGallery } from '@/features/property/components/PropertyGallery';
 import { PropertyHeaderBar } from '@/features/property/components/PropertyHeaderBar';
 import { PropertyHighlights } from '@/features/property/components/PropertyHighlights';
 import { PropertyReviews } from '@/features/property/components/PropertyReviews';
 import { PropertyTitle } from '@/features/property/components/PropertyTitle';
-import { StayCalendar } from '@/features/property/components/StayCalendar';
 import { UnitPicker } from '@/features/property/components/UnitPicker';
-import {
-  useProperty,
-  usePropertyReviews,
-} from '@/features/property/hooks/usePropertyData';
+import { usePublicUnitDetail } from '@/features/property/hooks/usePropertyData';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
-import { DEMO_STAY } from '@/data/demo-stay';
+import { MessageUsButton } from '@/features/messages/components/MessageUsButton';
 import { MobileTabBar } from '@/shared/components/MobileTabBar';
-import { formatNaira } from '@/shared/lib/format';
+import {
+  ErrorState,
+  Skeleton,
+  SkeletonText,
+} from '@/shared/components';
+import {
+  bathsLabel,
+  bedroomsLabel,
+  bedsOnlyLabel,
+  formatNaira,
+  guestsLabel,
+  shortArea,
+} from '@/shared/lib/format';
+import {
+  DEFAULT_STAY_LIMITS,
+  stayLengthProblem,
+} from '@/shared/lib/stay-length';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
+import { Building2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
@@ -27,11 +41,15 @@ type PropertyPageProps = {
 
 export function PropertyPage({ slug }: PropertyPageProps) {
   const router = useRouter();
-  const { data: property, isError, isPending } = useProperty(slug);
-  const { data: reviews = [] } = usePropertyReviews(property?.id);
+  const { data, isError, isPending } = usePublicUnitDetail(slug);
+  const property = data?.property;
+  const reviews = data?.reviews ?? [];
+  const houseRules = data?.houseRules ?? null;
   const selectedUnitId = usePropertyBookingStore((s) => s.selectedUnitId);
   const setSelectedUnitId = usePropertyBookingStore((s) => s.setSelectedUnitId);
-  const nights = DEMO_STAY.nights;
+  const checkIn = usePropertyBookingStore((s) => s.checkIn);
+  const checkOut = usePropertyBookingStore((s) => s.checkOut);
+  const guests = usePropertyBookingStore((s) => s.guests);
 
   useEffect(() => {
     if (property?.units[0] && !selectedUnitId) {
@@ -45,20 +63,20 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   );
 
   if (isPending) {
-    return (
-      <Box p={10} textAlign="center">
-        <Text color="ink.2">Loading property…</Text>
-      </Box>
-    );
+    return <PropertyPageSkeleton />;
   }
 
   if (isError || !property) {
     return (
-      <Box p={10} textAlign="center">
-        <Heading size="lg" mb={4}>
-          Property not found
-        </Heading>
-        <Button onClick={() => router.push('/search')}>Back to search</Button>
+      <Box maxW="1440px" mx="auto" minH="60vh" px={{ base: 4, md: 8, lg: '120px' }} py={10}>
+        <ErrorState
+          title="Property not found"
+          description="This stay may have been removed or the link is incorrect."
+          actionLabel="Back to search"
+          actionHref="/search"
+          mt={0}
+          icon={<Building2 size={22} strokeWidth={1.9} />}
+        />
       </Box>
     );
   }
@@ -66,10 +84,25 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   const nightly =
     selectedUnit?.nightly_rate ?? property.pricing.nightly_rate;
   const capacity = property.capacity;
+  const locationLabel =
+    shortArea(property.address.display) || property.address.city || 'Lagos';
+  const searchHref = '/search?tab=all';
+  const stayProblem = stayLengthProblem(
+    checkIn,
+    checkOut,
+    selectedUnit?.stay_limits ?? DEFAULT_STAY_LIMITS,
+  );
 
   return (
     <Box bg="bg" maxW="1440px" mx="auto" minH="100vh" pb={{ base: '100px', md: 0 }}>
-      <PropertyHeaderBar />
+      <PropertyHeaderBar
+        locationLabel={locationLabel}
+        searchHref={searchHref}
+        maxGuests={
+          selectedUnit?.capacity.max ?? property.capacity.max ?? 16
+        }
+        stayLimits={selectedUnit?.stay_limits}
+      />
 
       <Box as="main" px={{ base: 4, md: 8, lg: '120px' }}>
         <PropertyTitle property={property} />
@@ -113,9 +146,19 @@ export function PropertyPage({ slug }: PropertyPageProps) {
                   {property.summary}
                 </Heading>
                 <Text color="ink.2" fontSize="14px" mt={1}>
-                  {capacity.max} guests · {capacity.bedrooms} bedrooms ·{' '}
-                  {capacity.beds} beds · {capacity.bathrooms} baths
+                  {guestsLabel(capacity.max)} · {bedroomsLabel(capacity.bedrooms)}{' '}
+                  · {bedsOnlyLabel(capacity.beds)} ·{' '}
+                  {bathsLabel(capacity.bathrooms)}
                 </Text>
+                <Box mt={3}>
+                  <MessageUsButton
+                    propertyId={
+                      selectedUnit?.property_id ??
+                      property.units[0]?.property_id
+                    }
+                    unitId={selectedUnit?.id ?? property.id}
+                  />
+                </Box>
               </Box>
               <Flex
                 w="52px"
@@ -137,17 +180,10 @@ export function PropertyPage({ slug }: PropertyPageProps) {
               <PropertyHighlights highlights={property.highlights} />
             </Box>
 
-            <Text
-              py="28px"
-              color="ink.2"
-              borderBottom="1px solid"
-              borderColor="line"
-            >
-              {property.description}{' '}
-              <Text as="b" color="ink" textDecoration="underline" fontWeight="700">
-                Show more
-              </Text>
-            </Text>
+            <PropertyDescription
+              description={property.description}
+              houseRules={houseRules}
+            />
 
             <Box borderBottom="1px solid" borderColor="line">
               <UnitPicker units={property.units} />
@@ -156,11 +192,6 @@ export function PropertyPage({ slug }: PropertyPageProps) {
             <Box borderBottom="1px solid" borderColor="line">
               <PropertyAmenities labels={property.amenity_labels} />
             </Box>
-
-            <StayCalendar
-              areaLabel={property.address.display}
-              nights={nights}
-            />
           </Box>
 
           <Box display={{ base: 'none', lg: 'block' }}>
@@ -220,9 +251,10 @@ export function PropertyPage({ slug }: PropertyPageProps) {
           color="white"
           fontWeight="700"
           _hover={{ bg: 'brand.600' }}
+          disabled={Boolean(stayProblem)}
           onClick={() =>
             router.push(
-              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}`,
+              `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`,
             )
           }
         >
@@ -231,6 +263,24 @@ export function PropertyPage({ slug }: PropertyPageProps) {
       </Flex>
 
       <MobileTabBar />
+    </Box>
+  );
+}
+
+function PropertyPageSkeleton() {
+  return (
+    <Box bg="bg" maxW="1440px" mx="auto" minH="100vh" px={{ base: 4, md: 8, lg: '120px' }} py={6} aria-busy="true">
+      <Skeleton h="28px" w="220px" mb={4} borderRadius="full" />
+      <Skeleton h="18px" w="160px" mb={6} borderRadius="full" />
+      <Skeleton h={{ base: '240px', md: '420px' }} borderRadius="lg" mb={8} />
+      <Grid templateColumns={{ base: '1fr', lg: '1fr 360px' }} gap={8}>
+        <Box>
+          <SkeletonText lines={4} />
+          <Skeleton h="120px" mt={6} borderRadius="lg" />
+          <Skeleton h="180px" mt={6} borderRadius="lg" />
+        </Box>
+        <Skeleton h="360px" borderRadius="22px" />
+      </Grid>
     </Box>
   );
 }

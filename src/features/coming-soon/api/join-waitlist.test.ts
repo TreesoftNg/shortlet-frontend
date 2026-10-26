@@ -7,8 +7,9 @@ describe('joinWaitlist', () => {
     vi.unstubAllEnvs();
   });
 
-  it('posts email with coming-soon source and returns message', async () => {
+  it('posts email with coming-soon source and tenant slug header', async () => {
     vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:4000');
+    vi.stubEnv('NEXT_PUBLIC_TENANT_SLUG', 'sunmade');
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 202,
@@ -26,6 +27,9 @@ describe('joinWaitlist', () => {
       'http://localhost:4000/api/v1/public/waitlist',
       expect.objectContaining({
         method: 'POST',
+        headers: expect.objectContaining({
+          'X-Tenant-Slug': 'sunmade',
+        }),
         body: JSON.stringify({
           email: 'guest@example.com',
           source: 'coming-soon',
@@ -37,6 +41,7 @@ describe('joinWaitlist', () => {
 
   it('throws WaitlistApiError on API failure', async () => {
     vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:4000');
+    vi.stubEnv('NEXT_PUBLIC_TENANT_SLUG', 'sunmade');
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -59,8 +64,17 @@ describe('joinWaitlist', () => {
 
   it('throws when API base URL is missing', async () => {
     vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', '');
+    vi.stubEnv('NEXT_PUBLIC_TENANT_SLUG', 'sunmade');
     await expect(joinWaitlist('guest@example.com')).rejects.toBeInstanceOf(
       WaitlistApiError,
     );
+  });
+
+  it('throws when tenant slug is missing', async () => {
+    vi.stubEnv('NEXT_PUBLIC_API_BASE_URL', 'http://localhost:4000');
+    vi.stubEnv('NEXT_PUBLIC_TENANT_SLUG', '');
+    await expect(joinWaitlist('guest@example.com')).rejects.toMatchObject({
+      code: 'CONFIG_MISSING',
+    });
   });
 });

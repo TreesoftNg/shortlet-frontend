@@ -10,7 +10,7 @@
  *   queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all })
  */
 
-import type { PropertyListParams } from '@/data/api/properties';
+import type { PublicUnitsParams } from '@/data/api/public-units';
 import type { TripTab } from '@/data/types';
 
 export const queryKeys = {
@@ -26,12 +26,22 @@ export const queryKeys = {
       [...queryKeys.neighborhoods.all, 'detail', slug] as const,
   },
 
+  contact: {
+    all: ['contact'] as const,
+    details: () => [...queryKeys.contact.all, 'details'] as const,
+  },
+
+  publicUnits: {
+    all: ['public-units'] as const,
+    lists: () => [...queryKeys.publicUnits.all, 'list'] as const,
+    list: (params: PublicUnitsParams = {}) =>
+      [...queryKeys.publicUnits.lists(), params] as const,
+  },
+
   properties: {
     all: ['properties'] as const,
-    lists: () => [...queryKeys.properties.all, 'list'] as const,
-    list: (params: PropertyListParams) =>
-      [...queryKeys.properties.lists(), params] as const,
-    featured: () => [...queryKeys.properties.all, 'featured'] as const,
+    featured: (tab = 'all') =>
+      [...queryKeys.properties.all, 'featured', tab] as const,
     detail: (slug: string) =>
       [...queryKeys.properties.all, 'detail', slug] as const,
   },
@@ -42,6 +52,16 @@ export const queryKeys = {
       [...queryKeys.reviews.all, 'property', propertyId] as const,
   },
 
+  quotes: {
+    all: ['quotes'] as const,
+    unit: (params: {
+      unitId: string;
+      checkIn: string;
+      checkOut: string;
+      adults: number;
+    }) => [...queryKeys.quotes.all, 'unit', params] as const,
+  },
+
   bookings: {
     all: ['bookings'] as const,
     lists: () => [...queryKeys.bookings.all, 'list'] as const,
@@ -50,5 +70,16 @@ export const queryKeys = {
     counts: () => [...queryKeys.bookings.all, 'counts'] as const,
     detail: (id: string) =>
       [...queryKeys.bookings.all, 'detail', id] as const,
+  },
+
+  messages: {
+    all: ['messages'] as const,
+    conversations: () =>
+      [...queryKeys.messages.all, 'conversations'] as const,
+    detail: (id: string) =>
+      [...queryKeys.messages.all, 'detail', id] as const,
+    thread: (id: string) =>
+      [...queryKeys.messages.all, 'thread', id] as const,
+    unread: () => [...queryKeys.messages.all, 'unread'] as const,
   },
 } as const;

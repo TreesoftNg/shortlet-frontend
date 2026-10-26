@@ -9,16 +9,16 @@ export const metadata: Metadata = comingSoon
   ? {
       title: 'Coming soon',
       description:
-        'Sunmade Apartments & Suites. Serviced shortlet apartments in Lagos are ready — our website is coming soon.',
+        'Sunmade Luxury Shortlets & Suites. Serviced shortlet apartments in Lagos are ready — our website is coming soon.',
       openGraph: {
-        title: 'Coming soon · Sunmade Apartments & Suites',
+        title: 'Coming soon · Sunmade Luxury Shortlets & Suites',
         description:
           'Serviced shortlet apartments in Lagos are ready. Our website is coming soon.',
         type: 'website',
       },
     }
   : {
-      title: 'Sunmade Apartments & Suites',
+      title: 'Sunmade Luxury Shortlets & Suites',
       description:
         'Serviced shortlet apartments across Lagos & Abuja — verified, fully furnished, instantly bookable.',
     };

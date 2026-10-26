@@ -1,10 +1,17 @@
 import {
   badgeLabel,
+  bathsLabel,
+  bedroomsLabel,
   bedsGuestsLabel,
   bedsOnlyLabel,
+  formatDatesRangeLabel,
   formatLocation,
   formatNaira,
   formatNairaShort,
+  formatShortDate,
+  guestsLabel,
+  nightsBetween,
+  nightsLabel,
   shortArea,
 } from '@/shared/lib/format';
 import { describe, expect, it } from 'vitest';
@@ -63,5 +70,40 @@ describe('bedsOnlyLabel', () => {
   it('formats bed counts', () => {
     expect(bedsOnlyLabel(1)).toBe('1 bed');
     expect(bedsOnlyLabel(3)).toBe('3 beds');
+  });
+});
+
+describe('date helpers', () => {
+  it('counts nights between ISO dates', () => {
+    expect(nightsBetween('2026-10-12', '2026-10-16')).toBe(4);
+  });
+
+  it('formats short dates as DD/MM/YYYY', () => {
+    expect(formatShortDate('2026-10-18')).toBe('18/10/2026');
+  });
+
+  it('formats a same-month date range', () => {
+    expect(formatDatesRangeLabel('2026-10-12', '2026-10-16')).toBe(
+      '12–16 Oct',
+    );
+  });
+
+  it('formats guest counts', () => {
+    expect(guestsLabel(1)).toBe('1 guest');
+    expect(guestsLabel(2)).toBe('2 guests');
+  });
+
+  it('formats night counts', () => {
+    expect(nightsLabel(1)).toBe('1 night');
+    expect(nightsLabel(3)).toBe('3 nights');
+  });
+});
+
+describe('capacity labels', () => {
+  it('pluralises bedrooms and baths', () => {
+    expect(bedroomsLabel(1)).toBe('1 bedroom');
+    expect(bedroomsLabel(2)).toBe('2 bedrooms');
+    expect(bathsLabel(1)).toBe('1 bath');
+    expect(bathsLabel(3)).toBe('3 baths');
   });
 });

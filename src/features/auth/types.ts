@@ -1,4 +1,4 @@
-export type AuthMode = 'signin' | 'signup';
+export type AuthMode = 'signin' | 'signup' | 'forgot';
 
 export type AuthUser = {
   id: string;
@@ -9,7 +9,8 @@ export type AuthUser = {
   avatarInitials: string;
 };
 
-export const mockAuthUser: AuthUser = {
+/** Fixture for unit tests — not used for live sign-in. */
+export const sampleAuthUser: AuthUser = {
   id: 'usr_001',
   email: 'temi@example.com',
   firstName: 'Temitope',

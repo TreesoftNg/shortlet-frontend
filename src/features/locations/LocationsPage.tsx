@@ -1,31 +1,52 @@
 'use client';
 
-import { useNeighborhoods } from '@/features/home/hooks/useHomeData';
+// Neighbourhoods / locations UI temporarily disabled
+// import { useNeighborhoods } from '@/data/hooks';
 import {
   AppButton,
   AppPage,
-  NeighborhoodTile,
+  EmptyState,
+  // ErrorState,
+  // NeighborhoodTile,
+  // NeighborhoodTileSkeleton,
   PageHero,
 } from '@/shared/components';
-import type { Neighborhood } from '@/data/types';
-import { Box, Flex, Grid, Heading, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
+import { MapPin } from 'lucide-react';
 
 export function LocationsPage() {
-  const { data: neighborhoods = [] } = useNeighborhoods();
-
-  const lagos = neighborhoods.filter((n) => n.city === 'Lagos');
-  const abuja = neighborhoods.filter((n) => n.city === 'Abuja');
+  // const {
+  //   data: neighborhoods = [],
+  //   isPending,
+  //   isError,
+  //   refetch,
+  // } = useNeighborhoods();
 
   return (
     <AppPage mainPt={{ base: 8, md: 12 }}>
       <PageHero
         eyebrow="Destinations"
         title="Locations"
-        description="Browse Sunmade neighbourhoods across Lagos and Abuja, then jump into available apartments in each area."
+        description="Neighbourhood browsing is coming soon."
       />
 
-      <CitySection title="Lagos" areas={lagos} />
-      <CitySection title="Abuja" areas={abuja} mt={{ base: 10, md: 12 }} />
+      {/* Neighbourhood tiles temporarily disabled
+      {isPending ? (
+        <LocationsSkeleton />
+      ) : isError ? (
+        <ErrorState ... />
+      ) : (
+        <Grid>...</Grid>
+      )}
+      */}
+
+      <EmptyState
+        title="Neighbourhoods coming soon"
+        description="Browse all verified stays for now — area guides will be back shortly."
+        actionLabel="Open search"
+        actionHref="/search"
+        icon={<MapPin size={22} strokeWidth={1.9} />}
+      />
 
       <Flex
         mt={{ base: 10, md: 12 }}
@@ -51,44 +72,12 @@ export function LocationsPage() {
   );
 }
 
-function CitySection({
-  title,
-  areas,
-  mt,
-}: {
-  title: string;
-  areas: Neighborhood[];
-  mt?: { base: number; md: number };
-}) {
-  if (!areas.length) return null;
-
-  return (
-    <Box mt={mt}>
-      <Heading
-        as="h2"
-        fontSize={{ base: '22px', md: '26px' }}
-        fontWeight="700"
-        letterSpacing="-0.01em"
-        mb="18px"
-      >
-        {title}
-      </Heading>
-      <Grid
-        templateColumns={{
-          base: '1fr',
-          sm: 'repeat(2, 1fr)',
-          lg: 'repeat(3, 1fr)',
-        }}
-        gap={{ base: 3, md: 4 }}
-      >
-        {areas.map((area) => (
-          <NeighborhoodTile
-            key={area.id}
-            neighborhood={area}
-            height={{ base: '200px', md: '240px' }}
-          />
-        ))}
-      </Grid>
-    </Box>
-  );
-}
+// function LocationsSkeleton() {
+//   return (
+//     <Grid ...>
+//       {Array.from({ length: 3 }).map((_, i) => (
+//         <NeighborhoodTileSkeleton key={i} ... />
+//       ))}
+//     </Grid>
+//   );
+// }
