@@ -1,5 +1,6 @@
 'use client';
 
+import { IdDocumentUpload } from './components/IdDocumentUpload';
 import { CheckoutHeader } from '@/features/checkout/components/CheckoutHeader';
 import { CheckoutSummary } from '@/features/checkout/components/CheckoutSummary';
 import {
@@ -11,7 +12,12 @@ import {
 import { ApiError } from '@/data/api/http';
 import { saveBookingSession } from '@/data/lib/booking-session';
 import { quoteErrorMessage } from '@/data/lib/quote-error';
-import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
+import {
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  SkeletonText,
+} from '@/shared/components';
 import { getDefaultStay } from '@/shared/lib/default-stay';
 import { formatNaira } from '@/shared/lib/format';
 import { toMoneyNumber } from '@/data/lib/map-booking';
@@ -47,7 +53,11 @@ export function CheckoutPage() {
   const guests =
     guestsParam > 0 ? Math.max(1, guestsParam) : stayDefaults.guests;
 
-  const { data: property, isPending, isError } = useCheckoutProperty(propertySlug);
+  const {
+    data: property,
+    isPending,
+    isError,
+  } = useCheckoutProperty(propertySlug);
   const stay = useMemo(
     () => ({ checkIn, checkOut, guests }),
     [checkIn, checkOut, guests],
@@ -68,6 +78,7 @@ export function CheckoutPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [idDocumentId, setIdDocumentId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -143,11 +154,20 @@ export function CheckoutPage() {
 
   const handlePay = async () => {
     setFormError(null);
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim()) {
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !email.trim() ||
+      !phone.trim()
+    ) {
       setFormError('Please fill in your guest details.');
       return;
     }
 
+    if (!idDocumentId) {
+      setFormError('Please upload your ID document before paying.');
+      return;
+    }
     const unitForBooking = quote.unit?.id || unitId || property.id;
     if (!unitForBooking) {
       setFormError('Missing unit for this booking.');
@@ -166,6 +186,7 @@ export function CheckoutPage() {
         unitId: unitForBooking,
         checkIn: quote.checkIn,
         checkOut: quote.checkOut,
+        idDocumentId,
         adults: Math.max(1, guests),
         children: 0,
         infants: 0,
@@ -363,10 +384,7 @@ export function CheckoutPage() {
                 ) : null}
               </Flex>
 
-              <Grid
-                templateColumns={{ base: '1fr', sm: '1fr 1fr' }}
-                gap="12px"
-              >
+              <Grid templateColumns={{ base: '1fr', sm: '1fr 1fr' }} gap="12px">
                 {(
                   [
                     ['First name', firstName, setFirstName],
@@ -406,6 +424,7 @@ export function CheckoutPage() {
                   </Box>
                 ))}
               </Grid>
+              <IdDocumentUpload onUploaded={setIdDocumentId} />
 
               <Box
                 mt="12px"
@@ -475,6 +494,7 @@ export function CheckoutPage() {
                 w={{ base: 'full', sm: 'auto' }}
                 _hover={{ bg: 'brand.600' }}
                 loading={createBooking.isPending}
+                disabled={!idDocumentId || createBooking.isPending}
                 onClick={() => {
                   void handlePay();
                 }}

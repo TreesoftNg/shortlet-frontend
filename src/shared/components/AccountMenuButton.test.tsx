@@ -5,6 +5,10 @@ import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('@/features/messages/hooks/useMessagesData', () => ({
+  useUnreadCount: () => ({ data: { unreadConversations: 0 } }),
+}));
+
 vi.mock('next/link', () => ({
   default: ({
     href,
@@ -59,9 +63,10 @@ describe('AccountMenuButton', () => {
 
     renderWithProviders(<AccountMenuButton />);
 
-    expect(
-      screen.getByRole('link', { name: /your account/i }),
-    ).toHaveAttribute('href', '/account');
+    expect(screen.getByRole('link', { name: /your account/i })).toHaveAttribute(
+      'href',
+      '/account',
+    );
   });
 
   it('opens the desktop menu with guest actions when logged out', async () => {

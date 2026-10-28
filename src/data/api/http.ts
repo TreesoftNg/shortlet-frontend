@@ -103,10 +103,9 @@ function toApiError(status: number, payload: unknown): ApiError {
       status,
       code: typeof error.code === 'string' ? error.code : 'UNKNOWN',
       message:
-        typeof error.message === 'string'
-          ? error.message
-          : 'Request failed',
-      requestId: typeof meta?.requestId === 'string' ? meta.requestId : undefined,
+        typeof error.message === 'string' ? error.message : 'Request failed',
+      requestId:
+        typeof meta?.requestId === 'string' ? meta.requestId : undefined,
       details: error.details,
     });
   }
@@ -136,7 +135,7 @@ async function requestJson(
     ...options.headers,
   };
 
-  if (options.body !== undefined) {
+  if (options.body !== undefined && !(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -151,7 +150,12 @@ async function requestJson(
   const response = await fetch(apiUrl(path), {
     method: options.method ?? (options.body !== undefined ? 'POST' : 'GET'),
     headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body:
+      options.body instanceof FormData
+        ? options.body
+        : options.body !== undefined
+          ? JSON.stringify(options.body)
+          : undefined,
   });
 
   return {

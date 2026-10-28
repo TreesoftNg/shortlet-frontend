@@ -50,7 +50,9 @@ describe('mapApiBookingToBooking', () => {
     expect(booking.property_id).not.toBe(booking.unit_id);
     expect(booking.guests).toBe(2);
     expect(booking.amount_paid).toBe(577025);
-    expect(booking.property_image).toBe('https://api-staging.sunmadeapartments.com/media/photo.webp');
+    expect(booking.property_image).toBe(
+      'https://api-staging.sunmadeapartments.com/media/photo.webp',
+    );
     expect(booking.dates_range_label).toContain('Dec');
   });
 
@@ -92,7 +94,6 @@ describe('normalizeCreateBookingResult', () => {
     expect(result.accessToken).toBe('tok');
     expect(result.checkout?.checkoutUrl).toBe('https://pay.example');
   });
-
 });
 
 describe('bookings api', () => {
@@ -164,6 +165,7 @@ describe('bookings api', () => {
 
     const result = await createBooking(
       {
+        idDocumentId: 'id-doc-1',
         returnUrl: 'http://localhost:3000/confirmation',
         unitId: 'u1',
         checkIn: '2026-12-23',

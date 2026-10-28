@@ -8,6 +8,7 @@ export type BookingGuestInput = {
 };
 
 export type CreateBookingInput = {
+  idDocumentId: string;
   returnUrl: string;
   unitId: string;
   checkIn: string;
