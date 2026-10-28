@@ -1,6 +1,7 @@
 'use client';
 
 import { IdDocumentUpload } from './components/IdDocumentUpload';
+import { describePaymentError } from './utils/payment-error';
 import { CheckoutHeader } from '@/features/checkout/components/CheckoutHeader';
 import { CheckoutSummary } from '@/features/checkout/components/CheckoutSummary';
 import {
@@ -79,6 +80,7 @@ export function CheckoutPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [idDocumentId, setIdDocumentId] = useState<string | null>(null);
+  const [idUploadKey, setIdUploadKey] = useState(0);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -224,12 +226,12 @@ export function CheckoutPage() {
         setFormError('The price changed. Review the new total and try again.');
         return;
       }
-      const message =
-        error instanceof ApiError
-          ? error.message
-          : error instanceof Error
-            ? error.message
-            : 'Could not start payment.';
+      const { message, idDocumentRejected } = describePaymentError(error);
+      if (idDocumentRejected) {
+        // Start the ID row again so the guest can re-upload.
+        setIdDocumentId(null);
+        setIdUploadKey((key) => key + 1);
+      }
       setFormError(message);
     }
   };
@@ -424,7 +426,7 @@ export function CheckoutPage() {
                   </Box>
                 ))}
               </Grid>
-              <IdDocumentUpload onUploaded={setIdDocumentId} />
+              <IdDocumentUpload key={idUploadKey} onUploaded={setIdDocumentId} />
 
               <Box
                 mt="12px"

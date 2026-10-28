@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { Box, Input, Text } from '@chakra-ui/react';
+import { apiErrorMessage } from '@/data/api/http';
 import { validateIdFile, type IdDocumentType } from '@/data/api/id-documents';
 import { useUploadIdDocument } from '../hooks/useUploadIdDocument';
 export function IdDocumentUpload({
@@ -25,6 +26,8 @@ export function IdDocumentUpload({
   );
   const select = async (file?: File) => {
     const request = ++version.current;
+    // Cleared so choosing the same file again (e.g. after a failed upload) fires a change.
+    if (fileInput.current) fileInput.current.value = '';
     onUploaded(null);
     setError('');
     setFileName(file?.name ?? '');
@@ -47,9 +50,7 @@ export function IdDocumentUpload({
     } catch (err) {
       if (request !== version.current) return;
       setStatus('error');
-      setError(
-        err instanceof Error ? err.message : 'Upload failed. Please try again.',
-      );
+      setError(apiErrorMessage(err, 'Upload failed. Please try again.'));
     }
   };
   return (
@@ -92,7 +93,6 @@ export function IdDocumentUpload({
         type="file"
         aria-label="Upload ID document"
         accept="image/jpeg,image/png,image/webp,application/pdf"
-        capture="environment"
         onChange={(event) => void select(event.target.files?.[0])}
       />
       <Text fontSize="13px" mt="8px" role="status">

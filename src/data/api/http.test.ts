@@ -1,5 +1,6 @@
 import {
   ApiError,
+  apiErrorMessage,
   apiFieldErrors,
   http,
   httpWithMeta,
@@ -163,5 +164,32 @@ describe('apiFieldErrors', () => {
     ).toEqual({});
     expect(apiFieldErrors(new Error('network'))).toEqual({});
     expect(apiFieldErrors(null)).toEqual({});
+  });
+});
+
+describe('apiErrorMessage', () => {
+  it('prefers the first field message over the generic one', () => {
+    const error = new ApiError({
+      status: 400,
+      code: 'VALIDATION_ERROR',
+      message: 'The request contains invalid data',
+      details: {
+        fields: { file: ['Choose a JPEG, PNG, WebP or PDF file'] },
+      },
+    });
+
+    expect(apiErrorMessage(error, 'Upload failed')).toBe(
+      'Choose a JPEG, PNG, WebP or PDF file',
+    );
+  });
+
+  it('falls back to the error message, then to the fallback', () => {
+    expect(
+      apiErrorMessage(
+        new ApiError({ status: 409, code: 'CONFLICT', message: 'Taken' }),
+        'x',
+      ),
+    ).toBe('Taken');
+    expect(apiErrorMessage('boom', 'Upload failed')).toBe('Upload failed');
   });
 });

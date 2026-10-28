@@ -95,6 +95,17 @@ export function apiFieldErrors(error: unknown): Record<string, string[]> {
   return fields;
 }
 
+/**
+ * The most useful text to show for a failed request: the first field
+ * message when there is one (the top-level message is generic for
+ * validation errors), else the error's own message, else `fallback`.
+ */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  const [first] = Object.values(apiFieldErrors(error)).flat();
+  if (first) return first;
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
 function toApiError(status: number, payload: unknown): ApiError {
   if (isRecord(payload) && isRecord(payload.error)) {
     const error = payload.error;

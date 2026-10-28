@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiError } from '@/data/api/http';
 import { renderWithProviders } from '@/test/render';
 import { IdDocumentUpload } from './IdDocumentUpload';
 const { upload } = vi.hoisted(() => ({ upload: vi.fn() }));
@@ -69,5 +70,43 @@ describe('ID upload before payment', () => {
     );
     expect(await screen.findByRole('alert')).toHaveTextContent('10 MB');
     expect(upload).not.toHaveBeenCalled();
+  });
+  it('shows the field message from the API, not the generic one', async () => {
+    upload.mockRejectedValue(
+      new ApiError({
+        status: 400,
+        code: 'VALIDATION_ERROR',
+        message: 'The request contains invalid data',
+        details: { fields: { file: ['Choose a JPEG, PNG, WebP or PDF file'] } },
+      }),
+    );
+    renderWithProviders(<Checkout />);
+    await userEvent.upload(
+      screen.getByLabelText('Upload ID document'),
+      new File(['%PDF-'], 'id.pdf', { type: 'application/pdf' }),
+    );
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Choose a JPEG, PNG, WebP or PDF file',
+    );
+  });
+  it('lets the guest retry with the same file after a failure', async () => {
+    upload
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ id: 'd2' });
+    renderWithProviders(<Checkout />);
+    const file = new File(['%PDF-'], 'id.pdf', { type: 'application/pdf' });
+    await userEvent.upload(screen.getByLabelText('Upload ID document'), file);
+    await screen.findByRole('alert');
+    await userEvent.upload(screen.getByLabelText('Upload ID document'), file);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Pay' })).toBeEnabled(),
+    );
+    expect(upload).toHaveBeenCalledTimes(2);
+  });
+  it('lets phones choose a saved photo or file, not only the camera', () => {
+    renderWithProviders(<Checkout />);
+    expect(screen.getByLabelText('Upload ID document')).not.toHaveAttribute(
+      'capture',
+    );
   });
 });
