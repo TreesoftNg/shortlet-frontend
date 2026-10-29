@@ -35,17 +35,17 @@ describe('ID upload before payment', () => {
       screen.getByLabelText('Upload ID document'),
       new File(['%PDF-'], 'passport.pdf', { type: 'application/pdf' }),
     );
-    expect(screen.getByText(/Uploading passport.pdf/)).toBeInTheDocument();
+    expect(screen.getByText('Uploading…')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pay' })).toBeDisabled();
     await act(async () => finish({ id: 'd1' }));
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Pay' })).toBeEnabled(),
     );
-    expect(screen.getByText(/passport.pdf uploaded/)).toBeInTheDocument();
-    await userEvent.selectOptions(
-      screen.getByLabelText('Document type'),
-      'nin',
-    );
+    expect(screen.getByText('passport.pdf')).toBeInTheDocument();
+    expect(screen.getByText(/Uploaded · 1 KB/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('radio', { name: 'NIN slip' }));
+    expect(screen.getByRole('radio', { name: 'NIN slip' })).toBeChecked();
+    expect(screen.getByText('Upload your NIN slip')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pay' })).toBeDisabled();
   });
   it('shows upload errors and keeps Pay disabled', async () => {
