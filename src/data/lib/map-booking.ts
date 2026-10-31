@@ -167,6 +167,15 @@ export function bookingTab(booking: Booking): 'upcoming' | 'past' | 'cancelled' 
   return tabForBooking(booking.status, booking.check_out);
 }
 
+/** The area of a street address: "5 Admiralty Way, Lekki, Lagos" → "Lekki". */
+function areaOfAddress(address: string): string {
+  const parts = address
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  return parts.length >= 2 ? parts[parts.length - 2] : (parts[0] ?? '');
+}
+
 function bookingId(api: ApiBooking): string {
   const raw = api.id ?? api.reference;
   return raw != null && String(raw).length > 0 ? String(raw) : 'unknown';
@@ -179,11 +188,14 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
   const checkOut = toDateOnly(api.checkOut);
   const status = mapStatus(api.status);
   const unitName = api.unit?.name ?? null;
+  const address = api.unit?.address?.trim() || null;
   const city =
     api.unit?.location?.city ||
     shortArea(api.unit?.location?.display ?? '') ||
+    (address ? areaOfAddress(address) : '') ||
     'Nigeria';
   const location =
+    address ||
     api.unit?.location?.display ||
     api.unit?.location?.neighbourhood ||
     city;
@@ -203,7 +215,10 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
     api.nights ??
     (checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 1);
   const unitId = api.unitId || api.unit?.id || '';
-  const unitOrPropertyId = api.property?.id || unitId || id;
+  // Guest booking views expose property as unit.propertyId (not a nested property).
+  // Never fall back to unitId — that breaks create-conversation property lookups.
+  const propertyId =
+    api.unit?.propertyId || api.propertyId || api.property?.id || '';
 
   const guest = api.guest;
   const guestName = guest
@@ -213,14 +228,16 @@ export function mapApiBookingToBooking(api: ApiBooking): Booking {
   return {
     id,
     reference: api.reference || id.slice(0, 8).toUpperCase(),
-    property_id: unitOrPropertyId,
+    property_id: propertyId,
     unit_id: unitId,
-    property_slug: unitId || api.property?.slug || id,
-    property_name: api.unit?.name || api.property?.name || 'Stay',
+    property_slug: api.property?.slug || unitId || id,
+    property_name:
+      api.unit?.propertyName || api.unit?.name || api.property?.name || 'Stay',
     property_image: image,
     unit_label: unitName,
     location_label: location,
     city_label: city,
+    address,
     check_in: checkIn,
     check_out: checkOut,
     check_in_label: dateTimeLabel(checkIn),

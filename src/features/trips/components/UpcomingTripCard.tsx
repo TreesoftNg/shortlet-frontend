@@ -6,11 +6,12 @@ import { queryKeys } from '@/data/query-keys';
 import type { Booking } from '@/data/types';
 import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
 import { CoverImage } from '@/shared/components/CoverImage';
+import { directionsUrl } from '@/shared/lib/maps';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { MapPin, MessageCircle, PlaneLanding } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 type UpcomingTripCardProps = {
   booking: Booking;
@@ -19,19 +20,9 @@ type UpcomingTripCardProps = {
 export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [comingSoon, setComingSoon] = useState<string | null>(null);
   const [messaging, setMessaging] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!comingSoon) return;
-    const timer = window.setTimeout(() => setComingSoon(null), 2500);
-    return () => window.clearTimeout(timer);
-  }, [comingSoon]);
-
-  function showComingSoon(feature: string) {
-    setComingSoon(`${feature} is coming soon`);
-  }
+  const mapsUrl = directionsUrl(booking);
 
   async function openTripChat() {
     setMessageError(null);
@@ -258,26 +249,25 @@ export function UpcomingTripCard({ booking }: UpcomingTripCardProps) {
             <MessageCircle size={18} strokeWidth={1.9} />
             {messaging ? 'Opening…' : 'Message'}
           </Button>
-          <Button
-            h="48px"
-            px="16px"
-            borderRadius="12px"
-            bg="bg.soft"
-            color="ink"
-            fontWeight="700"
-            gap="8px"
-            onClick={() => showComingSoon('Directions')}
-          >
-            <MapPin size={18} strokeWidth={1.9} />
-            Directions
-          </Button>
+          {mapsUrl ? (
+            <Button
+              asChild
+              h="48px"
+              px="16px"
+              borderRadius="12px"
+              bg="bg.soft"
+              color="ink"
+              fontWeight="700"
+              gap="8px"
+            >
+              <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                <MapPin size={18} strokeWidth={1.9} />
+                Directions
+              </a>
+            </Button>
+          ) : null}
         </Flex>
 
-        {comingSoon ? (
-          <Text color="ink.2" fontSize="13px" fontWeight="600" mt="10px">
-            {comingSoon}
-          </Text>
-        ) : null}
         {messageError ? (
           <Text color="red.500" fontSize="13px" fontWeight="600" mt="10px">
             {messageError}

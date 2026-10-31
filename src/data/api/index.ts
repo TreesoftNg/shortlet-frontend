@@ -1,9 +1,10 @@
-export { http, ApiError } from './http';
+export { http, ApiError, apiFieldErrors } from './http';
 export { getPublicContactDetails, submitContactMessage } from './contact';
 export type { PublicContactDetails, SubmitContactInput } from './contact';
 export {
   createCustomerAccount,
   forgotCustomerPassword,
+  getCustomerMe,
   loginCustomer,
   resendCustomerOtp,
   resetCustomerPassword,
@@ -37,6 +38,8 @@ export type { CreateReviewInput, CustomerReview } from './reviews';
 
 export {
   cancelBooking,
+  claimGuestBookingAccount,
+  confirmClaimGuestBookingAccount,
   createBooking,
   getBookingById,
   getBookingCounts,

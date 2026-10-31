@@ -80,7 +80,7 @@ export function SiteFooter() {
             <SunmadeLogo size="22px" />
           </Box>
           <Text maxW="320px">
-            Premium shortlet apartments for business and leisure.
+            Premium luxury apartments for business and leisure.
           </Text>
         </Box>
 

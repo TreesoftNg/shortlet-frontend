@@ -74,6 +74,38 @@ export function unwrapApiData<T>(payload: unknown): T {
   return payload as T;
 }
 
+/**
+ * Field-level messages from a validation error envelope
+ * (`error.details.fields`, e.g. `{ checkOut: ['…'] }`). Empty when absent.
+ */
+export function apiFieldErrors(error: unknown): Record<string, string[]> {
+  if (!(error instanceof ApiError)) return {};
+  const details = error.details;
+  if (!isRecord(details) || !isRecord(details.fields)) return {};
+
+  const fields: Record<string, string[]> = {};
+  for (const [field, messages] of Object.entries(details.fields)) {
+    if (!Array.isArray(messages)) continue;
+    const texts = messages.filter(
+      (message): message is string =>
+        typeof message === 'string' && message.trim() !== '',
+    );
+    if (texts.length) fields[field] = texts;
+  }
+  return fields;
+}
+
+/**
+ * The most useful text to show for a failed request: the first field
+ * message when there is one (the top-level message is generic for
+ * validation errors), else the error's own message, else `fallback`.
+ */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  const [first] = Object.values(apiFieldErrors(error)).flat();
+  if (first) return first;
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
 function toApiError(status: number, payload: unknown): ApiError {
   if (isRecord(payload) && isRecord(payload.error)) {
     const error = payload.error;
@@ -82,10 +114,9 @@ function toApiError(status: number, payload: unknown): ApiError {
       status,
       code: typeof error.code === 'string' ? error.code : 'UNKNOWN',
       message:
-        typeof error.message === 'string'
-          ? error.message
-          : 'Request failed',
-      requestId: typeof meta?.requestId === 'string' ? meta.requestId : undefined,
+        typeof error.message === 'string' ? error.message : 'Request failed',
+      requestId:
+        typeof meta?.requestId === 'string' ? meta.requestId : undefined,
       details: error.details,
     });
   }
@@ -115,7 +146,7 @@ async function requestJson(
     ...options.headers,
   };
 
-  if (options.body !== undefined) {
+  if (options.body !== undefined && !(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -130,7 +161,12 @@ async function requestJson(
   const response = await fetch(apiUrl(path), {
     method: options.method ?? (options.body !== undefined ? 'POST' : 'GET'),
     headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body:
+      options.body instanceof FormData
+        ? options.body
+        : options.body !== undefined
+          ? JSON.stringify(options.body)
+          : undefined,
   });
 
   return {

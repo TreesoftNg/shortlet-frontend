@@ -23,7 +23,8 @@ import {
 } from '@/shared/components';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { MessageCircle } from 'lucide-react';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -125,6 +126,22 @@ export function MessagesPage() {
 
   return (
     <AppPage footer={false} mainPt={{ base: 6, md: '44px' }}>
+      <Flex
+        asChild
+        align="center"
+        gap={2}
+        mb={3}
+        color="ink.3"
+        fontSize="13px"
+        fontWeight="600"
+        w="fit-content"
+        _hover={{ color: 'ink' }}
+      >
+        <Link href="/trips">
+          <ArrowLeft size={16} strokeWidth={1.9} />
+          Back to trips
+        </Link>
+      </Flex>
       <Flex justify="space-between" align="flex-end" gap={4} mb={2}>
         <PageHero title="Messages" size="app" mb={0} maxW="none" />
         <AppButton

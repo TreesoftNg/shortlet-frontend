@@ -8,6 +8,7 @@ export type BookingGuestInput = {
 };
 
 export type CreateBookingInput = {
+  idDocumentId: string;
   returnUrl: string;
   unitId: string;
   checkIn: string;
@@ -98,10 +99,16 @@ export type ApiBooking = {
   price?: BookingQuotePrice | null;
   deposit?: BookingQuoteDeposit | null;
   unitId?: string | null;
+  /** Present on some payloads; guest booking views usually nest this under unit. */
+  propertyId?: string | null;
   unit?: {
     id?: string;
     name?: string | null;
     pictureUrl?: string | null;
+    propertyId?: string | null;
+    propertyName?: string | null;
+    /** Street address of the unit (or its property), e.g. "5 Admiralty Way, Lekki, Lagos". */
+    address?: string | null;
     location?: {
       city?: string | null;
       display?: string | null;
@@ -134,6 +141,8 @@ export type CreateBookingResult = ApiBooking & {
 
 export type VerifyBookingPaymentInput = {
   transactionId?: string;
+  /** Our payment reference (Paystack return URL `reference` / `trxref`). */
+  reference?: string;
 };
 
 export type CancelBookingInput = {

@@ -11,6 +11,7 @@ import {
   isAuthApiError,
   useIsAuthenticated,
 } from '@/features/auth/store/auth-store';
+import { LeaveReviewDialog } from '@/features/trips/components/LeaveReviewDialog';
 import {
   AppButton,
   AppPage,
@@ -23,15 +24,19 @@ import {
 } from '@/shared/components';
 import { CoverImage } from '@/shared/components/CoverImage';
 import { formatNaira } from '@/shared/lib/format';
+import { directionsUrl } from '@/shared/lib/maps';
 import { Box, Flex, Grid, Heading, Text, Textarea } from '@chakra-ui/react';
 import {
   ArrowLeft,
   CalendarDays,
   MapPin,
   MessageCircle,
+  Star,
   Users,
 } from 'lucide-react';
 import { restoreBookingSessionFromParams } from '@/data/lib/booking-session';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/data/query-keys';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
@@ -106,6 +111,7 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
     setTokenReady(true);
   }, [bookingId, emailToken]);
 
+  const queryClient = useQueryClient();
   const { data: booking, isPending, isError, error, refetch } =
     useBooking(tokenReady ? bookingId : undefined);
   const cancelBooking = useCancelBooking();
@@ -113,6 +119,7 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
   const [reason, setReason] = useState('');
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const cancellable = useMemo(
     () => (booking ? canCancelBooking(booking) : false),
@@ -175,9 +182,7 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
   }
 
   const styles = statusStyles(booking.status);
-  const mapsUrl = booking.location_label
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.location_label)}`
-    : null;
+  const mapsUrl = directionsUrl(booking);
 
   const handlePay = async () => {
     setActionError(null);
@@ -360,6 +365,31 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
           </AppButton>
         ) : null}
 
+        {booking.review_pending ? (
+          <AppButton
+            variant="ink"
+            leftIcon={<Star size={16} strokeWidth={1.9} />}
+            onClick={() => setReviewOpen(true)}
+          >
+            Leave a review
+          </AppButton>
+        ) : booking.your_rating != null ? (
+          <Flex
+            align="center"
+            gap="6px"
+            px="12px"
+            h="40px"
+            borderRadius="12px"
+            bg="bg.soft"
+            color="ink.2"
+            fontSize="14px"
+            fontWeight="700"
+          >
+            <Star size={14} strokeWidth={1.9} />
+            You rated {booking.your_rating.toFixed(1)}
+          </Flex>
+        ) : null}
+
         {booking.status === 'expired' ||
         (booking.status === 'pending' && !payable) ? (
           <AppButton href="/search">Book again</AppButton>
@@ -383,10 +413,9 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
         {mapsUrl ? (
           <AppButton
             variant="outlineMuted"
+            href={mapsUrl}
+            external
             leftIcon={<MapPin size={16} strokeWidth={1.9} />}
-            onClick={() =>
-              window.open(mapsUrl, '_blank', 'noopener,noreferrer')
-            }
           >
             Directions
           </AppButton>
@@ -451,6 +480,20 @@ export function ManageBookingPage({ bookingId }: ManageBookingPageProps) {
           )}
         </Surface>
       ) : null}
+
+      <LeaveReviewDialog
+        booking={booking}
+        open={reviewOpen}
+        onOpenChange={(open) => {
+          setReviewOpen(open);
+          if (!open) {
+            void queryClient.invalidateQueries({
+              queryKey: queryKeys.bookings.all,
+            });
+            void refetch();
+          }
+        }}
+      />
     </AppPage>
   );
 }

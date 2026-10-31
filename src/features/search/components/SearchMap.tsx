@@ -8,8 +8,9 @@ import {
 } from '@/shared/lib/format';
 import type { Property } from '@/data/types';
 import { CoverImage } from '@/shared/components/CoverImage';
+import { RatingStars } from '@/shared/components/RatingStars';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Minus, Plus, Star } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
@@ -152,10 +153,10 @@ export function SearchMap({ properties }: SearchMapProps) {
             <Box p="14px 16px">
               <Flex justify="space-between" gap={2} fontWeight="700" fontSize="15px">
                 <Text lineClamp={1}>{active.name}</Text>
-                <Flex align="center" gap="4px" fontSize="14px" flexShrink={0}>
-                  <Star size={14} fill="currentColor" stroke="none" />
-                  {active.review_summary.rating.toFixed(2)}
-                </Flex>
+                <RatingStars
+                  rating={active.review_summary.rating}
+                  count={active.review_summary.count}
+                />
               </Flex>
               <Text color="ink.2" fontSize="14px">
                 {bedsGuestsLabel(active.capacity.beds, active.capacity.max)}

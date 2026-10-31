@@ -38,8 +38,10 @@ export function applyMessageToConversationList(
   list: ConversationListItem[] | undefined,
   message: ConversationMessage,
   opts: { incrementUnread: boolean; clearUnread?: boolean },
-): ConversationListItem[] {
-  const rows = list ? [...list] : [];
+): ConversationListItem[] | undefined {
+  // Do not seed an empty inbox — callers should invalidate and refetch instead.
+  if (!list) return undefined;
+  const rows = [...list];
   const index = rows.findIndex((c) => c.id === message.conversationId);
   if (index < 0) return rows;
 
@@ -67,8 +69,10 @@ export function applyMessageToConversationList(
 export function clearConversationUnread(
   list: ConversationListItem[] | undefined,
   conversationId: string,
-): ConversationListItem[] {
-  if (!list) return [];
+): ConversationListItem[] | undefined {
+  // Returning [] here used to fake an empty inbox when mark-read ran before
+  // /messages had ever fetched the list (booking → chat → back).
+  if (!list) return undefined;
   return list.map((c) =>
     c.id === conversationId ? { ...c, unreadCount: 0 } : c,
   );

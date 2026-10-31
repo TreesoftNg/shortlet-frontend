@@ -18,6 +18,9 @@ export type ConversationListItem = {
   propertyId: string | null;
   unitId: string | null;
   bookingId: string | null;
+  propertyName: string | null;
+  unitName: string | null;
+  contextLabel: string | null;
   lastMessageAt: string | null;
   lastMessagePreview: string | null;
   lastMessageSenderType: MessageSenderType | null;

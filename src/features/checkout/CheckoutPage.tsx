@@ -1,5 +1,7 @@
 'use client';
 
+import { IdDocumentUpload } from './components/IdDocumentUpload';
+import { describePaymentError } from './utils/payment-error';
 import { CheckoutHeader } from '@/features/checkout/components/CheckoutHeader';
 import { CheckoutSummary } from '@/features/checkout/components/CheckoutSummary';
 import {
@@ -10,7 +12,13 @@ import {
 } from '@/features/checkout/hooks/useCheckoutData';
 import { ApiError } from '@/data/api/http';
 import { saveBookingSession } from '@/data/lib/booking-session';
-import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
+import { quoteErrorMessage } from '@/data/lib/quote-error';
+import {
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  SkeletonText,
+} from '@/shared/components';
 import { getDefaultStay } from '@/shared/lib/default-stay';
 import { formatNaira } from '@/shared/lib/format';
 import { toMoneyNumber } from '@/data/lib/map-booking';
@@ -46,7 +54,11 @@ export function CheckoutPage() {
   const guests =
     guestsParam > 0 ? Math.max(1, guestsParam) : stayDefaults.guests;
 
-  const { data: property, isPending, isError } = useCheckoutProperty(propertySlug);
+  const {
+    data: property,
+    isPending,
+    isError,
+  } = useCheckoutProperty(propertySlug);
   const stay = useMemo(
     () => ({ checkIn, checkOut, guests }),
     [checkIn, checkOut, guests],
@@ -67,6 +79,8 @@ export function CheckoutPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [idDocumentId, setIdDocumentId] = useState<string | null>(null);
+  const [idUploadKey, setIdUploadKey] = useState(0);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -121,9 +135,10 @@ export function CheckoutPage() {
             description={
               unavailable
                 ? 'Those dates are no longer free. Pick different dates and try again.'
-                : quoteErr instanceof Error
-                  ? quoteErr.message
-                  : 'This checkout link is invalid or the stay is no longer available.'
+                : quoteErrorMessage(
+                    quoteErr,
+                    'This checkout link is invalid or the stay is no longer available.',
+                  )
             }
             actionLabel="Back to search"
             actionHref="/search"
@@ -141,11 +156,20 @@ export function CheckoutPage() {
 
   const handlePay = async () => {
     setFormError(null);
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim()) {
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !email.trim() ||
+      !phone.trim()
+    ) {
       setFormError('Please fill in your guest details.');
       return;
     }
 
+    if (!idDocumentId) {
+      setFormError('Please upload your ID document before paying.');
+      return;
+    }
     const unitForBooking = quote.unit?.id || unitId || property.id;
     if (!unitForBooking) {
       setFormError('Missing unit for this booking.');
@@ -164,6 +188,7 @@ export function CheckoutPage() {
         unitId: unitForBooking,
         checkIn: quote.checkIn,
         checkOut: quote.checkOut,
+        idDocumentId,
         adults: Math.max(1, guests),
         children: 0,
         infants: 0,
@@ -201,12 +226,12 @@ export function CheckoutPage() {
         setFormError('The price changed. Review the new total and try again.');
         return;
       }
-      const message =
-        error instanceof ApiError
-          ? error.message
-          : error instanceof Error
-            ? error.message
-            : 'Could not start payment.';
+      const { message, idDocumentRejected } = describePaymentError(error);
+      if (idDocumentRejected) {
+        // Start the ID row again so the guest can re-upload.
+        setIdDocumentId(null);
+        setIdUploadKey((key) => key + 1);
+      }
       setFormError(message);
     }
   };
@@ -219,6 +244,7 @@ export function CheckoutPage() {
         as="main"
         px={{ base: 4, md: 10, lg: '160px' }}
         pb={{ base: 10, md: '80px' }}
+        overflowX="hidden"
       >
         <Flex align="center" gap="16px" my={{ base: 6, md: '44px' }}>
           <Flex
@@ -318,7 +344,12 @@ export function CheckoutPage() {
               </Flex>
             </Box>
 
-            <Box py="26px" borderBottom="1px solid" borderColor="line">
+            <Box
+              py="26px"
+              borderBottom="1px solid"
+              borderColor="line"
+              overflowX="hidden"
+            >
               <Flex
                 justify="space-between"
                 align={{ base: 'start', sm: 'center' }}
@@ -355,10 +386,7 @@ export function CheckoutPage() {
                 ) : null}
               </Flex>
 
-              <Grid
-                templateColumns={{ base: '1fr', sm: '1fr 1fr' }}
-                gap="12px"
-              >
+              <Grid templateColumns={{ base: '1fr', sm: '1fr 1fr' }} gap="12px">
                 {(
                   [
                     ['First name', firstName, setFirstName],
@@ -374,6 +402,8 @@ export function CheckoutPage() {
                     borderRadius="12px"
                     px="16px"
                     py="12px"
+                    minW={0}
+                    maxW="100%"
                   >
                     <Text
                       fontSize="11px"
@@ -387,14 +417,16 @@ export function CheckoutPage() {
                       unstyled
                       value={value}
                       onChange={(e) => setter(e.target.value)}
-                      fontSize="15px"
+                      fontSize={{ base: '16px', md: '15px' }}
                       mt={1}
                       w="full"
+                      minW={0}
                       outline="none"
                     />
                   </Box>
                 ))}
               </Grid>
+              <IdDocumentUpload key={idUploadKey} onUploaded={setIdDocumentId} />
 
               <Box
                 mt="12px"
@@ -403,6 +435,8 @@ export function CheckoutPage() {
                 borderRadius="12px"
                 px="16px"
                 py="12px"
+                minW={0}
+                maxW="100%"
               >
                 <Text
                   fontSize="11px"
@@ -418,12 +452,13 @@ export function CheckoutPage() {
                   placeholder="e.g. Business trip, family visit…"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
-                  fontSize="15px"
+                  fontSize={{ base: '16px', md: '15px' }}
                   color="ink"
                   _placeholder={{ color: 'ink.3' }}
                   rows={2}
                   resize="none"
                   w="full"
+                  minW={0}
                   outline="none"
                 />
               </Box>
@@ -461,6 +496,7 @@ export function CheckoutPage() {
                 w={{ base: 'full', sm: 'auto' }}
                 _hover={{ bg: 'brand.600' }}
                 loading={createBooking.isPending}
+                disabled={!idDocumentId || createBooking.isPending}
                 onClick={() => {
                   void handlePay();
                 }}

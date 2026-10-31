@@ -40,6 +40,7 @@ describe('public units api', () => {
               neighbourhood: null,
               display: 'Ikeja, Lagos',
             },
+            reviews: { averageRating: 4.5, totalCount: 2 },
           },
         ],
         meta: { page: 1, limit: 20, total: 1, totalPages: 1 },
@@ -56,6 +57,10 @@ describe('public units api', () => {
     expect(page.items).toHaveLength(1);
     expect(page.items[0]?.name).toBe('Studio One');
     expect(page.items[0]?.pricing.nightly_rate).toBe(40000);
+    expect(page.items[0]?.review_summary).toMatchObject({
+      rating: 4.5,
+      count: 2,
+    });
     expect(page.meta).toMatchObject({
       page: 1,
       limit: 20,
@@ -209,6 +214,10 @@ describe('public units api', () => {
     expect(detail?.property.amenity_labels).toEqual(['Wi-Fi', 'Pool']);
     expect(detail?.property.images[0]?.url).toBe('https://api-staging.sunmadeapartments.com/media/large.webp');
     expect(detail?.property.units).toHaveLength(1);
+    expect(detail?.property.units[0]?.stay_limits).toEqual({
+      min_nights: 1,
+      max_nights: null,
+    });
     expect(detail?.property.review_summary).toEqual(
       expect.objectContaining({ rating: 5, count: 1 }),
     );

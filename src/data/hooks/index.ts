@@ -27,7 +27,11 @@ import {
   type PublicUnitsParams,
 } from '@/data/api';
 import { DEMO_STAY } from '@/data/demo-stay';
-import { getBookingAccessToken } from '@/data/lib/booking-session';
+import {
+  getBookingAccessToken,
+  getPendingBookingId,
+  hasGuestBookingSession,
+} from '@/data/lib/booking-session';
 import { bookingTab, toMoneyNumber } from '@/data/lib/map-booking';
 import { toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
 import { queryKeys } from '@/data/query-keys';
@@ -183,10 +187,17 @@ export function useCreateReview() {
 
 function useAllBookingsQuery() {
   const accessToken = useValidAccessToken();
+  // sessionStorage guest token is not reactive; read at render for enable + key.
+  const guestBookingId = accessToken ? null : getPendingBookingId();
+  const guestSession =
+    !accessToken && hasGuestBookingSession() ? guestBookingId : null;
   return useQuery({
-    queryKey: [...queryKeys.bookings.list('all'), accessToken ?? 'anon'],
+    queryKey: [
+      ...queryKeys.bookings.list('all'),
+      accessToken ?? (guestSession ? `guest:${guestSession}` : 'anon'),
+    ],
     queryFn: () => getBookings(undefined, accessToken),
-    enabled: Boolean(accessToken),
+    enabled: Boolean(accessToken || guestSession),
     ...readOptions,
   });
 }
@@ -244,12 +255,16 @@ export function useVerifyBookingPayment() {
     mutationFn: async (args: {
       bookingId: string;
       transactionId?: string;
+      reference?: string;
       bookingToken?: string | null;
     }) => {
       const accessToken = await ensureAccessToken();
       return verifyBookingPayment(
         args.bookingId,
-        { transactionId: args.transactionId },
+        {
+          ...(args.transactionId ? { transactionId: args.transactionId } : {}),
+          ...(args.reference ? { reference: args.reference } : {}),
+        },
         { accessToken, bookingToken: args.bookingToken },
       );
     },

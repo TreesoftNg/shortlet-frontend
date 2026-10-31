@@ -1,6 +1,7 @@
 'use client';
 
 import { PastTripsGrid } from '@/features/trips/components/PastTripsGrid';
+import { SecureGuestAccountCard } from '@/features/trips/components/SecureGuestAccountCard';
 import { TripsTabs } from '@/features/trips/components/TripsTabs';
 import { UpcomingTripCard } from '@/features/trips/components/UpcomingTripCard';
 import {
@@ -8,6 +9,7 @@ import {
   useBookings,
 } from '@/features/trips/hooks/useTripsData';
 import { ApiError } from '@/data/api/http';
+import { hasGuestBookingSession } from '@/data/lib/booking-session';
 import { ensureAccessToken } from '@/features/auth/lib/refresh-session';
 import {
   isAuthApiError,
@@ -25,6 +27,7 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
   const isAuthenticated = useIsAuthenticated();
+  const [guestSession, setGuestSession] = useState(false);
   const [tab, setTab] = useState<TripTab>('upcoming');
   const {
     data: counts = { upcoming: 0, past: 0, cancelled: 0 },
@@ -42,8 +45,14 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
   } = useBookings(tab);
 
   useEffect(() => {
+    setGuestSession(hasGuestBookingSession());
+  }, [list.length, counts.upcoming]);
+
+  useEffect(() => {
     const err = countsErr ?? listErr;
     if (!err || !isAuthApiError(err)) return;
+    // Guest booking-token trips can 401 without a customer session — stay put.
+    if (!isAuthenticated && hasGuestBookingSession()) return;
     void ensureAccessToken()
       .then((token) => {
         if (token) {
@@ -58,9 +67,19 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
         logout();
         router.replace('/auth');
       });
-  }, [countsErr, listErr, logout, refetchCounts, refetchList, router]);
+  }, [
+    countsErr,
+    listErr,
+    logout,
+    refetchCounts,
+    refetchList,
+    router,
+    isAuthenticated,
+  ]);
 
-  if (!isAuthenticated && !embedded) {
+  const canViewTrips = isAuthenticated || guestSession;
+
+  if (!canViewTrips && !embedded) {
     return (
       <EmptyState
         title="Sign in to see your trips"
@@ -74,7 +93,7 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
     );
   }
 
-  if (!isAuthenticated && embedded) {
+  if (!canViewTrips && embedded) {
     return null;
   }
 
@@ -117,6 +136,16 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <>
+      {!isAuthenticated && guestSession ? (
+        <SecureGuestAccountCard
+          onSecured={() => {
+            setGuestSession(false);
+            void refetchCounts();
+            void refetchList();
+          }}
+        />
+      ) : null}
+
       {countsPending ? (
         <Box my={{ base: 4, md: '22px' }}>
           <Skeleton h="40px" w={{ base: '100%', md: '360px' }} borderRadius="full" />
@@ -132,7 +161,7 @@ export function TripsPanel({ embedded = false }: { embedded?: boolean }) {
           {list.length === 0 ? (
             <EmptyState
               title="No upcoming trips"
-              description="Ready for your next stay? Explore apartments across Lagos and Abuja."
+              description="Ready for your next stay? Explore apartments in Lagos."
               actionLabel="Explore stays"
               actionHref="/search"
               icon={<Plane size={22} strokeWidth={1.9} />}

@@ -1,7 +1,13 @@
 import { toAppMediaUrl } from '@/data/lib/app-media-url';
-import { mapPublicUnitToProperty } from '@/data/lib/map-public-unit';
+import {
+  mapPublicUnitDetailToProperty,
+  mapPublicUnitToProperty,
+} from '@/data/lib/map-public-unit';
 import { toCategoryId, toPublicUnitsTab } from '@/data/lib/public-unit-tabs';
-import type { PublicUnitCard } from '@/data/types/public-unit';
+import type {
+  PublicUnitCard,
+  PublicUnitDetail,
+} from '@/data/types/public-unit';
 import { describe, expect, it } from 'vitest';
 
 const sample: PublicUnitCard = {
@@ -27,6 +33,26 @@ const sample: PublicUnitCard = {
     neighbourhood: 'Phase 1',
     display: null,
   },
+  reviews: { averageRating: 4.8, totalCount: 3 },
+};
+
+const detailSample: PublicUnitDetail = {
+  ...sample,
+  description: 'Bright studio near the beach',
+  floor: '2',
+  cleaningFee: '10000.00',
+  weeklyDiscountPercent: null,
+  monthlyDiscountPercent: null,
+  minNights: 3,
+  maxNights: 10,
+  checkInTime: '15:00',
+  checkOutTime: '11:00',
+  timezone: 'Africa/Lagos',
+  houseRules: null,
+  property: null,
+  amenities: [],
+  media: [],
+  reviews: null,
 };
 
 describe('toPublicUnitsTab', () => {
@@ -76,5 +102,80 @@ describe('mapPublicUnitToProperty', () => {
       'https://api-staging.sunmadeapartments.com/media/tenants/t1/units/unit-1/photos/p1/medium.webp',
     );
     expect(property.images[0]?.url).toBe(property.picture);
+    expect(property.review_summary).toMatchObject({
+      rating: 4.8,
+      count: 3,
+    });
+  });
+
+  it('defaults review summary when the API omits reviews', () => {
+    const { reviews: _reviews, ...withoutReviews } = sample;
+    const property = mapPublicUnitToProperty(withoutReviews);
+    expect(property.review_summary).toMatchObject({ rating: 0, count: 0 });
+  });
+});
+
+describe('mapPublicUnitDetailToProperty', () => {
+  it('carries the effective stay limits onto the unit', () => {
+    const { property } = mapPublicUnitDetailToProperty(detailSample);
+    expect(property.units[0]?.stay_limits).toEqual({
+      min_nights: 3,
+      max_nights: 10,
+    });
+  });
+
+  it('treats a null maximum as no upper limit', () => {
+    const { property } = mapPublicUnitDetailToProperty({
+      ...detailSample,
+      minNights: 2,
+      maxNights: null,
+    });
+    expect(property.units[0]?.stay_limits).toEqual({
+      min_nights: 2,
+      max_nights: null,
+    });
+  });
+
+  it('defaults to one night with no maximum when the API omits limits', () => {
+    const withoutLimits: Partial<PublicUnitDetail> = { ...detailSample };
+    delete withoutLimits.minNights;
+    delete withoutLimits.maxNights;
+    const { property } = mapPublicUnitDetailToProperty(
+      withoutLimits as PublicUnitDetail,
+    );
+    expect(property.units[0]?.stay_limits).toEqual({
+      min_nights: 1,
+      max_nights: null,
+    });
+  });
+
+  it('defaults to one night when the API sends a null or non-positive minimum', () => {
+    const fromNull = mapPublicUnitDetailToProperty({
+      ...detailSample,
+      minNights: null as unknown as number,
+      maxNights: null,
+    });
+    const fromZero = mapPublicUnitDetailToProperty({
+      ...detailSample,
+      minNights: 0,
+      maxNights: 0,
+    });
+    expect(fromNull.property.units[0]?.stay_limits.min_nights).toBe(1);
+    expect(fromZero.property.units[0]?.stay_limits).toEqual({
+      min_nights: 1,
+      max_nights: null,
+    });
+  });
+
+  it('never lets the maximum fall below the minimum', () => {
+    const { property } = mapPublicUnitDetailToProperty({
+      ...detailSample,
+      minNights: 5,
+      maxNights: 3,
+    });
+    expect(property.units[0]?.stay_limits).toEqual({
+      min_nights: 5,
+      max_nights: 5,
+    });
   });
 });

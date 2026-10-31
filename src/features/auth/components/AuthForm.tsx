@@ -281,7 +281,7 @@ export function AuthForm() {
           : `Enter the code we sent to ${email.trim()}.`
         : isSignIn
           ? 'Sign in to manage your bookings and check out faster.'
-          : 'Join Sunmade to book verified shortlets across Lagos & Abuja.';
+          : 'Join Sunmade to book verified shortlets in Lagos.';
 
   return (
     <Box w="full" maxW="420px" px={{ base: 5, md: 0 }} py={{ base: 8, md: 0 }}>

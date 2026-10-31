@@ -18,6 +18,9 @@ const sample: ConversationListItem = {
   propertyId: null,
   unitId: null,
   bookingId: null,
+  propertyName: null,
+  unitName: null,
+  contextLabel: null,
   lastMessageAt: '2026-10-12T10:00:00.000Z',
   lastMessagePreview: 'Can I check in early?',
   lastMessageSenderType: 'customer',
@@ -45,5 +48,25 @@ describe('ConversationList', () => {
       'href',
       `/messages/${sample.id}`,
     );
+  });
+
+  it('prefers the API context label for unit/property', () => {
+    renderWithProviders(
+      <ConversationList
+        conversations={[
+          {
+            ...sample,
+            propertyId: 'prop-1',
+            unitId: 'unit-1',
+            bookingId: 'booking-1',
+            propertyName: 'Azure Lekki',
+            unitName: 'Studio A',
+            contextLabel: 'Azure Lekki · Studio A',
+          },
+        ]}
+      />,
+    );
+    expect(screen.getByText('Azure Lekki · Studio A')).toBeInTheDocument();
+    expect(screen.queryByText('About your stay')).not.toBeInTheDocument();
   });
 });
