@@ -18,16 +18,20 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Staging API
+## API base URL
 
-The browser calls the [staging API](https://api-staging.sunmadeapartments.com/api/docs) directly via `NEXT_PUBLIC_API_BASE_URL` (CORS must allow your app Origin).
-
-Required env:
+The browser calls the API directly via `NEXT_PUBLIC_API_BASE_URL` (CORS must allow your app Origin). Copy `.env.example` to `.env.local`:
 
 ```
-NEXT_PUBLIC_API_BASE_URL=https://api-staging.sunmadeapartments.com
+# Local API (shortlet-api on port 4000)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
 NEXT_PUBLIC_TENANT_SLUG=sunmade
+
+# Or staging:
+# NEXT_PUBLIC_API_BASE_URL=https://api-staging.sunmadeapartments.com
 ```
+
+Restart `npm run dev` after changing env vars.
 
 
 To learn more about Next.js, take a look at the following resources:

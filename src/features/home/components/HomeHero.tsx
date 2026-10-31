@@ -208,7 +208,7 @@ export function HomeHero({ headline, subheadline, image }: HomeHeroProps) {
           <Box
             position="absolute"
             inset={0}
-            bg="linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.1) 60%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,.35))"
+            bg="linear-gradient(90deg, rgba(0,0,0,.32), rgba(0,0,0,.04) 60%), linear-gradient(180deg, transparent 55%, rgba(0,0,0,.22))"
           />
         </Box>
 
