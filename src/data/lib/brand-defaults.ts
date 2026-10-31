@@ -24,8 +24,7 @@ export const BRAND_DEFAULTS = {
   currency_symbol: '₦',
   hero: {
     headline: 'Stay somewhere that feels like home.',
-    fallbackImage:
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=2000&q=80',
+    fallbackImage: '/images/hero.jpg',
   },
   trust: {
     title: 'Why guests book with Sunmade',
