@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { mediaRemotePatterns } from './src/shared/lib/media-remote-patterns';
 
 const DEFAULT_API_ORIGIN = 'https://api-staging.sunmadeapartments.com';
 
@@ -55,6 +56,8 @@ const nextConfig: NextConfig = {
         hostname: 'api-staging.sunmadeapartments.com',
         pathname: '/media/**',
       },
+      // Unit and property photos (S3 or a CDN): set MEDIA_PUBLIC_BASE_URL.
+      ...mediaRemotePatterns(process.env.MEDIA_PUBLIC_BASE_URL),
       // Whatever NEXT_PUBLIC_API_BASE_URL points at (local or another env).
       ...(apiHostname !== 'api-staging.sunmadeapartments.com' &&
       apiHostname !== 'localhost'

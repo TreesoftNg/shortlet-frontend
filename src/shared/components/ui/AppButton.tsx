@@ -17,6 +17,8 @@ type AppButtonProps = {
   size?: AppButtonSize;
   fullWidth?: boolean;
   href?: string;
+  /** Open `href` (another website or app) in a new tab instead of navigating in-app. */
+  external?: boolean;
   leftIcon?: ReactNode;
   children: ReactNode;
   type?: 'button' | 'submit';
@@ -83,6 +85,7 @@ export function AppButton({
   size = 'md',
   fullWidth = false,
   href,
+  external = false,
   leftIcon,
   children,
   type = 'button',
@@ -120,6 +123,21 @@ export function AppButton({
     flexShrink: 0,
     textDecoration: 'none',
   };
+
+  if (href && external) {
+    return (
+      <Box asChild {...visualProps}>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={ariaLabel}
+        >
+          {content}
+        </a>
+      </Box>
+    );
+  }
 
   if (href) {
     return (

@@ -10,9 +10,10 @@ import {
 } from '@/shared/lib/format';
 import type { Property } from '@/data/types';
 import { CoverImage } from '@/shared/components/CoverImage';
+import { RatingStars } from '@/shared/components/RatingStars';
 import { tokens } from '@/shared/theme/tokens';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Heart, Star } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -146,19 +147,10 @@ export function PropertyCard({
                 <Text as="span" lineClamp={1}>
                   {property.name}
                 </Text>
-                <Flex
-                  as="span"
-                  align="center"
-                  gap="4px"
-                  fontWeight="600"
-                  fontSize="14px"
-                  flexShrink={0}
-                >
-                  <Star size={14} fill="currentColor" stroke="none" />
-                  {property.review_summary.rating.toFixed(
-                    property.review_summary.rating % 1 === 0 ? 1 : 2,
-                  )}
-                </Flex>
+                <RatingStars
+                  rating={property.review_summary.rating}
+                  count={property.review_summary.count}
+                />
               </Flex>
               <Text color="ink.2" fontSize="14px" mt="2px">
                 {shortArea(property.address.display)} ·{' '}
@@ -187,19 +179,10 @@ export function PropertyCard({
                 <Text as="span" lineClamp={1}>
                   {formatLocation(property.address.display)}
                 </Text>
-                <Flex
-                  as="span"
-                  align="center"
-                  gap="4px"
-                  fontWeight="600"
-                  fontSize="14px"
-                  flexShrink={0}
-                >
-                  <Star size={14} fill="currentColor" stroke="none" />
-                  {property.review_summary.rating.toFixed(
-                    property.review_summary.rating % 1 === 0 ? 1 : 2,
-                  )}
-                </Flex>
+                <RatingStars
+                  rating={property.review_summary.rating}
+                  count={property.review_summary.count}
+                />
               </Flex>
               <Text color="ink.2" fontSize="14px" mt="2px" lineClamp={1}>
                 {property.name}

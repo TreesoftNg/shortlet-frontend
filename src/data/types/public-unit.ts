@@ -26,6 +26,12 @@ export type PublicUnitLocation = {
   longitude?: number | null;
 };
 
+/** Published review aggregate on list cards (no review bodies). */
+export type PublicUnitReviewSummary = {
+  averageRating: number | null;
+  totalCount: number;
+};
+
 export type PublicUnitCard = {
   id: string;
   tenantId: string;
@@ -42,6 +48,7 @@ export type PublicUnitCard = {
   nightlyRate: string | number;
   instantBook: boolean;
   location: PublicUnitLocation | null;
+  reviews?: PublicUnitReviewSummary | null;
 };
 
 export type PublicUnitAmenity = {
@@ -109,7 +116,9 @@ export type PublicUnitDetail = PublicUnitCard & {
   cleaningFee: string | number | null;
   weeklyDiscountPercent: string | number | null;
   monthlyDiscountPercent: string | number | null;
-  minNights: number | null;
+  /** Effective minimum stay (unit override or business default), at least 1. */
+  minNights: number;
+  /** Effective maximum stay; null means no upper limit. */
   maxNights: number | null;
   checkInTime: string | null;
   checkOutTime: string | null;

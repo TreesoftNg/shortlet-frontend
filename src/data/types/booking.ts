@@ -20,6 +20,8 @@ export type Booking = {
   unit_label: string | null;
   location_label: string;
   city_label: string;
+  /** Street address of the apartment; null when unknown. Used for directions. */
+  address: string | null;
   check_in: string;
   check_out: string;
   check_in_label: string;

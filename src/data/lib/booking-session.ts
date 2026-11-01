@@ -53,3 +53,9 @@ export function clearBookingSession() {
   store.removeItem(BOOKING_ID_KEY);
   store.removeItem(BOOKING_TOKEN_KEY);
 }
+
+/** True when this browser can load the latest guest checkout without signing in. */
+export function hasGuestBookingSession(): boolean {
+  const bookingId = getPendingBookingId();
+  return Boolean(bookingId && getBookingAccessToken(bookingId));
+}

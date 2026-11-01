@@ -7,7 +7,7 @@ import {
 const DEFAULT_GUESTS = 2;
 const DEFAULT_NIGHTS = 4;
 
-function addDays(base: Date, days: number): Date {
+export function addDays(base: Date, days: number): Date {
   const next = new Date(base);
   next.setDate(next.getDate() + days);
   return next;

@@ -1,5 +1,8 @@
 import { ApiError, http } from '@/data/api/http';
-import { getBookingAccessToken } from '@/data/lib/booking-session';
+import {
+  getBookingAccessToken,
+  getPendingBookingId,
+} from '@/data/lib/booking-session';
 import {
   asApiBookingList,
   bookingTab,
@@ -135,6 +138,45 @@ export async function cancelBooking(
   return mapApiBookingToBooking(api);
 }
 
+/**
+ * POST /api/v1/bookings/:id/claim-account — create a password and email an OTP.
+ * Does not return a session; confirm with `confirmClaimGuestBookingAccount`.
+ */
+export async function claimGuestBookingAccount(
+  bookingId: string,
+  password: string,
+  bookingToken?: string | null,
+): Promise<{ email: string }> {
+  const token = bookingToken ?? getBookingAccessToken(bookingId);
+  return http(`/api/v1/bookings/${encodeURIComponent(bookingId)}/claim-account`, {
+    body: { password },
+    ...authOptions(null, token),
+  });
+}
+
+/**
+ * POST /api/v1/bookings/:id/claim-account/confirm — verify OTP and sign in.
+ */
+export async function confirmClaimGuestBookingAccount(
+  bookingId: string,
+  otp: string,
+  bookingToken?: string | null,
+): Promise<{
+  accessToken: string;
+  accessTokenExpiresAt?: string;
+  refreshToken?: string;
+  refreshTokenExpiresAt?: string;
+}> {
+  const token = bookingToken ?? getBookingAccessToken(bookingId);
+  return http(
+    `/api/v1/bookings/${encodeURIComponent(bookingId)}/claim-account/confirm`,
+    {
+      body: { otp },
+      ...authOptions(null, token),
+    },
+  );
+}
+
 /** GET /api/v1/me/bookings — signed-in customer trips. */
 export async function getMyBookings(
   accessToken: string,
@@ -171,13 +213,27 @@ function filterByTab(list: Booking[], tab: TripTab): Booking[] {
   return list.filter((booking) => bookingTab(booking) === tab);
 }
 
-/** Customer trips list (requires auth). Falls back to empty when unsigned-in. */
+/**
+ * Customer trips when signed in. Without a session, returns the one stay
+ * held by the browser booking token (guest checkout).
+ */
 export async function getBookings(
   tab?: TripTab,
   accessToken?: string | null,
 ): Promise<Booking[]> {
-  if (!accessToken) return [];
-  const list = await getMyBookings(accessToken, { limit: 100 });
+  if (accessToken) {
+    const list = await getMyBookings(accessToken, { limit: 100 });
+    if (!tab) return list;
+    return filterByTab(list, tab);
+  }
+
+  const bookingId = getPendingBookingId();
+  const bookingToken = getBookingAccessToken(bookingId);
+  if (!bookingId || !bookingToken) return [];
+
+  const booking = await getGuestBooking(bookingId, { bookingToken });
+  if (!booking) return [];
+  const list = [booking];
   if (!tab) return list;
   return filterByTab(list, tab);
 }
@@ -200,7 +256,7 @@ export async function getBookingById(
 export async function getBookingCounts(
   accessToken?: string | null,
 ): Promise<Record<TripTab, number>> {
-  const list = accessToken ? await getMyBookings(accessToken, { limit: 100 }) : [];
+  const list = await getBookings(undefined, accessToken);
   return {
     upcoming: filterByTab(list, 'upcoming').length,
     past: filterByTab(list, 'past').length,

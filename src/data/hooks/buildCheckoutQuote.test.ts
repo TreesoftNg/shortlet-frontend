@@ -52,6 +52,7 @@ const property = {
       nightly_rate: 50000,
       currency: 'NGN',
       status: 'available',
+      stay_limits: { min_nights: 1, max_nights: null },
     },
   ],
   pricing: {

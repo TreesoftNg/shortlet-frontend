@@ -1,16 +1,22 @@
 'use client';
 
-import { DEMO_STAY } from '@/data/demo-stay';
+import type { StayLimits } from '@/data/types';
 import { usePropertyBookingStore } from '@/features/property/store/property-booking-store';
 import { AccountMenuButton } from '@/shared/components';
 import { SunmadeLogo } from '@/shared/components/brand';
+import { minBookableDate } from '@/shared/lib/default-stay';
 import {
   formatDatesRangeLabel,
   guestsLabel,
   nightsBetween,
-  parseISODate,
-  toISODate,
 } from '@/shared/lib/format';
+import {
+  DEFAULT_STAY_LIMITS,
+  earliestCheckOut,
+  fitCheckOutToLimits,
+  latestCheckOut,
+  stayLimitsHint,
+} from '@/shared/lib/stay-length';
 import { Box, Flex, Input, Text } from '@chakra-ui/react';
 import { Minus, Plus, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -22,6 +28,8 @@ type PropertyHeaderBarProps = {
   searchHref?: string;
   /** Listing capacity — steppers must not exceed this. */
   maxGuests?: number;
+  /** Selected unit's stay-length rules — date pickers stay inside them. */
+  stayLimits?: StayLimits;
 };
 
 type EditField = 'dates' | 'guests';
@@ -37,6 +45,7 @@ export function PropertyHeaderBar({
   locationLabel,
   searchHref = '/search',
   maxGuests = 16,
+  stayLimits = DEFAULT_STAY_LIMITS,
 }: PropertyHeaderBarProps) {
   const router = useRouter();
   const [open, setOpen] = useState<EditField | null>(null);
@@ -52,6 +61,7 @@ export function PropertyHeaderBar({
 
   const datesLabel = formatDatesRangeLabel(checkIn, checkOut);
   const guestsText = guestsLabel(clampedGuests);
+  const limitsHint = stayLimitsHint(stayLimits);
 
   useEffect(() => {
     if (!open) return;
@@ -74,13 +84,8 @@ export function PropertyHeaderBar({
   }, [open]);
 
   const applyDates = (nextIn: string, nextOut: string) => {
-    let start = nextIn || checkIn;
-    let end = nextOut || checkOut;
-    if (parseISODate(end) <= parseISODate(start)) {
-      const bumped = parseISODate(start);
-      bumped.setDate(bumped.getDate() + 1);
-      end = toISODate(bumped);
-    }
+    const start = nextIn || checkIn;
+    const end = fitCheckOutToLimits(start, nextOut || checkOut, stayLimits);
     setDates(start, end);
   };
 
@@ -248,7 +253,7 @@ export function PropertyHeaderBar({
                     <Input
                       type="date"
                       value={checkIn}
-                      min={DEMO_STAY.checkIn}
+                      min={minBookableDate()}
                       onChange={(e) => applyDates(e.target.value, checkOut)}
                       borderColor="line"
                       borderRadius="12px"
@@ -265,7 +270,8 @@ export function PropertyHeaderBar({
                     <Input
                       type="date"
                       value={checkOut}
-                      min={checkIn}
+                      min={earliestCheckOut(checkIn, stayLimits)}
+                      max={latestCheckOut(checkIn, stayLimits) ?? undefined}
                       onChange={(e) => applyDates(checkIn, e.target.value)}
                       borderColor="line"
                       borderRadius="12px"
@@ -308,6 +314,11 @@ export function PropertyHeaderBar({
                   {nightsBetween(checkIn, checkOut)} night
                   {nightsBetween(checkIn, checkOut) === 1 ? '' : 's'}
                 </Text>
+                {limitsHint ? (
+                  <Text color="ink.3" fontSize="13px" mt={1}>
+                    {limitsHint}
+                  </Text>
+                ) : null}
               </Box>
             ) : null}
 

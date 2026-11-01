@@ -44,6 +44,13 @@ export type MessagingSocketEvents = {
 type AckOk<T> = { ok: true } & T;
 type EmitAck<T> = AckOk<T> | { ok?: false; code?: string; message?: string };
 
+/**
+ * Long-polling first, then upgrade to WebSocket when the network allows it
+ * (the Socket.IO default). Starting with WebSocket only would never connect
+ * behind a proxy that drops the Upgrade header: the client does not fall back.
+ */
+export const MESSAGING_TRANSPORTS = ['polling', 'websocket'];
+
 let shared: Socket | null = null;
 let sharedToken: string | null = null;
 
@@ -76,7 +83,7 @@ export function getMessagingSocket(accessToken?: string): Socket | null {
   sharedToken = token;
   shared = io(`${messagingOrigin()}/messaging`, {
     autoConnect: true,
-    transports: ['websocket', 'polling'],
+    transports: MESSAGING_TRANSPORTS,
     auth: (cb) => {
       const next = currentGuestToken() ?? sharedToken ?? '';
       sharedToken = next || sharedToken;

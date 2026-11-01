@@ -26,6 +26,10 @@ import {
   guestsLabel,
   shortArea,
 } from '@/shared/lib/format';
+import {
+  DEFAULT_STAY_LIMITS,
+  stayLengthProblem,
+} from '@/shared/lib/stay-length';
 import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { Building2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -83,6 +87,11 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   const locationLabel =
     shortArea(property.address.display) || property.address.city || 'Lagos';
   const searchHref = '/search?tab=all';
+  const stayProblem = stayLengthProblem(
+    checkIn,
+    checkOut,
+    selectedUnit?.stay_limits ?? DEFAULT_STAY_LIMITS,
+  );
 
   return (
     <Box bg="bg" maxW="1440px" mx="auto" minH="100vh" pb={{ base: '100px', md: 0 }}>
@@ -92,6 +101,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
         maxGuests={
           selectedUnit?.capacity.max ?? property.capacity.max ?? 16
         }
+        stayLimits={selectedUnit?.stay_limits}
       />
 
       <Box as="main" px={{ base: 4, md: 8, lg: '120px' }}>
@@ -241,6 +251,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
           color="white"
           fontWeight="700"
           _hover={{ bg: 'brand.600' }}
+          disabled={Boolean(stayProblem)}
           onClick={() =>
             router.push(
               `/checkout?property=${property.slug}${selectedUnit ? `&unit=${selectedUnit.id}` : ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`,

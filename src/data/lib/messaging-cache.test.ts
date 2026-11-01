@@ -45,6 +45,9 @@ function conversation(
     propertyId: null,
     unitId: null,
     bookingId: null,
+    propertyName: null,
+    unitName: null,
+    contextLabel: null,
     lastMessageAt: null,
     lastMessagePreview: null,
     lastMessageSenderType: null,
@@ -104,9 +107,9 @@ describe('messaging-cache', () => {
     const next = applyMessageToConversationList(list, incoming, {
       incrementUnread: true,
     });
-    expect(next[0]?.id).toBe('conv-1');
-    expect(next[0]?.unreadCount).toBe(2);
-    expect(next[0]?.lastMessagePreview).toBe('New reply');
+    expect(next?.[0]?.id).toBe('conv-1');
+    expect(next?.[0]?.unreadCount).toBe(2);
+    expect(next?.[0]?.lastMessagePreview).toBe('New reply');
   });
 
   it('clears unread for one conversation', () => {
@@ -114,8 +117,17 @@ describe('messaging-cache', () => {
       conversation({ id: 'conv-1', unreadCount: 4 }),
       conversation({ id: 'conv-2', unreadCount: 1 }),
     ];
-    expect(clearConversationUnread(list, 'conv-1')[0]?.unreadCount).toBe(0);
-    expect(clearConversationUnread(list, 'conv-1')[1]?.unreadCount).toBe(1);
+    expect(clearConversationUnread(list, 'conv-1')?.[0]?.unreadCount).toBe(0);
+    expect(clearConversationUnread(list, 'conv-1')?.[1]?.unreadCount).toBe(1);
+  });
+
+  it('does not invent an empty inbox when the list was never loaded', () => {
+    expect(clearConversationUnread(undefined, 'conv-1')).toBeUndefined();
+    expect(
+      applyMessageToConversationList(undefined, message(), {
+        incrementUnread: true,
+      }),
+    ).toBeUndefined();
   });
 
   it('clears unread when the open thread gets a staff reply', () => {
@@ -125,7 +137,7 @@ describe('messaging-cache', () => {
       message({ senderType: 'staff', content: 'On it' }),
       { incrementUnread: false, clearUnread: true },
     );
-    expect(next[0]?.unreadCount).toBe(0);
+    expect(next?.[0]?.unreadCount).toBe(0);
   });
 
   it('subtracts a conversation from badge totals', () => {

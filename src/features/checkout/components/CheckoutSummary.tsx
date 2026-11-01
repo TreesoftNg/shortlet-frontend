@@ -1,9 +1,9 @@
 'use client';
 
 import type { CheckoutQuote } from '@/features/checkout/hooks/useCheckoutData';
+import { RatingStars } from '@/shared/components/RatingStars';
 import { formatNaira } from '@/shared/lib/format';
 import { Box, Flex, Heading, Text } from '@chakra-ui/react';
-import { Star } from 'lucide-react';
 import Image from 'next/image';
 
 type CheckoutSummaryProps = {
@@ -59,13 +59,11 @@ export function CheckoutSummary({ quote }: CheckoutSummaryProps) {
           <Text as="b" fontSize="16px" display="block" my="4px" fontWeight="700" lineClamp={2}>
             {property.public_name}
           </Text>
-          <Flex align="center" gap="4px" fontSize="14px" fontWeight="600">
-            <Star size={14} fill="currentColor" stroke="none" />
-            {property.review_summary.rating.toFixed(2)}{' '}
-            <Text as="span" color="ink.3" fontWeight="500">
-              ({property.review_summary.count})
-            </Text>
-          </Flex>
+          <RatingStars
+            rating={property.review_summary.rating}
+            count={property.review_summary.count}
+            showCount
+          />
         </Box>
       </Flex>
 

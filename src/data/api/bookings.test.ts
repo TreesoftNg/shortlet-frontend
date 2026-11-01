@@ -4,7 +4,13 @@ import {
   normalizeCreateBookingResult,
   toMoneyNumber,
 } from '@/data/lib/map-booking';
-import { createBooking, getMyBookings, getUnitQuote } from '@/data/api/bookings';
+import {
+  createBooking,
+  getBookings,
+  getMyBookings,
+  getUnitQuote,
+} from '@/data/api/bookings';
+import * as bookingSession from '@/data/lib/booking-session';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 function jsonResponse(body: unknown, status = 200) {
@@ -30,6 +36,8 @@ describe('mapApiBookingToBooking', () => {
       unit: {
         id: 'unit-1',
         name: 'Charming 1bedroom',
+        propertyId: 'prop-1',
+        propertyName: 'Azure Lekki',
         pictureUrl: 'http://localhost:4000/media/photo.webp',
         location: { city: 'Lagos', display: 'Lagos, NG' },
       },
@@ -38,9 +46,13 @@ describe('mapApiBookingToBooking', () => {
     expect(booking.reference).toBe('SMD-123');
     expect(booking.status).toBe('confirmed');
     expect(booking.unit_id).toBe('unit-1');
+    expect(booking.property_id).toBe('prop-1');
+    expect(booking.property_id).not.toBe(booking.unit_id);
     expect(booking.guests).toBe(2);
     expect(booking.amount_paid).toBe(577025);
-    expect(booking.property_image).toBe('https://api-staging.sunmadeapartments.com/media/photo.webp');
+    expect(booking.property_image).toBe(
+      'https://api-staging.sunmadeapartments.com/media/photo.webp',
+    );
     expect(booking.dates_range_label).toContain('Dec');
   });
 
@@ -82,12 +94,12 @@ describe('normalizeCreateBookingResult', () => {
     expect(result.accessToken).toBe('tok');
     expect(result.checkout?.checkoutUrl).toBe('https://pay.example');
   });
-
 });
 
 describe('bookings api', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('fetches a unit quote', async () => {
@@ -153,6 +165,7 @@ describe('bookings api', () => {
 
     const result = await createBooking(
       {
+        idDocumentId: 'id-doc-1',
         returnUrl: 'http://localhost:3000/confirmation',
         unitId: 'u1',
         checkIn: '2026-12-23',
@@ -216,5 +229,38 @@ describe('bookings api', () => {
     );
     expect(list).toHaveLength(1);
     expect(list[0]?.property_name).toBe('Studio');
+  });
+
+  it('loads the pending guest booking when there is no customer session', async () => {
+    vi.spyOn(bookingSession, 'getPendingBookingId').mockReturnValue('bk-guest');
+    vi.spyOn(bookingSession, 'getBookingAccessToken').mockReturnValue(
+      'booking-tok',
+    );
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        success: true,
+        data: {
+          id: 'bk-guest',
+          status: 'confirmed',
+          checkIn: '2026-12-23',
+          checkOut: '2026-12-27',
+          unit: { name: 'Studio' },
+        },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const list = await getBookings(undefined, null);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api-staging.sunmadeapartments.com/api/v1/bookings/bk-guest',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-booking-token': 'booking-tok',
+        }),
+      }),
+    );
+    expect(list).toHaveLength(1);
+    expect(list[0]?.id).toBe('bk-guest');
   });
 });

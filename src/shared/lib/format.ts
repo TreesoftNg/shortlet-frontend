@@ -100,3 +100,8 @@ export function formatDatesRangeLabel(checkIn: string, checkOut: string): string
 export function guestsLabel(guests: number | null): string {
   return guests === 1 ? '1 guest' : `${guests ?? 0} guests`;
 }
+
+/** e.g. 1 → "1 night", 3 → "3 nights" */
+export function nightsLabel(nights: number): string {
+  return nights === 1 ? '1 night' : `${nights} nights`;
+}

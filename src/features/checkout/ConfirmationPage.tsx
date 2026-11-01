@@ -12,7 +12,11 @@ import {
 } from '@/data/lib/booking-session';
 import { useAuthHydrated } from '@/features/auth/hooks/useAuthHydrated';
 import { isAccessTokenExpired } from '@/features/auth/lib/access-token';
-import { useAuthStore } from '@/features/auth/store/auth-store';
+import {
+  useAuthStore,
+  useIsAuthenticated,
+} from '@/features/auth/store/auth-store';
+import { SecureGuestAccountCard } from '@/features/trips/components/SecureGuestAccountCard';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/shared/components';
 import { formatNaira } from '@/shared/lib/format';
 import { SunmadeLogo } from '@/shared/components/brand';
@@ -21,8 +25,10 @@ import { Box, Button, Flex, Grid, Heading, Text } from '@chakra-ui/react';
 import { Check, CircleCheck, Menu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { paymentVerifyFromReturnParams } from '@/features/checkout/lib/payment-return-params';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { hasGuestBookingSession } from '@/data/lib/booking-session';
 
 export function ConfirmationPage() {
   const router = useRouter();
@@ -30,10 +36,10 @@ export function ConfirmationPage() {
   const authHydrated = useAuthHydrated();
   const bookingIdParam = searchParams.get('bookingId');
   const bookingTokenParam = searchParams.get('bookingToken');
-  const transactionId =
-    searchParams.get('transaction_id') ?? searchParams.get('transactionId');
+  const verifyParams = paymentVerifyFromReturnParams(searchParams);
   const slug = searchParams.get('property');
   const [bookingId, setBookingId] = useState(bookingIdParam);
+  const isAuthenticated = useIsAuthenticated();
   const accessToken = useAuthStore((s) => {
     if (!s.accessToken) return null;
     if (isAccessTokenExpired(s.accessToken, s.accessTokenExpiresAt)) {
@@ -46,6 +52,7 @@ export function ConfirmationPage() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [guestSession, setGuestSession] = useState(false);
 
   const {
     data: property,
@@ -57,6 +64,7 @@ export function ConfirmationPage() {
       bookingId: bookingIdParam,
       bookingToken: bookingTokenParam,
     });
+    setGuestSession(hasGuestBookingSession());
 
     // Drop token from the address bar after restoring session (Referer hygiene).
     if (bookingTokenParam && typeof window !== 'undefined') {
@@ -71,7 +79,7 @@ export function ConfirmationPage() {
       setBookingId(bookingIdParam);
       return;
     }
-    // Hosted Flutterwave return URL may omit bookingId — recover from session.
+    // Hosted payment return URL may omit bookingId — recover from session.
     const pending = getPendingBookingId();
     if (pending) setBookingId(pending);
     else setLoading(false);
@@ -83,15 +91,18 @@ export function ConfirmationPage() {
     let cancelled = false;
     const bookingToken =
       bookingTokenParam?.trim() || getBookingAccessToken(bookingId);
+    const shouldVerify = Boolean(
+      verifyParams.transactionId || verifyParams.reference,
+    );
 
     async function load() {
       setLoading(true);
       setLoadError(null);
       try {
-        if (transactionId) {
+        if (shouldVerify) {
           const verified = await verifyPayment.mutateAsync({
             bookingId: bookingId!,
-            transactionId,
+            ...verifyParams,
             bookingToken,
           });
           if (!cancelled) setBooking(verified);
@@ -119,7 +130,14 @@ export function ConfirmationPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per booking/tx/auth
-  }, [bookingId, bookingTokenParam, transactionId, accessToken, authHydrated]);
+  }, [
+    bookingId,
+    bookingTokenParam,
+    verifyParams.transactionId,
+    verifyParams.reference,
+    accessToken,
+    authHydrated,
+  ]);
 
   if (!bookingId && !slug) {
     return (
@@ -282,6 +300,14 @@ export function ConfirmationPage() {
             </Grid>
           </Box>
         </Box>
+
+        {!isAuthenticated && guestSession ? (
+          <SecureGuestAccountCard
+            onSecured={() => {
+              setGuestSession(false);
+            }}
+          />
+        ) : null}
       </Box>
     </Box>
   );
